@@ -20,6 +20,17 @@ def user_id_in_db(user):
 def user_auth0_in_db(user):
     return db.session.query(User.user_id).filter_by(auth0_id=user).scalar() is not None
 
+# add unit test 
+def addBookToDB(isbn):
+    url = "https://www.googleapis.com/books/v1/volumes?q=" + isbn
+    r = requests.get(url)
+    js = r.json()
+
+    entry = {"title" : js['items'][0]['volumeInfo']['title'], "author" :  js['items'][0]['volumeInfo']['authors'][0], "image" : js['items'][0]['volumeInfo']['imageLinks']['thumbnail'], "description" : js['items'][0]['volumeInfo']['description'], "ISBN" : js['items'][0]['volumeInfo']['industryIdentifiers'][0]['identifier'], "publish_date" : js['items'][0]['volumeInfo']['publishedDate'], "page_count" : js['items'][0]['volumeInfo']['pageCount']}
+    
+    db.session.add(Book(ISBN=entry['ISBN'], title=entry['title'], author=entry['author'], publish_date=entry['publish_date'], page_count=entry['page_count'], image_link=entry['image']))
+    db.session.commit()
+
 @app.route("/api/v1.0/auth0/<auth0_id>", methods=["GET"])
 def get_user_id_by_auth0(auth0_id):
     try:
@@ -147,6 +158,59 @@ def get_one_review(review_id):
         return make_response(jsonify(rev), 200)
     else:
         return make_response(jsonify({"error" : "Invalid review ID"}), 404)
+
+@app.route("/api/v1.0/books/<string:ISBN>/reviews", methods=["POST"])
+def add_review(ISBN):
+    data_to_return = []
+
+    exists = db.session.query(Book.ISBN).filter_by(ISBN=ISBN).scalar() is not None
+
+    if not exists:
+        addBookToDB(ISBN)
+
+    book = db.session.query(Book).filter(Book.ISBN==ISBN).first()
+
+    if "id" in request.form and "reviewer_id" in request.form and "book_id" in request.form and "text" in request.form and "rating" in request.form:
+        new_review = {
+        "id" : request.form["id"],
+        "reviewer_id" : request.form["reviewer_id"],
+        "book_id" : request.form["book_id"],
+        "text" : request.form["text"],
+        "rating" : request.form["rating"]
+        }
+    else:
+        return make_response(jsonify({"error" : "Missing form data"}), 400)
+
+    if book is not None:
+        db.session.add(Review(id=new_review['id'], reviewer_id=new_review['reviewer_id'], book_id=new_review['book_id'], rating=new_review['rating'], text=new_review['text'], likes=0)))
+    else:
+        return make_response( jsonify({"error" : "Failed to add review"}), 404)
+
+@app.route("/api/v1.0/reviews/<string:review_id>", methods=["PUT"])
+def edit_review(review_id):
+
+    if "text" in request.form and "rating" in request.form:
+        text = request.form["text"]
+        rating = request.form["rating"]
+    else:
+        return make_response(jsonify({"error" : "Missing form data"}), 404)
+
+    db.session.query(Review).filter(Review.id==review_id).update({'text' : text, 'rating' : rating})
+    db.session.commit()
+
+    return make_response(jsonify("Successfully edited review"), 200)
+
+@app.route("/api/v1.0/reviews/<string:review_id>", methods=["DELETE"])
+def delete_review(review_id):
+    deleted_rows = db.session.query(Review).filter(Review.id==review_id).delete()
+
+    if deleted_rows == 1:
+        db.session.commit()
+        return make_response( jsonify( {} ), 204)
+    else:
+        return make_response( jsonify( {"error" : "Invalid review ID"} ), 400)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
