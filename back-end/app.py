@@ -31,6 +31,7 @@ def addBookToDB(isbn):
     db.session.add(Book(ISBN=entry['ISBN'], title=entry['title'], author=entry['author'], publish_date=entry['publish_date'], page_count=entry['page_count'], image_link=entry['image']))
     db.session.commit()
 
+# User endpoints
 @app.route("/api/v1.0/auth0/<auth0_id>", methods=["GET"])
 def get_user_id_by_auth0(auth0_id):
     try:
@@ -209,6 +210,62 @@ def delete_review(review_id):
         return make_response( jsonify( {} ), 204)
     else:
         return make_response( jsonify( {"error" : "Invalid review ID"} ), 400)
+
+# Messaging endpoints
+
+@app.route("/api/v1.0/user/<string:user_id>/messages/received", methods=["GET"])
+def get_all_received_messages_by_user_id(user_id):
+    data_to_return = []
+
+    messages = db.session.query(Message.msg_id, Message.msg_text, Message.sender_id, Message.recipient_id, Message.time_sent).filter(Message.recipient_id==user_id)
+
+    for message in messages:
+        msg = {"id" : message.msg_id, "text" : message.msg_text, "sender" : message.sender_id, "recipient" : message.recipient_id, "sent" : message.time_sent }
+        data_to_return.append(msg)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No messages found"}), 404)
+
+@app.route("/api/v1.0/user/<string:user_id>/messages/sent", methods=["GET"])
+def get_all_sent_messages_by_user_id(user_id):
+    data_to_return = []
+
+    if not user_id_in_db(user_id):
+        return make_response(jsonify({"error" : "Invalid user ID"}), 404)
+
+    messages = db.session.query(Message.msg_id, Message.msg_text, Message.sender_id, Message.recipient_id, Message.time_sent).filter(Message.sender_id==user_id)
+
+    for message in messages:
+        msg = {"id" : message.msg_id, "text" : message.msg_text, "sender" : message.sender_id, "recipient" : message.recipient_id, "sent" : message.time_sent }
+        data_to_return.append(msg)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No messages found"}), 404)
+
+
+@app.route("/api/v1.0/user/<string:user_id>/contact", methods=["POST"])
+def send_message(user_id):
+
+    if not user_id_in_db(user_id):
+        return make_response(jsonify({"error" : "Invalid user ID"}), 400)
+
+    if "msg_text" in request.form and "sender_id" in request.form and "time_sent" in request.form:
+        msg_text = request.form["msg_text"]
+        sender_id = request.form["sender_id"]
+        recipient_id = user_id
+        time_sent = request.form["time_sent"]
+    else:
+        return make_response(jsonify({"error" : "Missing form data"}), 400)
+
+
+    db.session.add(Message(msg_text=msg_text, sender_id=sender_id, recipient_id=recipient_id, time_sent=time_sent))
+    db.session.commit()
+
+    return make_response(jsonify({"success" : "Message sent successfully"}), 200)
 
 
 
