@@ -183,7 +183,7 @@ def add_review(ISBN):
         return make_response(jsonify({"error" : "Missing form data"}), 400)
 
     if book is not None:
-        db.session.add(Review(id=new_review['id'], reviewer_id=new_review['reviewer_id'], book_id=new_review['book_id'], rating=new_review['rating'], text=new_review['text'], likes=0)))
+        db.session.add(Review(id=new_review['id'], reviewer_id=new_review['reviewer_id'], book_id=new_review['book_id'], rating=new_review['rating'], text=new_review['text'], likes=0))
     else:
         return make_response( jsonify({"error" : "Failed to add review"}), 404)
 

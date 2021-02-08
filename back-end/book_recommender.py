@@ -1,11 +1,3 @@
-# -----------------------------------------------------------------------------
-# Console-based implementation of a machine learning book recommendation system
-#
-# Kevin Mallon
-# BSc Software Engineering
-# B00469446
-# -----------------------------------------------------------------------------
-
 import itertools
 import numpy as np
 import pandas as pd
