@@ -16,10 +16,10 @@ books = None
 
 def read_data_from_csv():
     global ratings 
-    ratings = pd.read_csv('back-end/data/ratings.csv')
+    ratings = pd.read_csv('data/ratings.csv')
 
     global books 
-    books = pd.read_csv('back-end/data/books.csv')
+    books = pd.read_csv('data/books.csv')
 
 def get_rating_stats(ratings):
     n_ratings = len(ratings)
@@ -103,7 +103,7 @@ def create_matrix(dataframe):
 
     matrix = csr_matrix((dataframe["rating"], (book_index, user_index)), shape=(M, N))
     # saves generated user-item matrix to file
-    save_npz('back-end/data/user_item_matrix_books.npz', matrix)
+    save_npz('data/user_item_matrix_books.npz', matrix)
     
     return matrix, user_mapper, book_mapper, user_inv_mapper, book_inv_mapper
 
