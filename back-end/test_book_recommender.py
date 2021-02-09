@@ -14,12 +14,12 @@ testBooks = None
 
 def test_csv_import_ratings():
     global testRatings
-    testRatings = pd.read_csv('data/ratings.csv')
+    testRatings = pd.read_csv('back-end/data/ratings.csv')
     assert testRatings is not None
 
 def test_csv_import_books():
     global testBooks
-    testBooks = pd.read_csv('data/books.csv')
+    testBooks = pd.read_csv('back-end/data/books.csv')
     assert testBooks is not None
 
 def test_books_bayesian_avg():
@@ -61,7 +61,7 @@ def test_find_similar_books():
 
 def test_find_similar_books_insufficient_rating_data():
         book_id = 1
-        testRatings = pd.read_csv('data/ratings.csv')
+        testRatings = pd.read_csv('back-end/data/ratings.csv')
         matrix, user_mapper, book_mapper, user_inv_mapper, book_inv_mapper = create_matrix(testRatings)
         
         with pytest.raises(KeyError):
