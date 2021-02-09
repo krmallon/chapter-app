@@ -14,12 +14,12 @@ testBooks = None
 
 def test_csv_import_ratings():
     global testRatings
-    testRatings = pd.read_csv('data/ratings.csv')
+    testRatings = pd.read_csv('back-end/data/ratings.csv')
     assert testRatings is not None
 
 def test_csv_import_books():
     global testBooks
-    testBooks = pd.read_csv('data/books.csv')
+    testBooks = pd.read_csv('back-end/data/books.csv')
     assert testBooks is not None
 
 def test_books_bayesian_avg():
