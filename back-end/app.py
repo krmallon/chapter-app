@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from models import *
+from sqlalchemy import and_, or_
 
 import configparser
 
@@ -237,6 +238,24 @@ def get_all_sent_messages_by_user_id(user_id):
         return make_response(jsonify({"error" : "Invalid user ID"}), 404)
 
     messages = db.session.query(Message.msg_id, Message.msg_text, Message.sender_id, Message.recipient_id, Message.time_sent).filter(Message.sender_id==user_id)
+
+    for message in messages:
+        msg = {"id" : message.msg_id, "text" : message.msg_text, "sender" : message.sender_id, "recipient" : message.recipient_id, "sent" : message.time_sent }
+        data_to_return.append(msg)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No messages found"}), 404)
+
+@app.route("/api/v1.0/messages/", methods=["GET"])
+def get_all_messages_between_two_users():
+    user_A = request.args.get('userA')
+    user_B = request.args.get('userB')
+
+    data_to_return = []
+
+    messages = db.session.query(Message).filter(or_(and_(Message.sender_id==user_A, Message.recipient_id==user_B), and_(Message.sender_id==user_B, Message.recipient_id==user_A)))
 
     for message in messages:
         msg = {"id" : message.msg_id, "text" : message.msg_text, "sender" : message.sender_id, "recipient" : message.recipient_id, "sent" : message.time_sent }

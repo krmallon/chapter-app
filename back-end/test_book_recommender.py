@@ -1,13 +1,6 @@
 import pandas as pd 
 import pytest
-from book_recommender import books_bayesian_avg
-from book_recommender import create_matrix
-from book_recommender import find_similar_books
-from book_recommender import get_rating_stats
-from book_recommender import make_recommendations
-from book_recommender import matrix_sparsity
-from book_recommender import read_data_from_csv
-from book_recommender import show_books
+from book_recommender import *
 
 testRatings = None
 testBooks = None
