@@ -16,6 +16,25 @@ class Achievement(Base):
     badge = Column(String)
 
 
+class Action(Base):
+    __tablename__ = 'Action'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    description = Column(String)
+
+
+class Activity(Base):
+    __tablename__ = 'Activity'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(ForeignKey('User.user_id'))
+    action_id = Column(Integer)
+    object_id = Column(Integer)
+    date_created = Column(Date)
+    target_id = Column(Integer)
+
+
 class Book(Base):
     __tablename__ = 'Book'
 
@@ -39,6 +58,13 @@ class Group(Base):
     member_count = Column(Integer)
 
 
+class Object(Base):
+    __tablename__ = 'Object'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+
+
 class UpdateType(Base):
     __tablename__ = 'UpdateType'
 
@@ -54,26 +80,6 @@ class User(Base):
     full_name = Column(String)
     nickname = Column(String)
     email = Column(String)
-
-
-class Book(Base):
-    __tablename__ = 'books'
-
-    book_id = Column(Integer, primary_key=True)
-    ISBN = Column(String)
-    title = Column(String)
-    author = Column(String)
-    publish_date = Column(String)
-    page_count = Column(Integer)
-    image_link = Column(String)
-
-
-class Example(Base):
-    __tablename__ = 'example'
-
-    id = Column(Integer, primary_key=True, server_default=text("nextval('example_id_seq'::regclass)"))
-    username = Column(String(80), nullable=False, unique=True)
-    email = Column(String(120), nullable=False, unique=True)
 
 
 class BookRecommendation(Base):

@@ -1,3 +1,4 @@
+from config import DB_URI, auth0_access_token
 from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -9,9 +10,9 @@ import configparser
 app = Flask(__name__)
 CORS(app)
 
-config = configparser.ConfigParser()
-config.read("config.py")
-DB_URI = config.get("DEFAULT", "DB_URI")
+# config = configparser.ConfigParser()
+# config.read("config.py")
+# DB_URI = config.get("DEFAULT", "DB_URI")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URI
 db = SQLAlchemy(app)
@@ -63,7 +64,7 @@ def get_user_details(user_id):
 @app.route("/api/v1.0/search/users/<query>", methods=["GET"])
 def search_users(query):
     url = 'https://dev-1spzh9o1.eu.auth0.com/api/v2/users?q=name:*' + query + '*'
-    headers = {'authorization' : 'Bearer ' + access_token}
+    headers = {'authorization' : 'Bearer ' + auth0_access_token}
 
     req = requests.get(url, headers=headers)
     js = req.json()
@@ -287,6 +288,32 @@ def send_message(user_id):
 
     return make_response(jsonify({"success" : "Message sent successfully"}), 200)
 
+# Activity endpoints
+@app.route("/api/v1.0/activity/<string:user_id>", methods=["GET"])
+def get_all_activity_by_user(user_id):
+    data_to_return = []
+
+    activities = db.session.query(Action.description, Activity.date_created, Activity.target_id, Activity.action_id, Activity.object_id, User.user_id, User.full_name).join(User, Activity.user_id==User.user_id).join(Action, Activity.action_id==Action.id).filter(Activity.user_id==user_id)
+
+    for activity in activities:
+        if activity.action_id == 1:
+            target = db.session.query(Book.title, Book.author, Book.ISBN, Review.id, Review.rating, Review.text).join(Review, Book.book_id==Review.book_id).filter(Book.book_id==activity.target_id).first()
+        elif activity.action_id == 2 or activity.action_id == 3 or activity.action_id == 4:
+            target = db.session.query(Book.title, Book.author, Book.ISBN).filter(Book.book_id==activity.target_id).first()
+        elif activity.action_id == 5:
+            target = db.session.query(Book.title, Book.author, Book.ISBN, Review.id, Review.rating, Review.text, User.user_id, User.full_name).join(Book, Review.book_id==Book.book_id).join(User, User.user_id==Review.reviewer_id).filter(Review.id==activity.target_id).first()
+        elif activity.action_id == 6:
+            target = db.session.query(User.user_id, User.full_name).filter(User.user_id==activity.target_id).first()
+        elif activity.action_id == 7:
+            target = db.session.query(Achievement.id, Achievement.name, Achievement.description, Achievement.badge).filter(Achievement.id==activity.target_id).first()
+
+        act = {"user_id" : activity.user_id, "user" : activity.full_name, "action" : activity.description, "target" : target, "date_created" : activity.date_created}
+        data_to_return.append(act)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No activities found"}), 404)
 
 
 if __name__ == "__main__":
