@@ -107,6 +107,17 @@ def get_followers(user_id):
     else:
         return make_response(jsonify({"error" : "This user has 0 followers or does not exist"}), 404)
 
+def get_followed_users(user_id):
+    results = db.session.query(Follow.user_id, Follow.follow_date).filter(Follow.follower_id==user_id)
+
+    data_to_return = []
+
+    for follower in results:
+        user = {"user_id" : follower.user_id, "follow_date" : follower.follow_date, "followed_by" : user_id}
+        data_to_return.append(user)
+
+    return data_to_return
+
 @app.route("/api/v1.0/userprofiletodb/<auth0_id>/<name>/<email>", methods=["POST"])
 def send_profile_to_db(auth0_id, name, email):
     
@@ -321,24 +332,24 @@ def get_activity_followed_users(user_id):
 
     followed = get_followed_users(user_id)
 
-    activities = db2.session.query(Action.description, Activity.date_created, Activity.target_id, Activity.action_id, Activity.object_id, User.user_id, User.full_name, User.image).join(User, Activity.user_id==User.user_id).join(Action, Activity.action_id==Action.id).filter(Activity.user_id.in_([(f['user_id']) for f in followed])).order_by(Activity.date_created.desc()).all()
+    activities = db.session.query(Action.description, Activity.date_created, Activity.target_id, Activity.action_id, Activity.object_id, User.user_id, User.full_name, User.image).join(User, Activity.user_id==User.user_id).join(Action, Activity.action_id==Action.id).filter(Activity.user_id.in_([(f['user_id']) for f in followed])).order_by(Activity.date_created.desc()).all()
    
     for activity in activities:
         if activity.action_id == 1:
-            target = db2.session.query(Book.title, Book.author, Book.ISBN, Book.image_link, Review.id, Review.rating, Review.text).join(Review, Book.book_id==Review.book_id).filter(Book.book_id==activity.target_id).first()
+            target = db.session.query(Book.title, Book.author, Book.ISBN, Book.image_link, Review.id, Review.rating, Review.text).join(Review, Book.book_id==Review.book_id).filter(Book.book_id==activity.target_id).first()
         elif activity.action_id == 2 or activity.action_id == 3 or activity.action_id == 4:
-            target = db2.session.query(Book.title, Book.author, Book.ISBN, Book.image_link).filter(Book.book_id==activity.target_id).first()
+            target = db.session.query(Book.title, Book.author, Book.ISBN, Book.image_link).filter(Book.book_id==activity.target_id).first()
         elif activity.action_id == 5:
             if activity.object_id == 2:
-                target = db2.session.query(Book.title, Book.author, Book.ISBN, Review.id, Review.rating, Review.text, User.user_id, User.full_name).join(Book, Review.book_id==Book.book_id).join(User, User.user_id==Review.reviewer_id).filter(Review.id==activity.target_id).first()
+                target = db.session.query(Book.title, Book.author, Book.ISBN, Review.id, Review.rating, Review.text, User.user_id, User.full_name).join(Book, Review.book_id==Book.book_id).join(User, User.user_id==Review.reviewer_id).filter(Review.id==activity.target_id).first()
             if activity.object_id == 3:
-                target = db2.session.query(Comment.comment_id, Comment.commenter_id, Comment.text, Comment.time_submitted, User.user_id, User.full_name).join(User, Comment.commenter_id==User.user_id).filter(Comment.comment_id==activity.target_id).first()
+                target = db.session.query(Comment.comment_id, Comment.commenter_id, Comment.text, Comment.time_submitted, User.user_id, User.full_name).join(User, Comment.commenter_id==User.user_id).filter(Comment.comment_id==activity.target_id).first()
             if activity.object_id == 4:
-                target = db2.session.query(Achievement.id, Achievement.name, Achievement.description, Achievement.badge).filter(Achievement.id==activity.target_id).first()
+                target = db.session.query(Achievement.id, Achievement.name, Achievement.description, Achievement.badge).filter(Achievement.id==activity.target_id).first()
         elif activity.action_id == 6:
-            target = db2.session.query(User.user_id, User.full_name, User.image).filter(User.user_id==activity.target_id).first()
+            target = db.session.query(User.user_id, User.full_name, User.image).filter(User.user_id==activity.target_id).first()
         elif activity.action_id == 7:
-            target = db2.session.query(Achievement.id, Achievement.name, Achievement.description, Achievement.badge).filter(Achievement.id==activity.target_id).first()
+            target = db.session.query(Achievement.id, Achievement.name, Achievement.description, Achievement.badge).filter(Achievement.id==activity.target_id).first()
 
         act = {"user_id" : activity.user_id, "user" : activity.full_name, "user_image" : activity.image, "action" : activity.description, "object_id" : activity.object_id, "target" : target, "date_created" : activity.date_created}
         data_to_return.append(act)
