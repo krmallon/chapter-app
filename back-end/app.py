@@ -6,6 +6,7 @@ from models import *
 from sqlalchemy import and_, or_
 
 import configparser
+import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -59,7 +60,7 @@ def get_user_details(user_id):
     user = {"user_id" : result.user_id, "auth0_id" : result.auth0_id, "name" : result.full_name}
     data_to_return.append(user)
 
-    return make_response(jsonify(data), 200)
+    return make_response(jsonify(data_to_return), 200)
 
 @app.route("/api/v1.0/search/users/<query>", methods=["GET"])
 def search_users(query):
@@ -118,11 +119,45 @@ def get_followed_users(user_id):
 
     return data_to_return
 
-@app.route("/api/v1.0/userprofiletodb/<auth0_id>/<name>/<email>", methods=["POST"])
-def send_profile_to_db(auth0_id, name, email):
+@app.route("/api/v1.0/user/<string:user_id>/follow/<string:follower_id>", methods=["POST"])
+def follow_user(user_id, follower_id):
+    if user_id_in_db(user_id) and user_id_in_db(follower_id):
+        db.session.add(Follow(user_id=user_id, follower_id=follower_id, follow_date=datetime.date.today()))
+        db.session.commit()
+        
+        return make_response(jsonify({"success" : "Followed user"}), 200)
+
+    else:
+        return make_response(jsonify({"error" : "Invalid user"}), 400)
+
+@app.route("/api/v1.0/user/<string:user_id>/unfollow/<string:follower_id>", methods=["DELETE"])
+def unfollow_user(user_id, follower_id):
+    exists = db.session.query(Follow).filter_by(user_id=user_id, follower_id=follower_id).scalar() is not None
+
+    if exists:
+        relationship = db.session.query(Follow).filter_by(user_id=user_id, follower_id=follower_id).first()
+        db.session.delete(relationship)
+        db.session.commit()
+
+        return make_response(jsonify({}), 204)
+    else:
+        return make_response(jsonify({"error" : "Relationship does not exist"}), 400)
+
+@app.route("/api/v1.0/userprofiletodb/", methods=["POST"])
+def send_profile_to_db():
+
+    if "auth0_id" in request.form and "name" in request.form and "nickname" in request.form and "email" in request.form and "image" in request.form:
+        auth0_id = request.form["auth0_id"]
+        name = request.form["name"]
+        nickname = request.form["nickname"]
+        email = request.form["email"]
+        image = request.form["image"]
+    else:
+        return make_response(jsonify({"error" : "Missing form data"}), 400)
+
     
     if not user_auth0_in_db(auth0_id):
-        db.session.add(User(auth0_id = auth0_id, full_name=name, nickname='km', email=email))
+        db.session.add(User(auth0_id = auth0_id, full_name=name, nickname=nickname, email=email, image=image))
         db.session.commit()
         
         return make_response(jsonify("User added to DB"), 200)
@@ -227,14 +262,53 @@ def delete_review(review_id):
 
 # Messaging endpoints
 
+@app.route("/api/v1.0/user/<string:user_id>/messages/participants", methods=["GET"])
+def get_chat_partners(user_id):
+    data_to_return = []
+
+    messages = db.session.query(Message.msg_id, Message.msg_text, Message.sender_id, Message.recipient_id, Message.time_sent).filter(or_(Message.sender_id==user_id, Message.recipient_id==user_id)).all()
+
+    for message in messages:
+        if message.sender_id == int(user_id):
+            user = db.session.query(User.full_name, User.image).filter(User.user_id==message.recipient_id).first()
+            partner = {"id" : message.recipient_id, "name" : user.full_name, "image" : user.image }
+        elif message.recipient_id == int(user_id):
+            user = db.session.query(User.full_name, User.image).filter(User.user_id==message.sender_id).first()
+            partner = {"id" : message.sender_id, "name" : user.full_name, "image" : user.image }
+        if partner not in data_to_return:
+            data_to_return.append(partner)
+   
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No chats found"}), 404)
+
+@app.route("/api/v1.0/user/<string:user_id>/messages/", methods=["GET"])
+def get_all_messages_by_user_id(user_id):
+    data_to_return = []
+
+    if not user_id_in_db(user_id):
+        return make_response(jsonify({"error" : "Invalid user ID"}), 404)
+
+    messages = db.session.query(Message.msg_id, Message.msg_text, Message.sender_id, Message.recipient_id, Message.time_sent).filter(or_(Message.sender_id==user_id, Message.recipient_id==user_id)).all()
+
+    for message in messages:
+        msg = {"id" : message.msg_id, "text" : message.msg_text, "sender" : message.sender_id, "recipient" : message.recipient_id, "sent" : message.time_sent }
+        data_to_return.append(msg)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No messages found"}), 404)
+
 @app.route("/api/v1.0/user/<string:user_id>/messages/received", methods=["GET"])
 def get_all_received_messages_by_user_id(user_id):
     data_to_return = []
 
-    messages = db.session.query(Message.msg_id, Message.msg_text, Message.sender_id, Message.recipient_id, Message.time_sent).filter(Message.recipient_id==user_id)
+    messages = db.session.query(Message.msg_id, Message.msg_text, Message.sender_id, Message.recipient_id, Message.time_sent, User.full_name, User.image).join(User, User.user_id==Message.sender_id).filter(Message.recipient_id==user_id)
 
     for message in messages:
-        msg = {"id" : message.msg_id, "text" : message.msg_text, "sender" : message.sender_id, "recipient" : message.recipient_id, "sent" : message.time_sent }
+        msg = {"id" : message.msg_id, "text" : message.msg_text, "sender" : message.sender_id, "sender_name" : message.full_name, "sender_image" : message.image, "recipient" : message.recipient_id, "sent" : message.time_sent }
         data_to_return.append(msg)
 
     if data_to_return:
@@ -270,7 +344,8 @@ def get_all_messages_between_two_users():
     messages = db.session.query(Message).filter(or_(and_(Message.sender_id==user_A, Message.recipient_id==user_B), and_(Message.sender_id==user_B, Message.recipient_id==user_A)))
 
     for message in messages:
-        msg = {"id" : message.msg_id, "text" : message.msg_text, "sender" : message.sender_id, "recipient" : message.recipient_id, "sent" : message.time_sent }
+        sender = db.session.query(User.full_name, User.image).filter(User.user_id==message.sender_id).first()
+        msg = {"id" : message.msg_id, "text" : message.msg_text, "sender" : message.sender_id, "sender_name" : sender.full_name, "sender_image" : sender.image, "recipient" : message.recipient_id, "sent" : message.time_sent }
         data_to_return.append(msg)
 
     if data_to_return:
@@ -285,11 +360,11 @@ def send_message(user_id):
     if not user_id_in_db(user_id):
         return make_response(jsonify({"error" : "Invalid user ID"}), 400)
 
-    if "msg_text" in request.form and "sender_id" in request.form and "time_sent" in request.form:
+    if "msg_text" in request.form and "sender_id" in request.form:
         msg_text = request.form["msg_text"]
         sender_id = request.form["sender_id"]
         recipient_id = user_id
-        time_sent = request.form["time_sent"]
+        time_sent = datetime.datetime.now()
     else:
         return make_response(jsonify({"error" : "Missing form data"}), 400)
 
