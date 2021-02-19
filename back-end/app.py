@@ -35,7 +35,8 @@ def addBookToDB(isbn):
     db.session.add(Book(ISBN=entry['ISBN'], title=entry['title'], author=entry['author'], publish_date=entry['publish_date'], page_count=entry['page_count'], image_link=entry['image']))
     db.session.commit()
 
-# User endpoints
+# USER ENDPOINTS
+
 @app.route("/api/v1.0/auth0/<auth0_id>", methods=["GET"])
 def get_user_id_by_auth0(auth0_id):
     try:
@@ -164,7 +165,7 @@ def send_profile_to_db():
     else: 
         return make_response(jsonify({"error" : "User already exists in DB"}), 400)
 
-# Review endpoints
+# REVIEW ENDPOINTS
 
 @app.route("/api/v1.0/books/<string:ISBN>/reviews", methods=["GET"])
 def get_all_reviews(ISBN):
@@ -260,7 +261,7 @@ def delete_review(review_id):
     else:
         return make_response( jsonify( {"error" : "Invalid review ID"} ), 400)
 
-# Messaging endpoints
+# MESSAGING ENDPOINTS
 
 @app.route("/api/v1.0/user/<string:user_id>/messages/participants", methods=["GET"])
 def get_chat_partners(user_id):
@@ -374,7 +375,8 @@ def send_message(user_id):
 
     return make_response(jsonify({"success" : "Message sent successfully"}), 200)
 
-# Activity endpoints
+# ACTIVITY ENDPOINTS
+
 @app.route("/api/v1.0/activity/<string:user_id>", methods=["GET"])
 def get_all_activity_by_user(user_id):
     data_to_return = []
@@ -433,6 +435,52 @@ def get_activity_followed_users(user_id):
         return make_response(jsonify(data_to_return), 200)
     else:
         return make_response(jsonify({"error" : "No activities found"}), 404)
+
+# ACHIEVEMENT ENDPOINTS
+
+@app.route("/api/v1.0/achievements", methods=["GET"])
+def get_all_achievements():
+    data_to_return = []
+    achievements = db.session.query(Achievement.id, Achievement.name, Achievement.description, Achievement.badge).all()
+
+    for achievement in achievements:
+        a = {"id" : achievement.id, "name" : achievement.name, "description" : achievement.description, "image" : achievement.badge}
+        data_to_return.append(a)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No achievements found"}), 404)
+
+@app.route("/api/v1.0/achievements/<id>", methods=["GET"])
+def get_one_achievement(id):
+    data_to_return = []
+    achievements = db.session.query(Achievement.id, Achievement.name, Achievement.description, Achievement.badge).filter(Achievement.id==id).all()
+
+    for achievement in achievements:
+        a = {"id" : achievement.id, "name" : achievement.name, "description" : achievement.description, "image" : achievement.badge}
+        data_to_return.append(a)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No achievement found"}), 404)
+
+
+
+@app.route("/api/v1.0/user/<string:user_id>/achievements", methods=["GET"])
+def get_user_achievements(user_id):
+    data_to_return = []
+    user_achievements = db.session.query(Achievement.id, Achievement.name, Achievement.description, Achievement.badge, UserAchievement.date_earned).join(UserAchievement, Achievement.id == UserAchievement.achievement_id).filter(UserAchievement.user_id==user_id)
+
+    for achievement in user_achievements:
+        ach = {"name" : achievement.name, "description" : achievement.description, "date_earned" : achievement.date_earned, "image" : achievement.badge}
+        data_to_return.append(ach)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No achievements found"}), 404)
 
 
 if __name__ == "__main__":
