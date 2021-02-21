@@ -1,3 +1,4 @@
+import requests
 import itertools
 import numpy as np
 import pandas as pd
@@ -6,20 +7,48 @@ import warnings
 from scipy.sparse import csr_matrix
 from scipy.sparse import save_npz
 from sklearn.neighbors import NearestNeighbors
+from config import DB_URI
+import sqlalchemy
+import csv
+from app import addBookToDB
 
 # suppresses potential warning from pandas library as discussed here: https://github.com/pandas-dev/pandas/issues/2841 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+engine = sqlalchemy.create_engine(DB_URI)
+
 # initialises two files to be used from the chosen dataset
-ratings = None
-books = None
+ratings = pd.read_csv('data/ratings.csv')
+books = pd.read_csv('data/books_updated.csv')
+
+# books = pd.read_sql_table('BookRecData', con=engine)
+
+# updates books CSV to correct date formatting and append leading zeroes to ISBN values
+def modify_csv():
+    df = pd.read_csv('data/books_modified.csv')
+
+    print(df.head())
+
+    # read data and append leading zero(es) to any ISBN values that have fewer than 10 digits
+    df['isbn'] = df['isbn'].where(df['isbn'].str.len() ==9, "00" + df['isbn'])
+    df['isbn'] = df['isbn'].where(df['isbn'].str.len() ==10, "0" + df['isbn'])
+
+    # remove decimal place from date e.g. 2008.0 -> 2008
+    df['original_publication_year'] = df['original_publication_year'].values.astype(float).astype(int).astype(str)
+
+    print(df.head())
+
+    # # save updated data to file
+    df.to_csv('data/books_updated.csv', encoding='utf-8', index=False)
+
 
 def read_data_from_csv():
     global ratings 
     ratings = pd.read_csv('data/ratings.csv')
 
-    global books 
-    books = pd.read_csv('data/books.csv')
+    global books
+    books = pd.read_csv('data/books_updated.csv')
+
 
 def get_rating_stats(ratings):
     n_ratings = len(ratings)
@@ -177,31 +206,37 @@ def get_book_id_from_user():
     
     return book_id
 
-def make_recommendations(matrix, book_mapper, book_inv_mapper):
-    # prints 30 book_id + titles and prompts user to select one
-    # prints the k similar books that are determined by the kNN algorithm
-    book_titles = dict(zip(books['book_id'], books['title']))
+def get_recommendations(matrix, book_mapper, book_inv_mapper):
+    # finds the k similar books that are determined by the kNN algorithm
+    recs = []
 
-    show_books(book_titles, 30)
-    book_id = get_book_id_from_user()
+    book_list = dict(zip(books['isbn'], books['book_id']))
+    book_list_inv = dict(zip(books['book_id'], books['isbn']))
+
+    isbn = '0752864327'
+    book_id = book_list[isbn]
 
     try:
         similar_ids = find_similar_books(book_id, matrix, book_mapper, book_inv_mapper, k=5)
     except:
         # if the chosen book does not have an adequate number of ratings, the user is prompted to choose another
         print("Insufficient rating data for this book. Please make another choice.")
-        make_recommendations(matrix, book_mapper, book_inv_mapper)
+        get_recommendations(matrix, book_mapper, book_inv_mapper)
     else:
-        book_title = book_titles[book_id]
+        # book_id = book_list[isbn]
 
-        print(f"Because you read {book_title}:")
         for i in similar_ids:
-            print(book_titles[i])
+            isbn = book_list_inv[i]
+            recs.append(isbn)
+            addBookToDB(isbn)
+
+    return recs
 
 def main():
     read_data_from_csv()
     matrix, user_mapper, book_mapper, user_inv_mapper, book_inv_mapper = create_matrix(ratings)
-    make_recommendations(matrix, book_mapper, book_inv_mapper)
+    recs = get_recommendations(matrix, book_mapper, book_inv_mapper)
+    print(recs)
 
 if __name__ == "__main__":
     main()
