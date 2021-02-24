@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy import Column, Date, ForeignKey, Integer, Numeric, String, Table, text
+from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, Numeric, String, Table, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -28,7 +28,7 @@ class Activity(Base):
     __tablename__ = 'Activity'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(ForeignKey('User.user_id'))
+    user_id = Column(Integer)
     action_id = Column(Integer)
     object_id = Column(Integer)
     date_created = Column(Date)
@@ -49,6 +49,16 @@ class Book(Base):
     users = relationship('User', secondary='WantsToRead')
 
 
+class BookRecDatum(Base):
+    __tablename__ = 'BookRecData'
+
+    book_id = Column(Integer, primary_key=True)
+    isbn = Column(String)
+    authors = Column(String)
+    published_year = Column(String)
+    title = Column(String)
+
+
 class Group(Base):
     __tablename__ = 'Group'
 
@@ -63,6 +73,14 @@ class Object(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+
+
+class Rating(Base):
+    __tablename__ = 'Ratings'
+
+    user_id = Column(Integer, primary_key=True, nullable=False)
+    book_id = Column(Integer, primary_key=True, nullable=False)
+    rating = Column(Integer)
 
 
 class UpdateType(Base):
@@ -80,6 +98,7 @@ class User(Base):
     full_name = Column(String)
     nickname = Column(String)
     email = Column(String)
+    image = Column(String)
 
 
 class BookRecommendation(Base):
@@ -174,7 +193,7 @@ class Message(Base):
     msg_text = Column(String)
     sender_id = Column(ForeignKey('User.user_id'))
     recipient_id = Column(ForeignKey('User.user_id'))
-    time_sent = Column(Date)
+    time_sent = Column(DateTime(True))
 
     recipient = relationship('User', primaryjoin='Message.recipient_id == User.user_id')
     sender = relationship('User', primaryjoin='Message.sender_id == User.user_id')
