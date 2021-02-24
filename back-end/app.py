@@ -4,6 +4,8 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from models import *
 from sqlalchemy import and_, or_
+import requests
+import book_recommender
 
 import configparser
 import datetime
@@ -24,17 +26,118 @@ def user_id_in_db(user):
 def user_auth0_in_db(user):
     return db.session.query(User.user_id).filter_by(auth0_id=user).scalar() is not None
 
+def isbn_in_bookRecData(isbn):
+    return db.session.query(BookRecDatum).filter_by(isbn=isbn).scalar() is not None
+
 # add unit test 
 def addBookToDB(isbn):
-    url = "https://www.googleapis.com/books/v1/volumes?q=" + isbn
+    # url = "https://www.googleapis.com/books/v1/volumes?q=" + isbn
+    url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn
+    r = requests.get(url)
+    js = r.json()
+    
+    ISBN = "N/A"
+    title = "N/A"
+    author = "N/A"
+    image = "N/A"
+    description = "Description unavailable"
+
+    # NEED TO REFACTOR THIS TO REMOVE MULTIPLE TRY/EXCEPT BLOCK
+
+    # currently set to only get ISBN if it's 10 digits (could change to also use ISBN-13)
+    try:
+        if js['items'][0]['volumeInfo']['industryIdentifiers'][0]['type']=="ISBN_10":
+            ISBN = js['items'][0]['volumeInfo']['industryIdentifiers'][0]['identifier']
+        elif js['items'][0]['volumeInfo']['industryIdentifiers'][1]['type']=="ISBN_10":
+            ISBN = js['items'][0]['volumeInfo']['industryIdentifiers'][1]['identifier']
+    except Exception:
+        pass
+    try:
+        title = js['items'][0]['volumeInfo']['title']
+    except Exception:
+        pass
+    try:
+        author = js['items'][0]['volumeInfo']['authors'][0]
+    except Exception:
+        pass
+    try:
+        image = js['items'][0]['volumeInfo']['imageLinks']['thumbnail']
+    except Exception:
+        pass
+    try:
+        publish_date = js['items'][0]['volumeInfo']['publishedDate']
+    except Exception:
+        pass
+    try:
+        page_count = js['items'][0]['volumeInfo']['pageCount']
+    except Exception:
+        pass
+    try:
+        description = js['items'][0]['volumeInfo']['description']
+    except Exception:
+        pass
+    
+    db.session.add(Book(ISBN=ISBN, title=title, author=author, publish_date=publish_date, page_count=page_count, image_link=image))
+    db.session.commit()
+
+def addRecToDB(rec_book_id, rec_source_id, user_id):
+    # update once unique SERIAL has been created for id on this table
+    db.session.add(BookRecommendation(id="5", rec_book_id=rec_book_id, rec_source_id=rec_source_id, user_id=user_id))
+
+# BOOK ENDPOINTS
+
+@app.route("/api/v1.0/book_id/<isbn>", methods=["GET"])
+def get_book_id_by_ISBN(isbn):
+    book = db.session.query(Book.book_id).filter(Book.ISBN==isbn).first()
+
+    data_to_return = []
+
+    if book is not None:
+        data_to_return.append(book.book_id)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "Book not found in DB"}), 404)
+
+@app.route("/api/v1.0/books/<string:id>", methods=["GET"])
+def get_one_book(id):
+    data = []
+ 
+    url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + id
     r = requests.get(url)
     js = r.json()
 
-    entry = {"title" : js['items'][0]['volumeInfo']['title'], "author" :  js['items'][0]['volumeInfo']['authors'][0], "image" : js['items'][0]['volumeInfo']['imageLinks']['thumbnail'], "description" : js['items'][0]['volumeInfo']['description'], "ISBN" : js['items'][0]['volumeInfo']['industryIdentifiers'][0]['identifier'], "publish_date" : js['items'][0]['volumeInfo']['publishedDate'], "page_count" : js['items'][0]['volumeInfo']['pageCount']}
+    if not "items" in js:
+        return make_response(jsonify({"error" : "No result found"}), 404)
     
-    db.session.add(Book(ISBN=entry['ISBN'], title=entry['title'], author=entry['author'], publish_date=entry['publish_date'], page_count=entry['page_count'], image_link=entry['image']))
-    db.session.commit()
+    title = "N/A"
+    author = "N/A"
+    image = "N/A"
+    description = "Description unavailable"
 
+    # NEED TO REFACTOR THIS TO REMOVE MULTIPLE TRY/EXCEPT BLOCK
+
+    try:
+        title = js['items'][0]['volumeInfo']['title']
+    except Exception:
+        pass
+    try:
+        author = js['items'][0]['volumeInfo']['authors'][0]
+    except Exception:
+        pass
+    try:
+        image = js['items'][0]['volumeInfo']['imageLinks']['thumbnail']
+    except Exception:
+        pass
+    try:
+        description = js['items'][0]['volumeInfo']['description']
+    except Exception:
+        pass
+    
+    book = {"title" : title, "author" :  author, "image" : image, "description" : description}
+
+    return make_response(jsonify(book), 200)
 # USER ENDPOINTS
 
 @app.route("/api/v1.0/auth0/<auth0_id>", methods=["GET"])
@@ -221,19 +324,31 @@ def add_review(ISBN):
 
     book = db.session.query(Book).filter(Book.ISBN==ISBN).first()
 
-    if "id" in request.form and "reviewer_id" in request.form and "book_id" in request.form and "text" in request.form and "rating" in request.form:
-        new_review = {
-        "id" : request.form["id"],
-        "reviewer_id" : request.form["reviewer_id"],
-        "book_id" : request.form["book_id"],
-        "text" : request.form["text"],
-        "rating" : request.form["rating"]
-        }
+    if "reviewer_id" in request.form and "book_id" in request.form and "text" in request.form and "rating" in request.form:
+        reviewer_id = request.form["reviewer_id"]
+        book_id = request.form["book_id"]
+        text = request.form["text"]
+        rating = request.form["rating"]
     else:
         return make_response(jsonify({"error" : "Missing form data"}), 400)
 
+    if rating in ("3.5", "4", "4.5", "5"):
+        try:
+            recs = book_recommender.recommend(ISBN)
+        except Exception:
+            pass
+        else:
+            rec_source_id = db.session.query(Book.book_id).filter(Book.ISBN==ISBN).first()
+            for rec in recs:
+                addBookToDB(rec)
+                rec_book_id = db.session.query(Book.book_id).filter(Book.ISBN==rec).first()
+                addRecToDB(rec_book_id, rec_source_id, reviewer_id)
+            # print(recs)
+
     if book is not None:
-        db.session.add(Review(id=new_review['id'], reviewer_id=new_review['reviewer_id'], book_id=new_review['book_id'], rating=new_review['rating'], text=new_review['text'], likes=0))
+        db.session.add(Review(reviewer_id=reviewer_id, book_id=book_id, rating=rating, text=text, likes=0))
+        db.session.commit()
+        return make_response( jsonify( "Review successfully added" ), 201 )
     else:
         return make_response( jsonify({"error" : "Failed to add review"}), 404)
 
@@ -444,8 +559,8 @@ def get_all_achievements():
     achievements = db.session.query(Achievement.id, Achievement.name, Achievement.description, Achievement.badge).all()
 
     for achievement in achievements:
-        a = {"id" : achievement.id, "name" : achievement.name, "description" : achievement.description, "image" : achievement.badge}
-        data_to_return.append(a)
+        ach = {"id" : achievement.id, "name" : achievement.name, "description" : achievement.description, "image" : achievement.badge}
+        data_to_return.append(ach)
 
     if data_to_return:
         return make_response(jsonify(data_to_return), 200)
@@ -458,8 +573,8 @@ def get_one_achievement(id):
     achievements = db.session.query(Achievement.id, Achievement.name, Achievement.description, Achievement.badge).filter(Achievement.id==id).all()
 
     for achievement in achievements:
-        a = {"id" : achievement.id, "name" : achievement.name, "description" : achievement.description, "image" : achievement.badge}
-        data_to_return.append(a)
+        ach = {"id" : achievement.id, "name" : achievement.name, "description" : achievement.description, "image" : achievement.badge}
+        data_to_return.append(ach)
 
     if data_to_return:
         return make_response(jsonify(data_to_return), 200)
@@ -482,6 +597,24 @@ def get_user_achievements(user_id):
     else:
         return make_response(jsonify({"error" : "No achievements found"}), 404)
 
+# RECOMMENDATION ENDPOINTS
+
+@app.route("/api/v1.0/<string:user_id>/recommendations", methods=["GET"])
+def get_recommendations_by_user_id(user_id):
+    data_to_return = []
+    recs = db.session.query(BookRecommendation.id, BookRecommendation.rec_book_id, BookRecommendation.rec_source_id, Book.title).join(Book, Book.book_id == BookRecommendation.rec_book_id).filter(BookRecommendation.user_id==user_id).all()
+
+    for rec in recs:
+        rec_source_title = db.session.query(Book.title).filter(Book.book_id == rec.rec_source_id).first()
+        rec_source = {"id" : rec.rec_source_id, "title" : rec_source_title.title}
+        rec_book = {"id" : rec.rec_book_id, "title" : rec.title}
+        recommendation = {"id" : rec.id, "rec_book" : rec_book, "rec_source" : rec_source}
+        data_to_return.append(recommendation)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No recommendations found"}), 404)
 
 if __name__ == "__main__":
     app.run(debug=True)
