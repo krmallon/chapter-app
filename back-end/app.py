@@ -43,8 +43,6 @@ def addBookToDB(isbn):
     description = "Description unavailable"
 
     # NEED TO REFACTOR THIS TO REMOVE MULTIPLE TRY/EXCEPT BLOCK
-
-    # currently set to only get ISBN if it's 10 digits (could change to also use ISBN-13)
     try:
         if js['items'][0]['volumeInfo']['industryIdentifiers'][0]['type']=="ISBN_10":
             ISBN = js['items'][0]['volumeInfo']['industryIdentifiers'][0]['identifier']
