@@ -29,9 +29,12 @@ def user_auth0_in_db(user):
 def isbn_in_bookRecData(isbn):
     return db.session.query(BookRecDatum).filter_by(isbn=isbn).scalar() is not None
 
+@app.route("/api/v1.0/bookinDB/<string:ISBN>", methods=["GET"])
+def book_in_db(ISBN):
+    return make_response(jsonify(db.session.query(Book.ISBN).filter_by(ISBN=ISBN).scalar() is not None), 200)   
+
 # add unit test 
 def addBookToDB(isbn):
-    # url = "https://www.googleapis.com/books/v1/volumes?q=" + isbn
     url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn
     r = requests.get(url)
     js = r.json()
@@ -41,15 +44,10 @@ def addBookToDB(isbn):
     author = "N/A"
     image = "N/A"
     description = "Description unavailable"
+    publish_date = "N/A"
+    page_count = 0
 
     # NEED TO REFACTOR THIS TO REMOVE MULTIPLE TRY/EXCEPT BLOCK
-    try:
-        if js['items'][0]['volumeInfo']['industryIdentifiers'][0]['type']=="ISBN_10":
-            ISBN = js['items'][0]['volumeInfo']['industryIdentifiers'][0]['identifier']
-        elif js['items'][0]['volumeInfo']['industryIdentifiers'][1]['type']=="ISBN_10":
-            ISBN = js['items'][0]['volumeInfo']['industryIdentifiers'][1]['identifier']
-    except Exception:
-        pass
     try:
         title = js['items'][0]['volumeInfo']['title']
     except Exception:
@@ -75,7 +73,7 @@ def addBookToDB(isbn):
     except Exception:
         pass
     
-    db.session.add(Book(ISBN=ISBN, title=title, author=author, publish_date=publish_date, page_count=page_count, image_link=image))
+    db.session.add(Book(ISBN=isbn, title=title, author=author, publish_date=publish_date, page_count=page_count, image_link=image))
     db.session.commit()
 
 def addRecToDB(rec_book_id, rec_source_id, user_id):
@@ -83,6 +81,23 @@ def addRecToDB(rec_book_id, rec_source_id, user_id):
     db.session.add(BookRecommendation(id="5", rec_book_id=rec_book_id, rec_source_id=rec_source_id, user_id=user_id))
 
 # BOOK ENDPOINTS
+
+@app.route("/api/v1.0/addbooktodb", methods=["POST"])
+def add_book_to_db():
+    if "title" in request.form and "author" in request.form and "isbn" in request.form and "publish_date" in request.form and "page_count" in request.form and "image_link" in request.form:
+        title = request.form["title"]
+        author = request.form["author"]
+        isbn = request.form["isbn"]
+        publish_date = request.form["publish_date"]
+        page_count = request.form["page_count"]
+        image = request.form["image_link"]
+    else:
+        return make_response(jsonify({"error" : "Missing form data"}), 404)
+        
+    db.session.add(Book(ISBN=isbn, title=title, author=author, publish_date=publish_date, page_count=page_count, image_link=image))
+    db.session.commit()
+
+    return make_response(jsonify({}), 200)
 
 @app.route("/api/v1.0/book_id/<isbn>", methods=["GET"])
 def get_book_id_by_ISBN(isbn):
@@ -164,6 +179,8 @@ def get_user_details(user_id):
 
     return make_response(jsonify(data_to_return), 200)
 
+#  SEARCH ENDPOINTS
+
 @app.route("/api/v1.0/search/users/<query>", methods=["GET"])
 def search_users(query):
     url = 'https://dev-1spzh9o1.eu.auth0.com/api/v2/users?q=name:*' + query + '*'
@@ -185,6 +202,52 @@ def search_users(query):
         return make_response(jsonify(data_to_return), 200)
     else:
         return make_response(jsonify({"error" : "No results for this query"}), 404)
+
+@app.route("/api/v1.0/search/<string:query>", methods=["GET"])
+def search_books(query):
+    url = "https://www.googleapis.com/books/v1/volumes?q=" + query +'&startIndex=0&maxResults=40' # add pagination
+    r = requests.get(url)
+    js = r.json()
+
+    data_to_return = []
+
+    # add what to do if no results i.e. no books in js['items']
+    for book in js['items']:
+        title = book['volumeInfo']['title']
+        try:
+            author = book['volumeInfo']['authors'][0]
+        except:
+            author = "N/A"
+        gb_id = book['id']
+        try:
+            # use ISBN_10 if present, otherwise use ISBN_13 or mark as N/A
+            # clean up code here
+            if book['volumeInfo']['industryIdentifiers'][0]['type'] == "ISBN_10":
+                ISBN = book['volumeInfo']['industryIdentifiers'][0]['identifier']
+            elif book['volumeInfo']['industryIdentifiers'][1]['type'] and book['volumeInfo']['industryIdentifiers'][1]['type'] == "ISBN_10":
+                ISBN = book['volumeInfo']['industryIdentifiers'][1]['identifier']
+            elif book['volumeInfo']['industryIdentifiers'][0]['type'] == "ISBN_13":
+                ISBN = book['volumeInfo']['industryIdentifiers'][0]['identifier']
+            else:
+                ISBN = "N/A"
+        except:
+            ISBN = "N/A"
+        try:
+            date = book['volumeInfo']['publishedDate']
+        except:
+            date = "N/A"
+        try:
+            imgLink = book['volumeInfo']['imageLinks']['thumbnail']
+        except:
+            imgLink = "https://www.rit.edu/nsfadvance/sites/rit.edu.nsfadvance/files/default_images/photo-unavailable.png" # find free-use default 'Cover Unavailable' image to use here
+        new_book = {"title" : title, "author" : author, "date" : date, "image" : imgLink, "ISBN" : ISBN}
+        if ISBN != "N/A":
+            data_to_return.append(new_book)
+
+    if data_to_return:
+        return make_response( jsonify(data_to_return), 200 )
+    else:
+        return make_response( jsonify({"error" : "No results"}), 404 )
 
 @app.route("/api/v1.0/user/<string:user_id>/followedby/<string:follower_id>", methods=["GET"])
 def check_following(user_id, follower_id):
@@ -345,6 +408,7 @@ def add_review(ISBN):
 
     if book is not None:
         db.session.add(Review(reviewer_id=reviewer_id, book_id=book_id, rating=rating, text=text, likes=0))
+        # review_id = db.session.query(Review.review_id).filter_by(Review.reviewer_id=reviewer_id, Review.book_id=book_id, Review.rating=rating)
         db.session.commit()
         return make_response( jsonify( "Review successfully added" ), 201 )
     else:
@@ -600,12 +664,12 @@ def get_user_achievements(user_id):
 @app.route("/api/v1.0/<string:user_id>/recommendations", methods=["GET"])
 def get_recommendations_by_user_id(user_id):
     data_to_return = []
-    recs = db.session.query(BookRecommendation.id, BookRecommendation.rec_book_id, BookRecommendation.rec_source_id, Book.title).join(Book, Book.book_id == BookRecommendation.rec_book_id).filter(BookRecommendation.user_id==user_id).all()
+    recs = db.session.query(BookRecommendation.id, BookRecommendation.rec_book_id, BookRecommendation.rec_source_id, Book.title, Book.image_link).join(Book, Book.book_id == BookRecommendation.rec_book_id).filter(BookRecommendation.user_id==user_id).all()
 
     for rec in recs:
         rec_source_title = db.session.query(Book.title).filter(Book.book_id == rec.rec_source_id).first()
         rec_source = {"id" : rec.rec_source_id, "title" : rec_source_title.title}
-        rec_book = {"id" : rec.rec_book_id, "title" : rec.title}
+        rec_book = {"id" : rec.rec_book_id, "title" : rec.title, "image" : rec.image_link}
         recommendation = {"id" : rec.id, "rec_book" : rec_book, "rec_source" : rec_source}
         data_to_return.append(recommendation)
 
