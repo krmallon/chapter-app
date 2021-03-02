@@ -15,7 +15,7 @@ import os
 # suppresses potential warning from pandas library as discussed here: https://github.com/pandas-dev/pandas/issues/2841 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-DB_URI = os.environ['DB_SECRET_KEY']
+DB_URI = os.environ['DB_URI']
 engine = sqlalchemy.create_engine(DB_URI)
 
 # initialises two files to be used from the chosen dataset
