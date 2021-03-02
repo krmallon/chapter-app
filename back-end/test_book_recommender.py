@@ -2,21 +2,11 @@ import pandas as pd
 import pytest
 from book_recommender import *
 
-testRatings = None
-testBooks = None
-
-def test_csv_import_ratings():
-    global testRatings
-    testRatings = pd.read_csv('data/ratings.csv')
-    assert testRatings is not None
-
-def test_csv_import_books():
-    global testBooks
-    testBooks = pd.read_csv('data/books.csv')
-    assert testBooks is not None
+# initialises two files to be used from the chosen dataset
+testBooks = pd.read_sql_table('BookRecData', con=engine)
+testRatings = pd.read_sql_table('Ratings', con=engine)
 
 def test_books_bayesian_avg():
-    read_data_from_csv()
     books = books_bayesian_avg()
 
     if 'bayesian_avg' in books.columns:
@@ -54,7 +44,6 @@ def test_find_similar_books():
 
 def test_find_similar_books_insufficient_rating_data():
         book_id = 1
-        testRatings = pd.read_csv('data/ratings.csv')
         matrix, user_mapper, book_mapper, user_inv_mapper, book_inv_mapper = create_matrix(testRatings)
         
         with pytest.raises(KeyError):
