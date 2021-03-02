@@ -7,13 +7,15 @@ import warnings
 from scipy.sparse import csr_matrix
 from scipy.sparse import save_npz
 from sklearn.neighbors import NearestNeighbors
-# from config import DB_URI
+from config import DB_URI 
 import sqlalchemy
 import csv
+import os
 
 # suppresses potential warning from pandas library as discussed here: https://github.com/pandas-dev/pandas/issues/2841 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
+DB_URI = os.environ['DB_SECRET_KEY']
 engine = sqlalchemy.create_engine(DB_URI)
 
 # initialises two files to be used from the chosen dataset
