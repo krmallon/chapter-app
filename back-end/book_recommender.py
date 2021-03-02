@@ -7,7 +7,7 @@ import warnings
 from scipy.sparse import csr_matrix
 from scipy.sparse import save_npz
 from sklearn.neighbors import NearestNeighbors
-from config import DB_URI
+# from config import DB_URI
 import sqlalchemy
 import csv
 
