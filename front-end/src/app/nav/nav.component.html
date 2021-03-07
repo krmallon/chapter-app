@@ -1,7 +1,11 @@
-<mdb-navbar SideClass="navbar navbar-expand-lg navbar-dark default-color" [containerInside]="false">
+<mdb-navbar SideClass="navbar navbar-expand-lg navbar-dark cyan darken-3">
 
     <!-- Navbar brand -->
-    <mdb-navbar-brand><a class="navbar-brand" href="#">{{this.brand}}</a></mdb-navbar-brand>
+    <mdb-navbar-brand><a class="navbar-brand" href="#">
+      <a class="navbar-brand" href="#">
+        <img src="https://mdbootstrap.com/img/logo/mdb-transparent.png" height="30" alt="">
+    </a>
+    <b>{{this.brand}}</b></a></mdb-navbar-brand>
   
     <!-- Collapsible content -->
     <links>
@@ -9,49 +13,55 @@
       <!-- Links -->
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-          <a class="nav-link waves-light" mdbWavesEffect>Home</a>
+          <a class="nav-link waves-light" mdbWavesEffect routerLink='/'>Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link waves-light" mdbWavesEffect>Profile</a>
+          <a class="nav-link waves-light" mdbWavesEffect routerLink='/about'>About</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link waves-light" mdbWavesEffect>Recommendations</a>
+          <a class="nav-link waves-light" mdbWavesEffect *ngIf="authService.loggedIn">Profile</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link waves-light" mdbWavesEffect>Community</a>
+          <a class="nav-link waves-light" mdbWavesEffect *ngIf="authService.loggedIn">Recommendations</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link waves-light" mdbWavesEffect *ngIf="authService.loggedIn">Community</a>
           </li>
      </ul>
 
-     <ul class="navbar-nav mr-auto">
+     <!-- <ul class="navbar-nav mr-auto">
         <form class="form-inline waves-light" mdbWavesEffect>
             <div class="md-form my-0">
               <input class="form-control mr-sm-2" type="text" placeholder="Search books...">
             </div>
           </form>
-    </ul>
+    </ul> -->
   
       <ul class="navbar-nav ml-auto nav-flex-icons">
-        <form class="form-inline my-2 my-lg-0">
+        <!-- <form class="form-inline my-2 my-lg-0">
             <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
             <button class="btn btn-primary my-2 my-sm-0" type="submit">Search</button>
           </form>
-          <button mdbBtn type="button" color="secondary" outline="true" mdbWavesEffect>Log In</button>
+          -->
+          
+            
+
         <li class="nav-item">
           <a class="nav-link"><mdb-icon fas icon="envelope"></mdb-icon></a>
         </li>
         <li class="nav-item">
           <a class="nav-link">
-            <mdb-icon fab icon="twitter"></mdb-icon>
+            <mdb-icon fab icon="github"></mdb-icon>
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link">
-            <mdb-icon fab icon="google-plus"></mdb-icon>
+            <mdb-icon fab icon="linkedin"></mdb-icon>
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link">
-            <div class="btn-group" mdbDropdown>
+            <div class="btn-group" mdbDropdown *ngIf="authService.loggedIn">
               <mdb-icon fas icon="user" mdbDropdownToggle></mdb-icon>
               <div class="dropdown-menu dropdown-menu-right dropdown-primary">
                 <a class="dropdown-item" href="#">Profile</a>
@@ -62,8 +72,53 @@
           </a>
         </li>
       </ul>
+      <div class="form-inline ml-auto">
+        <button mdbBtn type="button" color="success" outline="true" mdbWavesEffect
+        (click)="authService.login()"
+        *ngIf="!authService.loggedIn">
+        Log In</button>
+       
+        <button mdbBtn type="button" color="success" outline="true" mdbWavesEffect
+        (click)="authService.logout()"
+        *ngIf="authService.loggedIn">
+        Log Out</button>
+        </div>
+      <!-- <button mdbBtn type="button" color="secondary" outline="true" mdbWavesEffect>Log In</button> -->
     </links>
     
     <!-- Collapsible content -->
   
   </mdb-navbar>
+
+  <!-- Footer -->
+<footer class="page-footer font-small cyan darken-3">
+
+  <!-- Footer Elements -->
+  <div class="container">
+
+    <!-- Grid row-->
+    <div class="row">
+
+      <!-- Grid column -->
+      <div class="col-md-12 py-5">
+        <div class="mb-5 flex-center">
+          <!--GitHub  -->
+          <a href="https://www.github.com/krmallon/chapter-app" target="_blank" rel="noopener noreferrer"
+          class="li-ic">
+            <mdb-icon fab icon="github" size="2x" class="white-text mr-md-5 mr-3"></mdb-icon>
+        </a>
+          <!--Linkedin -->
+          <a href="https://www.linkedin.com/in/krmallon/" target="_blank" rel="noopener noreferrer" class="li-ic">
+              <mdb-icon fab icon="linkedin" size="2x" class="white-text mr-md-5 mr-3"></mdb-icon>
+          </a>
+        </div>
+      </div>
+      <!-- Grid column -->
+
+    </div>
+    <!-- Grid row-->
+
+  </div>
+  <!-- Footer Elements -->
+</footer>
+<!-- Footer -->
