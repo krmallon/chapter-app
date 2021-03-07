@@ -4,8 +4,8 @@ import Auth0Client from '@auth0/auth0-spa-js/dist/typings/Auth0Client';
 import { from, of, Observable, BehaviorSubject, combineLatest, throwError } from 'rxjs';
 import { tap, catchError, concatMap, shareReplay } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { WebService } from './web.service'
 import config  from './config'
+import { UserService } from './services/user.service';
 
 
 @Injectable({
@@ -40,7 +40,7 @@ export class AuthService {
   // Create a local property for login status
   loggedIn: boolean = null;
 
-  constructor(private router: Router, private webService : WebService) {
+  constructor(private router: Router, private userService : UserService) {
     // On initial load, check authentication state with authorization server
     // Set up local auth streams if user is already authenticated
     this.localAuthSetup();
@@ -111,7 +111,7 @@ export class AuthService {
       authComplete$.subscribe(([user, loggedIn]) => {
         sessionStorage.setItem("user", user.sub)
         console.log(sessionStorage.getItem("user"))
-        this.webService.getCurrentUser(sessionStorage.getItem("user"))
+        this.userService.getCurrentUser(sessionStorage.getItem("user"))
         this.router.navigate([targetRoute]);
       });
     }
