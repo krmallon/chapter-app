@@ -13,6 +13,8 @@ import { NotfoundComponent } from './notfound/notfound.component';
 import { UserService } from './services/user.service';
 import { AuthService } from './auth.service';
 import { HttpClientModule } from '@angular/common/http';
+import { BookService } from './services/book.service';
+import { RecommendationsComponent } from './recommendations/recommendations.component';
 
 var routes = [
   {
@@ -22,6 +24,10 @@ var routes = [
   {
     path: 'user/:id',
     component: ProfileComponent
+  },
+  {
+    path: 'recommendations',
+    component: RecommendationsComponent
   },
   {
     path: 'books/:id',
@@ -45,6 +51,7 @@ var routes = [
     BookComponent,
     ProfileComponent,
     NotfoundComponent,
+    RecommendationsComponent,
   ],
   imports: [
     BrowserModule,
@@ -53,7 +60,7 @@ var routes = [
     MDBBootstrapModule.forRoot(),
     HttpClientModule
   ],
-  providers: [UserService, AuthService],
+  providers: [UserService, AuthService, BookService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
