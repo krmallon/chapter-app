@@ -1,0 +1,11 @@
+<div class="container">
+    <div class="card-deck">
+    <div class="row mt-5 justify-content-center" *ngFor =
+        "let recommendation of recommendationService.books_list | async">
+        <div class="card-header">
+        <b>{{ recommendation.rec_book.title }}</b>
+        <div class="img-holder">
+            <img src={{recommendation.rec_book.image}} alt="Image">
+        </div>
+        <br>Because you enjoyed {{ recommendation.rec_source.title}}
+    </div>
