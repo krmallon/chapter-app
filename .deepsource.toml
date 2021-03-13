@@ -15,4 +15,8 @@ enabled = true
   plugins = ["angular"]
   style_guide = "standard"
   dialect = "typescript"
-  environment = ["nodejs"]
+  environment = [
+    "nodejs",
+    "browser",
+    "jasmine"
+  ]
