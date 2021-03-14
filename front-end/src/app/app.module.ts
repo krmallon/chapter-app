@@ -15,6 +15,10 @@ import { AuthService } from './auth.service';
 import { HttpClientModule } from '@angular/common/http';
 import { BookService } from './services/book.service';
 import { RecommendationsComponent } from './recommendations/recommendations.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FeedComponent } from './feed/feed.component';
+import { MessagesComponent } from './messages/messages.component';
+import { SearchComponent } from './search/search.component';
 
 var routes = [
   {
@@ -32,6 +36,18 @@ var routes = [
   {
     path: 'books/:id',
     component: BookComponent
+  },
+  {
+    path: 'search/:query',
+    component: SearchComponent
+  },
+  {
+    path: 'feed',
+    component: FeedComponent
+  },
+  {
+    path: 'messages',
+    component: MessagesComponent
   },
   {
     path: '404',
@@ -52,13 +68,18 @@ var routes = [
     ProfileComponent,
     NotfoundComponent,
     RecommendationsComponent,
+    FeedComponent,
+    MessagesComponent,
+    SearchComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     RouterModule.forRoot(routes),
     MDBBootstrapModule.forRoot(),
-    HttpClientModule
+    HttpClientModule,
+    ReactiveFormsModule,
+    FormsModule
   ],
   providers: [UserService, AuthService, BookService],
   bootstrap: [AppComponent]
