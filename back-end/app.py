@@ -31,7 +31,8 @@ def isbn_in_bookRecData(isbn):
 
 @app.route("/api/v1.0/bookinDB/<string:ISBN>", methods=["GET"])
 def book_in_db(ISBN):
-    return make_response(jsonify(db.session.query(Book.ISBN).filter_by(ISBN=ISBN).scalar() is not None), 200)   
+    return make_response(jsonify(db.session.query(Book.ISBN).filter_by(ISBN=ISBN).first() is not None), 200) 
+    # change to .scalar() instead of first when unique constraint is added to ISBN column  
 
 # add unit test 
 def addBookToDB(isbn):
@@ -128,7 +129,8 @@ def get_one_book(id):
     author = "N/A"
     image = "N/A"
     description = "Description unavailable"
-
+    page_count = 0
+    publish_date = "N/A"
     # NEED TO REFACTOR THIS TO REMOVE MULTIPLE TRY/EXCEPT BLOCK
 
     try:
@@ -147,10 +149,50 @@ def get_one_book(id):
         description = js['items'][0]['volumeInfo']['description']
     except Exception:
         pass
+    try:
+        publish_date = js['items'][0]['volumeInfo']['publishedDate']
+    except Exception:
+        pass
+    try:
+        page_count = js['items'][0]['volumeInfo']['pageCount']
+    except Exception:
+        pass
     
-    book = {"title" : title, "author" :  author, "image" : image, "description" : description}
+    book = {"title" : title, "author" :  author, "image" : image, "description" : description, "pages" : page_count, "date" : publish_date}
 
     return make_response(jsonify(book), 200)
+
+@app.route("/api/v1.0/books/<string:ISBN>/<string:user_id>/currentlyreading", methods=["POST"])
+def add_currently_reading(isbn, user_id):
+    book = db.session.query(Book).filter_by(ISBN=isbn).first()
+    book_id = book.book_id
+
+    db.session.add(Reading(user_id=user_id, book_id=book_id, start_date=datetime.date.today()))
+    db.session.commit()
+
+    return make_response( jsonify( "Successfully added to bookshelf"), 201 )
+
+@app.route("/api/v1.0/books/<string:ISBN>/<string:user_id>/wanttoread", methods=["POST"])
+def add_want_to_read(isbn, user_id):
+    book = db2.session.query(Book).filter_by(ISBN=isbn).first()
+    book_id = book.book_id
+
+    db2.session.add(WantsToRead(user_id=user_id, book_id=book_id, date_added=datetime.date.today()))
+    db2.session.commit()
+
+    return make_response( jsonify( "Successfully added to bookshelf"), 201 )
+
+@app.route("/api/v1.0/books/<string:ISBN>/<string:user_id>/hasread", methods=["POST"])
+def add_has_read(isbn, user_id):
+    book = db2.session.query(Book).filter_by(ISBN=isbn).first()
+    book_id = book.book_id
+
+    # update date selection
+    db2.session.add(HasRead(user_id=user_id, book_id=book_id, start_date=datetime.date.today(), finish_date=datetime.date.today()))
+    db2.session.commit()
+
+    return make_response( jsonify( "Successfully added to bookshelf"), 201 )
+
 # USER ENDPOINTS
 
 @app.route("/api/v1.0/auth0/<auth0_id>", methods=["GET"])
@@ -174,7 +216,7 @@ def get_user_details(user_id):
     except:
         return make_response(jsonify({"error" : "Invalid ID"}), 404)
     
-    user = {"user_id" : result.user_id, "auth0_id" : result.auth0_id, "name" : result.full_name}
+    user = {"user_id" : result.user_id, "auth0_id" : result.auth0_id, "name" : result.full_name, "image" : result.image}
     data_to_return.append(user)
 
     return make_response(jsonify(data_to_return), 200)
@@ -378,7 +420,8 @@ def get_one_review(review_id):
 def add_review(ISBN):
     data_to_return = []
 
-    exists = db.session.query(Book.ISBN).filter_by(ISBN=ISBN).scalar() is not None
+    # exists = db.session.query(Book.ISBN).filter_by(ISBN=ISBN).scalar() is not None
+    exists = db.session.query(Book.ISBN).filter_by(ISBN=ISBN).first() is not None
 
     if not exists:
         addBookToDB(ISBN)
