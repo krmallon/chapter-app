@@ -13,6 +13,7 @@ export class BookService {
   book = this.bookSubject.asObservable();
 
   bookID;
+  bookInDB;
 
   constructor(private http: HttpClient) { }
 
@@ -43,4 +44,29 @@ getBook(isbn) {
  addToHasRead(book, user_id) {
    axios.post('http://localhost:5000/api/v1.0/books/'+ book + '/' + user_id + '/hasread')
  }
+
+ bookPresentInDB(isbn) {
+  this.http.get('http://localhost:5000/api/v1.0/bookinDB/' + isbn).subscribe(
+    response => {
+      this.bookInDB = response;
+      console.log(typeof response)
+      return response;
+    }
+  )
+ }
+
+  addBookToDB(book) {
+    let bookData = new FormData();
+    bookData.append("title", book.title)
+    bookData.append("author", book.author)
+    bookData.append("isbn", book.isbn)
+    bookData.append("publish_date", book.date)
+    bookData.append("page_count", book.pages)
+    bookData.append("image_link", book.image)
+    
+    this.http.post(
+      'http://localhost:5000/api/v1.0/addbooktodb', bookData).subscribe(
+        response => {}
+      );
+  }
 }
