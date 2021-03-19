@@ -12,9 +12,4 @@ name = "javascript"
 enabled = true
 
   [analyzers.meta]
-  environment = [
-    "nodejs",
-    "browser",
-    "jasmine",
-    "jquery"
-  ]
+  environment = ["jquery"]
