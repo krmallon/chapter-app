@@ -1,1 +1,14 @@
-<p>search works!</p>
+<div class="container" style="margin-top:200px;">
+    <div class="card-deck">
+    <div class="row mt-5 justify-content-center">
+      <div *ngFor = "let book of searchService.book_results_list | async">
+      <div class="card card-custom mx-2 mb-3" routerLink='/books/{{book.ISBN}}'
+      style="cursor: pointer">
+             <img src={{book.image}} alt="Book cover" class="card-img mx-auto">
+             <div class="card-footer">
+              <!-- {{ book.title }} -->
+          </div>
+        
+      </div>
+      </div>
+    </div>
