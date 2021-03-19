@@ -19,15 +19,34 @@
           <a class="nav-link waves-light" mdbWavesEffect routerLink='/about'>About</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link waves-light" mdbWavesEffect *ngIf="authService.loggedIn">Profile</a>
+          <a class="nav-link waves-light" mdbWavesEffect  routerLink='/user/{{sessionStorage.user_id}}' *ngIf="authService.loggedIn">Profile</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link waves-light" mdbWavesEffect *ngIf="authService.loggedIn">Recommendations</a>
+          <a class="nav-link waves-light" mdbWavesEffect routerLink='/recommendations' *ngIf="authService.loggedIn">Recommendations</a>
         </li>
         <li class="nav-item">
             <a class="nav-link waves-light" mdbWavesEffect *ngIf="authService.loggedIn">Community</a>
           </li>
      </ul>
+
+     
+     <form class="form-inline md-form form-sm active-pink active-pink-2">
+      <input class="form-control form-control-sm ml-3 w-75" name="query" type="text" placeholder="Search" aria-label="Search"
+        mdbInput>
+        <mdb-icon fas icon="search" aria-hidden="true" routerLink='/search/{{query}}'></mdb-icon>
+        <!-- <button class="btn btn-success" type="button" routerLink='/search/{{query}}'>
+          <i class="fa fa-search"></i>Search
+        </button> -->
+    </form>
+    
+    <!-- <div class="input-group mx-auto" [formGroup]="searchForm">
+      <input type="text" class="form-control has-search" name="query" formControlName="query" placeholder="Search books by any keyword">
+      <div class="input-group-append">
+        <button class="btn btn-success" type="button" routerLink='/search/{{this.searchForm.value.query}}'>
+          <i class="fa fa-search"></i>
+        </button>
+      </div>
+    </div> -->
 
      <!-- <ul class="navbar-nav mr-auto">
         <form class="form-inline waves-light" mdbWavesEffect>
@@ -49,7 +68,7 @@
         <li class="nav-item">
           <a class="nav-link"><mdb-icon fas icon="envelope"></mdb-icon></a>
         </li>
-        <li class="nav-item">
+        <!-- <li class="nav-item">
           <a class="nav-link">
             <mdb-icon fab icon="github"></mdb-icon>
           </a>
@@ -58,7 +77,7 @@
           <a class="nav-link">
             <mdb-icon fab icon="linkedin"></mdb-icon>
           </a>
-        </li>
+        </li> -->
         <li class="nav-item">
           <a class="nav-link">
             <div class="btn-group" mdbDropdown *ngIf="authService.loggedIn">
@@ -89,36 +108,3 @@
     <!-- Collapsible content -->
   
   </mdb-navbar>
-
-  <!-- Footer -->
-<footer class="page-footer font-small cyan darken-3">
-
-  <!-- Footer Elements -->
-  <div class="container">
-
-    <!-- Grid row-->
-    <div class="row">
-
-      <!-- Grid column -->
-      <div class="col-md-12 py-5">
-        <div class="mb-5 flex-center">
-          <!--GitHub  -->
-          <a href="https://www.github.com/krmallon/chapter-app" target="_blank" rel="noopener noreferrer"
-          class="li-ic">
-            <mdb-icon fab icon="github" size="2x" class="white-text mr-md-5 mr-3"></mdb-icon>
-        </a>
-          <!--Linkedin -->
-          <a href="https://www.linkedin.com/in/krmallon/" target="_blank" rel="noopener noreferrer" class="li-ic">
-              <mdb-icon fab icon="linkedin" size="2x" class="white-text mr-md-5 mr-3"></mdb-icon>
-          </a>
-        </div>
-      </div>
-      <!-- Grid column -->
-
-    </div>
-    <!-- Grid row-->
-
-  </div>
-  <!-- Footer Elements -->
-</footer>
-<!-- Footer -->
