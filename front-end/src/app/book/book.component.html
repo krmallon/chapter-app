@@ -16,9 +16,22 @@
          </div>
          <!-- Masthead Subheading-->
          <p class="masthead-subheading font-weight-light mb-0">{{book.author}} <br>Published: {{book.date}} <br>Pages: {{book.pages}}<br> {{book.description}}</p>
-     <button type="button" mdbBtn color="primary" class="relative waves-light" (click)="basicModal.show()" mdbWavesEffect>Add Review</button> 
     </div>
-     </div>
+     <button type="button" mdbBtn color="primary" class="relative waves-light"  (click)="checkInDB(book.isbn)" *ngIf="authService.loggedIn" mdbWavesEffect>Test - Check in DB</button>
+    <div class="btn-group" mdbDropdown *ngIf="authService.loggedIn">
+      <button mdbDropdownToggle type="button" mdbBtn color="primary" class="dropdown-toggle waves-light" (click)="addToDB(book)"
+        mdbWavesEffect>
+        Add to shelf
+      </button>
+      <div class="dropdown-menu dropdown-primary">
+        <a class="dropdown-item" (click)="addToCurrentlyReading(book)">Currently Reading</a>
+        <div class="divider dropdown-divider"></div>
+        <a class="dropdown-item" (click)="addToHasRead(book)">Read</a>
+        <div class="divider dropdown-divider"></div>
+        <a class="dropdown-item" (click)="addToWantToRead(book)">Want to Read</a>
+      </div>
+    </div>   
+  </div>
  </header>
  <!-- reviews Section-->
  <section class="page-section reviews" id="reviews">
@@ -32,8 +45,10 @@
              <div class="divider-custom-line"></div>
          </div>
          <!-- reviews Grid Items-->
-         
-       <div *ngFor = "let review of reviewService.reviews_list | async">
+         <div class="col text-center">
+         <!-- <button type="button" mdbBtn color="primary" class="relative waves-light" (click)="basicModal.show()" *ngIf="authService.loggedIn" mdbWavesEffect>Add Review</button> -->
+     </div>
+         <div *ngFor = "let review of reviewService.reviews_list | async">
          <div class="row justify-content-center">
              <!-- reviews Item 1-->
              <div class="col-md-6 col-lg-8 mb-5">
@@ -85,10 +100,7 @@
          </div>
      </div>
  </footer>
- <!-- Copyright Section-->
- <div class="copyright py-4 text-center text-white">
-     <div class="container"><small>Copyright © Your Website 2020</small></div>
- </div>
+ 
  <!-- Scroll to Top Button (Only visible on small and extra-small screen sizes)-->
  <div class="scroll-to-top d-lg-none position-fixed">
      <a class="js-scroll-trigger d-block text-center text-white rounded" href="#page-top"><i class="fa fa-chevron-up"></i></a>
