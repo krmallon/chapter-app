@@ -13,8 +13,12 @@ enabled = true
 
   [analyzers.meta]
   environment = [
-    "nodejs",
-    "browser",
     "jasmine",
-    "jquery"
+    "browser",
+    "nodejs",
+    "jquery",
+    "jest"
   ]
+  plugins = ["angular"]
+  style_guide = "standard"
+  dialect = "typescript"
