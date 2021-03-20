@@ -114,11 +114,9 @@ def get_book_id_by_ISBN(isbn):
     else:
         return make_response(jsonify({"error" : "Book not found in DB"}), 404)
 
-@app.route("/api/v1.0/books/<string:id>", methods=["GET"])
-def get_one_book(id):
-    data = []
- 
-    url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + id
+@app.route("/api/v1.0/books/<string:isbn>", methods=["GET"])
+def get_one_book(isbn):
+    url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn
     r = requests.get(url)
     js = r.json()
 
@@ -158,11 +156,11 @@ def get_one_book(id):
     except Exception:
         pass
     
-    book = {"title" : title, "author" :  author, "image" : image, "description" : description, "pages" : page_count, "date" : publish_date}
+    book = {"isbn" : isbn, "title" : title, "author" :  author, "image" : image, "description" : description, "pages" : page_count, "date" : publish_date}
 
     return make_response(jsonify(book), 200)
 
-@app.route("/api/v1.0/books/<string:ISBN>/<string:user_id>/currentlyreading", methods=["POST"])
+@app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/currentlyreading", methods=["POST"])
 def add_currently_reading(isbn, user_id):
     book = db.session.query(Book).filter_by(ISBN=isbn).first()
     book_id = book.book_id
@@ -172,24 +170,24 @@ def add_currently_reading(isbn, user_id):
 
     return make_response( jsonify( "Successfully added to bookshelf"), 201 )
 
-@app.route("/api/v1.0/books/<string:ISBN>/<string:user_id>/wanttoread", methods=["POST"])
+@app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/wanttoread", methods=["POST"])
 def add_want_to_read(isbn, user_id):
-    book = db2.session.query(Book).filter_by(ISBN=isbn).first()
+    book = db.session.query(Book).filter_by(ISBN=isbn).first()
     book_id = book.book_id
 
-    db2.session.add(WantsToRead(user_id=user_id, book_id=book_id, date_added=datetime.date.today()))
-    db2.session.commit()
+    db.session.add(WantsToRead(user_id=user_id, book_id=book_id, date_added=datetime.date.today()))
+    db.session.commit()
 
     return make_response( jsonify( "Successfully added to bookshelf"), 201 )
 
-@app.route("/api/v1.0/books/<string:ISBN>/<string:user_id>/hasread", methods=["POST"])
+@app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/hasread", methods=["POST"])
 def add_has_read(isbn, user_id):
-    book = db2.session.query(Book).filter_by(ISBN=isbn).first()
+    book = db.session.query(Book).filter_by(ISBN=isbn).first()
     book_id = book.book_id
 
     # update date selection
-    db2.session.add(HasRead(user_id=user_id, book_id=book_id, start_date=datetime.date.today(), finish_date=datetime.date.today()))
-    db2.session.commit()
+    db.session.add(HasRead(user_id=user_id, book_id=book_id, start_date=datetime.date.today(), finish_date=datetime.date.today()))
+    db.session.commit()
 
     return make_response( jsonify( "Successfully added to bookshelf"), 201 )
 
@@ -281,7 +279,8 @@ def search_books(query):
         try:
             imgLink = book['volumeInfo']['imageLinks']['thumbnail']
         except:
-            imgLink = "https://www.rit.edu/nsfadvance/sites/rit.edu.nsfadvance/files/default_images/photo-unavailable.png" # find free-use default 'Cover Unavailable' image to use here
+            imgLink = ""
+            # https://www.rit.edu/nsfadvance/sites/rit.edu.nsfadvance/files/default_images/photo-unavailable.png" # find free-use default 'Cover Unavailable' image to use here
         new_book = {"title" : title, "author" : author, "date" : date, "image" : imgLink, "ISBN" : ISBN}
         if ISBN != "N/A":
             data_to_return.append(new_book)
@@ -721,5 +720,54 @@ def get_recommendations_by_user_id(user_id):
     else:
         return make_response(jsonify({"error" : "No recommendations found"}), 404)
 
+# GOAL ENDPOINTS
+@app.route("/api/v1.0/<string:user_id>/goals", methods=["GET"])
+def get_goals_by_user_id(user_id):
+    data_to_return = []
+
+    goals = db.session.query(Goal.target, Goal.current, Goal.year).filter(Goal.user_id==user_id).all()
+
+    for goal in goals:
+        target = goal.target
+        current = goal.current
+        year = goal.year
+        data_to_return.append(goal)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No goals found"}), 404)
+
+@app.route("/api/v1.0/goals/new", methods=["POST"])
+def set_new_reading_goal():
+    if "user_id" in request.form and "target" in request.form and "year" in request.form:
+        user_id = request.form["user_id"],
+        target = request.form["target"],
+        year = request.form["year"]
+
+    db.session.add(Goal(id=4, target=target, current=0, user_id=user_id, year=year))
+    db.session.commit()
+
+    return make_response(jsonify({"success:" : "Reading goal successfully set"}), 200)
+
+@app.route("/api/v1.0/goals/<string:goal_id>", methods=["PUT"])
+def edit_reading_goal(goal_id):
+    if "target" in request.form:
+        new_target = request.form["target"]
+
+    goal = db.session.query(Goal).filter(Goal.id==goal_id).first()
+    goal.target = new_target
+    db.session.commit()
+
+    return make_response(jsonify({"success:" : "Reading goal successfully edited"}), 200)
+    
+
+@app.route("/api/v1.0/goals/<string:goal_id>", methods=["DELETE"])
+def delete_reading_goal(goal_id):
+    goal = db.session.query(Goal).filter(Goal.id==goal_id).first()
+    db.session.delete(goal)
+
+    return make_response(jsonify({}), 204)
+    
 if __name__ == "__main__":
     app.run(debug=True)
