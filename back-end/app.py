@@ -725,9 +725,10 @@ def get_recommendations_by_user_id(user_id):
 def get_goals_by_user_id(user_id):
     data_to_return = []
 
-    goals = db.session.query(Goal.target, Goal.current, Goal.year).filter(Goal.user_id==user_id).all()
+    goals = db.session.query(Goal.id, Goal.target, Goal.current, Goal.year).filter(Goal.user_id==user_id).all()
 
     for goal in goals:
+        goal_id = goal.id
         target = goal.target
         current = goal.current
         year = goal.year
@@ -768,6 +769,82 @@ def delete_reading_goal(goal_id):
     db.session.delete(goal)
 
     return make_response(jsonify({}), 204)
+
+# GROUP ENDPOINTS
+@app.route("/api/v1.0/groups/new", methods=["POST"])
+def create_new_group():
+    if "name" in request.form and "description" in request.form:
+        name = request.form["name"],
+        description = request.form["description"]
+
+    db.session.add(Group(name=name, description=description))
+    db.session.commit()
+
+    return make_response(jsonify({"success:" : "Group created"}), 200)
+
+@app.route("/api/v1.0/groups/edit", methods=["PUT"])
+def edit_group():
+    if "group_id" in request.form:
+        group_id = request.form["group_id"]
+        group = db.session.query(Group).filter(Group.id==group_id).first()
+
+        if "name" in request.form:
+            group.name = request.form["name"]
+        if "description" in request.form:
+            group.description = request.form[""]
+
+        db.session.commit()
+
+    return make_response(jsonify({"success:" : "Group edited"}), 200)
+
+@app.route("/api/v1.0/groups/delete", methods=["DELETE"])
+def delete_group():
+    if "group_id" in request.form:
+        group_id = request.form["group_id"]
+
+    group = db.session.query(Group).filter(Group.id==group_id).first()
+    db.session.delete(group)
+    db.session.commit()
+
+    return make_response(jsonify({}), 204)
+
+@app.route("/api/v1.0/groups/<string:group_id>/members", methods=["GET"])
+def get_group_members(group_id):
+    data_to_return = []
+    members = db.session.query(UserGroup.user_id, User.full_name).join(User, UserGroup.user_id==User.user_id).filter(UserGroup.group_id==group_id).all()
+
+    for member in members:
+        memb = {"user_id" : member.user_id, "name" : member.full_name }
+        data_to_return.append(memb)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No members found"}), 404)
+
+@app.route("/api/v1.0/groups/<string:group_id>/join", methods=["POST"])
+def join_group(group_id):
+    if "user_id" in request.form:
+        user_id = request.form["user_id"]
+
+    db.session.add(UserGroup(user_id=user_id, group_id=group_id, join_date=datetime.date.today()))
+    db.session.commit()
+
+    return make_response(jsonify({"success:" : "Group joined"}), 200)
+
+@app.route("/api/v1.0/groups/<string:group_id>/leave", methods=["DELETE"])
+def leave_group(group_id):
+    if "user_id" in request.form:
+        user_id = request.form["user_id"]
+
+    entry = db.session.query(UserGroup).filter(UserGroup.group_id==group_id, UserGroup.user_id==user_id).first()
+    db.session.delete(entry)
+    db.session.commit()
+
+    return make_response(jsonify({}), 204)
+
+
+    
     
 if __name__ == "__main__":
     app.run(debug=True)
