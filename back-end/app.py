@@ -843,6 +843,56 @@ def leave_group(group_id):
 
     return make_response(jsonify({}), 204)
 
+@app.route("/api/v1.0/groups/<string:group_id>/posts", methods=["GET"])
+def get_all_group_posts(group_id):
+    data_to_return = []
+    posts = db.session.query(Post.author_id, Post.text, Post.title, User.full_name).join(User, Post.author_id==User.user_id).filter(Post.group_id==group_id).all()
+
+    for post in posts:
+        p = {"author_id" : post.author_id, "author_name" : post.full_name, "text" : post.text, "title" : post.title}
+        data_to_return.append(p)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No posts found"}), 404)
+
+@app.route("/api/v1.0/groups/<string:group_id>/posts", methods=["POST"])
+def add_group_post(group_id):
+    if "user_id" in request.form and "text" in request.form:
+        user_id = request.form["user_id"]
+        text = request.form["text"]
+
+    db.session.add(Post(id=1, group_id=group_id, author_id=user_id, text=text, title="title"))
+    db.session.commit()
+
+    return make_response(jsonify({"success:" : "Posted"}), 200)
+
+
+@app.route("/api/v1.0/groups/posts/<string:post_id>", methods=["PUT"])
+def edit_group_post(post_id):
+    post = db.session.query(Post).filter(Post.id==post_id).first()
+    
+    if "text" in request.form:
+        post.text = request.form["text"]
+    if "title" in request.form:
+        post.title = request.form["title"]
+
+    db.session.commit()
+
+    # change so it only returns this if successful
+    return make_response(jsonify({"success:" : "Post edited"}), 200)
+
+@app.route("/api/v1.0/groups/posts", methods=["DELETE"])
+def delete_group_post(): 
+    if "post_id" in request.form:
+        post_id = request.form["post_id"]
+        post = db.session.query(Post).filter(Post.id==post_id).first()
+        db.session.delete(post)
+    
+    db.session.commit()
+    
+    return make_response(jsonify({}), 204)
 
     
     
