@@ -1,0 +1,33 @@
+<div class="container">
+    <h1>All Groups</h1>
+    <div class="card-deck">
+    <div class="row mt-5 justify-content-center">
+      <div *ngFor = "let group of groupService.groups_list | async">
+      <div class="card card-custom mx-2 mb-3"
+      style="cursor: pointer" routerLink='/group/{{group.id}}'>
+             <div class="card-footer">
+              {{ group.name }}
+              <br>
+              {{ group.description}}
+          </div>
+        
+      </div>
+      </div>
+    </div>
+
+    <div class="container">
+        <h1>My Groups</h1>
+        <div class="card-deck">
+        <div class="row mt-5 justify-content-center">
+          <div *ngFor = "let group of groupService.user_groups_list | async">
+          <div class="card card-custom mx-2 mb-3"
+          style="cursor: pointer" routerLink='/group/{{group.id}}'>
+                 <div class="card-footer">
+                  {{ group.name }}
+                  <br>
+                  {{ group.description}}
+              </div>
+            
+          </div>
+          </div>
+        </div>
