@@ -78,8 +78,7 @@ def addBookToDB(isbn):
     db.session.commit()
 
 def addRecToDB(rec_book_id, rec_source_id, user_id):
-    # update once unique SERIAL has been created for id on this table
-    db.session.add(BookRecommendation(id="5", rec_book_id=rec_book_id, rec_source_id=rec_source_id, user_id=user_id))
+    db.session.add(BookRecommendation(rec_book_id=rec_book_id, rec_source_id=rec_source_id, user_id=user_id))
 
 # BOOK ENDPOINTS
 
@@ -187,6 +186,12 @@ def add_has_read(isbn, user_id):
 
     # update date selection
     db.session.add(HasRead(user_id=user_id, book_id=book_id, start_date=datetime.date.today(), finish_date=datetime.date.today()))
+    goals = db.session.query(Goal).filter(Goal.user_id==user_id).all()
+
+    for goal in goals:
+        if str(goal.year) in str(datetime.date.today()):
+            goal.current = goal.current + 1
+
     db.session.commit()
 
     return make_response( jsonify( "Successfully added to bookshelf"), 201 )
@@ -379,10 +384,10 @@ def get_all_reviews(ISBN):
     book = db.session.query(Book).filter(Book.ISBN==ISBN).first()
 
     if book is not None:
-        reviews = db.session.query(Book.title, User.full_name, Review.id, Review.reviewer_id, Review.rating, Review.text, Review.likes).join(Review, Book.book_id==Review.book_id).join(User, User.user_id==Review.reviewer_id).filter(Book.ISBN==ISBN)
+        reviews = db.session.query(Book.title, User.full_name, User.image, Review.id, Review.reviewer_id, Review.rating, Review.text, Review.likes).join(Review, Book.book_id==Review.book_id).join(User, User.user_id==Review.reviewer_id).filter(Book.ISBN==ISBN)
         
         for review in reviews:
-            rev = {"review_id" : review.id, "book" : review.title, "reviewer_id" : review.reviewer_id, "reviewer_name" : review.full_name, "rating" : review.rating, "text" : review.text, "likes" : review.likes}
+            rev = {"review_id" : review.id, "book" : review.title, "reviewer_id" : review.reviewer_id, "reviewer_name" : review.full_name, "reviewer_image" : review.image, "rating" : review.rating, "text" : review.text, "likes" : review.likes}
             data_to_return.append(rev)
 
         return make_response( jsonify(data_to_return), 200)
@@ -706,12 +711,12 @@ def get_user_achievements(user_id):
 @app.route("/api/v1.0/<string:user_id>/recommendations", methods=["GET"])
 def get_recommendations_by_user_id(user_id):
     data_to_return = []
-    recs = db.session.query(BookRecommendation.id, BookRecommendation.rec_book_id, BookRecommendation.rec_source_id, Book.title, Book.image_link).join(Book, Book.book_id == BookRecommendation.rec_book_id).filter(BookRecommendation.user_id==user_id).all()
+    recs = db.session.query(BookRecommendation.id, BookRecommendation.rec_book_id, BookRecommendation.rec_source_id, Book.title, Book.ISBN, Book.image_link).join(Book, Book.book_id == BookRecommendation.rec_book_id).filter(BookRecommendation.user_id==user_id).all()
 
     for rec in recs:
-        rec_source_title = db.session.query(Book.title).filter(Book.book_id == rec.rec_source_id).first()
-        rec_source = {"id" : rec.rec_source_id, "title" : rec_source_title.title}
-        rec_book = {"id" : rec.rec_book_id, "title" : rec.title, "image" : rec.image_link}
+        rec_source_info = db.session.query(Book.title, Book.ISBN).filter(Book.book_id == rec.rec_source_id).first()
+        rec_source = {"id" : rec.rec_source_id, "ISBN" : rec_source_info.ISBN, "title" : rec_source_info.title}
+        rec_book = {"id" : rec.rec_book_id, "ISBN" : rec.ISBN, "title" : rec.title, "image" : rec.image_link}
         recommendation = {"id" : rec.id, "rec_book" : rec_book, "rec_source" : rec_source}
         data_to_return.append(recommendation)
 
@@ -771,6 +776,35 @@ def delete_reading_goal(goal_id):
     return make_response(jsonify({}), 204)
 
 # GROUP ENDPOINTS
+
+@app.route("/api/v1.0/groups", methods=["GET"])
+def get_all_groups():
+    data_to_return = []
+    groups = db.session.query(Group).all()
+
+    for group in groups:
+        gr = {"id" : group.id, "name" : group.name, "description" : group.description}
+        data_to_return.append(gr)
+    
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No groups found"}), 404)
+
+@app.route("/api/v1.0/user/<string:user_id>/groups", methods=["GET"])
+def get_groups_by_user(user_id):
+    data_to_return = []
+    groups = db.session.query(Group).join(UserGroup, Group.id==UserGroup.group_id).filter(UserGroup.user_id==user_id).all()
+
+    for group in groups:
+        gr = {"id" : group.id, "name" : group.name, "description" : group.description}
+        data_to_return.append(gr)
+    
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No groups found"}), 404)
+
 @app.route("/api/v1.0/groups/new", methods=["POST"])
 def create_new_group():
     if "name" in request.form and "description" in request.form:
@@ -807,6 +841,20 @@ def delete_group():
     db.session.commit()
 
     return make_response(jsonify({}), 204)
+
+@app.route("/api/v1.0/groups/<string:group_id>", methods=["GET"])
+def get_group(group_id):
+    data_to_return = []
+
+    group = db.session.query(Group).filter(Group.id==group_id).first()
+    gr = {"id" : group.id, "name" : group.name, "description" : group.description}
+
+    data_to_return.append(gr)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No group information available"}), 404)
 
 @app.route("/api/v1.0/groups/<string:group_id>/members", methods=["GET"])
 def get_group_members(group_id):
@@ -846,10 +894,10 @@ def leave_group(group_id):
 @app.route("/api/v1.0/groups/<string:group_id>/posts", methods=["GET"])
 def get_all_group_posts(group_id):
     data_to_return = []
-    posts = db.session.query(Post.author_id, Post.text, Post.title, User.full_name).join(User, Post.author_id==User.user_id).filter(Post.group_id==group_id).all()
+    posts = db.session.query(Post.id, Post.author_id, Post.text, Post.title, User.full_name, User.image).join(User, Post.author_id==User.user_id).filter(Post.group_id==group_id).all()
 
     for post in posts:
-        p = {"author_id" : post.author_id, "author_name" : post.full_name, "text" : post.text, "title" : post.title}
+        p = {"id" : post.id, "author_id" : post.author_id, "author_name" : post.full_name, "author_image" : post.image, "text" : post.text, "title" : post.title}
         data_to_return.append(p)
 
     if data_to_return:
@@ -863,7 +911,7 @@ def add_group_post(group_id):
         user_id = request.form["user_id"]
         text = request.form["text"]
 
-    db.session.add(Post(id=1, group_id=group_id, author_id=user_id, text=text, title="title"))
+    db.session.add(Post(id=3, group_id=group_id, author_id=user_id, text=text, title="title"))
     db.session.commit()
 
     return make_response(jsonify({"success:" : "Posted"}), 200)
@@ -893,6 +941,34 @@ def delete_group_post():
     db.session.commit()
     
     return make_response(jsonify({}), 204)
+
+# COMMENT/REPLIES ENDPOINTS
+@app.route("/api/v1.0/comments/<string:object_id>/<string:target_id>", methods=["GET"])
+def get_comments(object_id, target_id):
+    data_to_return = []
+    comments = db.session.query(Comment.commenter_id, Comment.text, Comment.time_submitted, User.full_name).join(User, User.user_id==Comment.commenter_id).filter(Comment.object_id==object_id, Comment.target_id==target_id).all()
+         
+    for comment in comments:
+        com = {"commenter_id" : comment.commenter_id, "commenter_name" : comment.full_name, "text" : comment.text, "time" : comment.time_submitted}
+        data_to_return.append(com)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+        
+@app.route("/api/v1.0/comments/<string:object_id>/<string:target_id>", methods=["POST"])
+def add_comment(object_id, target_id):
+    if "commenter_id" in request.form and "text" in request.form:
+        commenter_id = request.form["commenter_id"]
+        text = request.form["text"]
+        db.session.add(Comment(comment_id=2, object_id=object_id, commenter_id=commenter_id, text=text, time_submitted=datetime.date.today(), target_id=target_id))
+        db.session.commit()
+
+    return make_response(jsonify({"success:" : "Comment posted"}), 200)
+    
+         
+        
+
+
 
     
     
