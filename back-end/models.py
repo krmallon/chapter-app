@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, Numeric, String, Table, text
+from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, Numeric, String, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -46,8 +46,6 @@ class Book(Base):
     page_count = Column(Integer)
     image_link = Column(String)
 
-    users = relationship('User', secondary='WantsToRead')
-
 
 class BookRecDatum(Base):
     __tablename__ = 'BookRecData'
@@ -62,10 +60,9 @@ class BookRecDatum(Base):
 class Group(Base):
     __tablename__ = 'Group'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, server_default=text("nextval('group_id_seq'::regclass)"))
     name = Column(String)
     description = Column(String)
-    member_count = Column(Integer)
 
 
 class Object(Base):
@@ -118,12 +115,11 @@ class Comment(Base):
     __tablename__ = 'Comment'
 
     comment_id = Column(Integer, primary_key=True)
-    object_type = Column(String)
     object_id = Column(Integer)
     commenter_id = Column(ForeignKey('User.user_id'))
     text = Column(String)
     time_submitted = Column(Date)
-    likes = Column(Integer)
+    target_id = Column(Integer)
 
     commenter = relationship('User')
 
@@ -157,8 +153,8 @@ class Goal(Base):
     id = Column(Integer, primary_key=True)
     target = Column(Integer)
     current = Column(Integer)
-    progress = Column(Integer)
     user_id = Column(ForeignKey('User.user_id'))
+    year = Column(Integer)
 
     user = relationship('User')
 
@@ -271,8 +267,12 @@ class UserGroup(Base):
     user = relationship('User')
 
 
-t_WantsToRead = Table(
-    'WantsToRead', metadata,
-    Column('user_id', ForeignKey('User.user_id'), primary_key=True, nullable=False),
-    Column('book_id', ForeignKey('Book.book_id'), primary_key=True, nullable=False)
-)
+class WantsToRead(Base):
+    __tablename__ = 'WantsToRead'
+
+    user_id = Column(ForeignKey('User.user_id'), primary_key=True, nullable=False)
+    book_id = Column(ForeignKey('Book.book_id'), primary_key=True, nullable=False)
+    date_added = Column(Date)
+
+    book = relationship('Book')
+    user = relationship('User')
