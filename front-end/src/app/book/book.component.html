@@ -36,6 +36,7 @@
  <!-- reviews Section-->
  <section class="page-section reviews" id="reviews">
      <div class="container">
+      <!-- <div *ngFor = "let book of bookService.book | async"> -->
          <!-- reviews Section Heading-->
          <h2 class="page-section-heading text-center text-uppercase text-secondary mb-0">Reviews</h2>
          <!-- Icon Divider-->
@@ -46,7 +47,7 @@
          </div>
          <!-- reviews Grid Items-->
          <div class="col text-center">
-         <!-- <button type="button" mdbBtn color="primary" class="relative waves-light" (click)="basicModal.show()" *ngIf="authService.loggedIn" mdbWavesEffect>Add Review</button> -->
+         <button type="button" mdbBtn color="primary" class="relative waves-light" (click)="basicModal.show()" *ngIf="authService.loggedIn" mdbWavesEffect>Add Review</button>
      </div>
          <div *ngFor = "let review of reviewService.reviews_list | async">
          <div class="row justify-content-center">
@@ -54,16 +55,20 @@
              <div class="col-md-6 col-lg-8 mb-5">
                      <div class="reviews-item-caption d-flex h-100 w-100">
                          <div class="reviews-item-caption-content text-center text-white"><i class="fas fa-plus fa-3x"></i></div>
+                         <img src={{review.reviewer_image}} class="rounded-circle img-fluid profile-picture" style="width:65px;height:65px" alt="Image"> &nbsp;
                          <p>{{review.text}} 
                            <br>
                            <b>{{review.rating}} stars </b>
                            <br>
                            Posted by {{review.reviewer_name}}
+                           <button type="button" class="btn btn-success btn-sm" *ngIf="this.isOwnReview(review)">Edit</button>
+                           <button type="button" class="btn btn-danger btn-sm" (click)="deleteModal.show()" *ngIf="this.isOwnReview(review)">Delete</button> 
                          </p>
-                     </div>
+                     </div> 
              </div>
          </div>
      </div>
+     
      </div>
  </section>
  
@@ -144,7 +149,29 @@
               </div>
               <div class="modal-footer">
                 <button type="button" mdbBtn color="danger" class="waves-light" aria-label="Close" (click)="basicModal.hide()" mdbWavesEffect>Cancel</button>
-                <button type="button" mdbBtn color="primary" class="relative waves-light" (click)="basicModal.hide()" mdbWavesEffect>Submit</button>
+                <button type="button" mdbBtn color="primary" class="relative waves-light" (click)="this.postReview(); basicModal.hide()" mdbWavesEffect>Submit</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div mdbModal #deleteModal="mdbModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myDeleteModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close pull-right" aria-label="Close" (click)="deleteModal.hide()">
+                  <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title w-100" id="myModalLabel">Confirm Deletion</h4>
+              </div>
+              <div class="modal-body">
+        
+              Are you sure you want to delete this review?
+        
+              </div>
+              <div class="modal-footer">
+                <button type="button" mdbBtn color="primary" class="waves-light" aria-label="Close" (click)="deleteModal.hide()" mdbWavesEffect>Cancel</button>
+                <button type="button" mdbBtn color="danger" class="relative waves-light" mdbWavesEffect>Delete</button>
               </div>
             </div>
           </div>

@@ -42,9 +42,24 @@ export class BookComponent implements OnInit {
     this.bookService.addToHasRead(book.isbn, sessionStorage.user_id)
   }
 
+  checkInDB(isbn) {
+    // debugging method
+    console.log(this.bookService.bookInDB)
+  }
+
   addToDB(book) {
     if (!this.bookService.bookInDB) {
       this.bookService.addBookToDB(book)
     }
+  }
+
+  postReview() {
+    // let book_id = this.bookService.getBookID(this.route.snapshot.params.id)
+    this.bookService.getBookID(this.route.snapshot.params.id)
+    this.reviewService.postReview(this.route.snapshot.params.id, this.bookService.bookID, this.reviewForm.value)
+  }
+
+  isOwnReview(review) {
+    return review.reviewer_id == sessionStorage.user_id;
   }
 }
