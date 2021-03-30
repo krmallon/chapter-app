@@ -7,15 +7,13 @@ import warnings
 from scipy.sparse import csr_matrix
 from scipy.sparse import save_npz
 from sklearn.neighbors import NearestNeighbors
-# from config import DB_URI 
+from config import DB_URI 
 import sqlalchemy
 import csv
-import os
 
 # suppresses potential warning from pandas library as discussed here: https://github.com/pandas-dev/pandas/issues/2841 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
-DB_URI = os.environ['DB_URI']
 engine = sqlalchemy.create_engine(DB_URI)
 
 # initialises two files to be used from the chosen dataset
@@ -207,7 +205,7 @@ def get_recommendations(isbn, matrix, book_mapper, book_inv_mapper):
     book_id = book_list[isbn]
 
     try:
-        similar_ids = find_similar_books(book_id, matrix, book_mapper, book_inv_mapper, k=1)
+        similar_ids = find_similar_books(book_id, matrix, book_mapper, book_inv_mapper, k=2)
     except:
         # if the chosen book does not have an adequate number of ratings, the user is prompted to choose another
         print("Insufficient rating data for this book. Please make another choice.")
