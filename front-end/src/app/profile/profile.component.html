@@ -1,1 +1,18 @@
 <p>profile works!</p>
+
+<div class="container mb-5 mt-5">
+    <div class="card">
+        <div *ngFor = "let goal of goalService.goal_list | async">
+        <div class="row">
+            <div class="col-md-12">
+                <h1 class="text-center mb-5">Reading Goal</h1>
+                <div class="progress">
+                <div class="progress-bar bg-success" role="progressbar" style="width: {{goal.current / goal.target * 100}}%" aria-valuenow="{{goal.current}}" aria-valuemin="0" aria-valuemax="{{goal.target}}"></div>
+                </div>
+                <h3 class="text-center mb-5"> Current: {{goal.current}}</h3>
+                <h3 class="text-center mb-5"> Target: {{goal.target}}</h3>
+                <h3 class="text-center mb-5"> Year: {{goal.year}}</h3>
+
+            </div>
+        </div>
+        </div>
