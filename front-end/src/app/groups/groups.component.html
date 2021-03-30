@@ -16,7 +16,7 @@
     </div>
 
     <div class="container">
-        <h1>My Groups</h1>
+        <h1 *ngIf="authService.loggedIn">My Groups</h1>
         <div class="card-deck">
         <div class="row mt-5 justify-content-center">
           <div *ngFor = "let group of groupService.user_groups_list | async">

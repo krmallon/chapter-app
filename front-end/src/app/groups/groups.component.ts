@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../auth.service';
 import { GroupService } from '../services/group.service';
 
 @Component({
@@ -8,7 +9,7 @@ import { GroupService } from '../services/group.service';
 })
 export class GroupsComponent implements OnInit {
 
-  constructor(public groupService: GroupService) { }
+  constructor(public groupService: GroupService, public authService: AuthService) { }
 
   ngOnInit(): void {
     this.groupService.getAllGroups()
