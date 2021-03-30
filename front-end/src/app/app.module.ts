@@ -19,6 +19,15 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FeedComponent } from './feed/feed.component';
 import { MessagesComponent } from './messages/messages.component';
 import { SearchComponent } from './search/search.component';
+import { GroupComponent } from './group/group.component';
+import { GroupsComponent } from './groups/groups.component';
+import { GoalService } from './services/goal.service';
+import { GroupService } from './services/group.service';
+import { ReviewService } from './services/review.service';
+import { CommentService } from './services/comment.service';
+import { AchievementService } from './services/achievement.service';
+import { MessagingService } from './services/messaging.service';
+import { SearchService } from './services/search.service';
 
 var routes = [
   {
@@ -50,6 +59,14 @@ var routes = [
     component: MessagesComponent
   },
   {
+    path: 'groups',
+    component: GroupsComponent
+  }, 
+  {
+    path: 'group/:id',
+    component: GroupComponent
+  },
+  {
     path: '404',
     component: NotfoundComponent
   },
@@ -71,6 +88,8 @@ var routes = [
     FeedComponent,
     MessagesComponent,
     SearchComponent,
+    GroupComponent,
+    GroupsComponent,
   ],
   imports: [
     BrowserModule,
@@ -81,7 +100,11 @@ var routes = [
     ReactiveFormsModule,
     FormsModule
   ],
-  providers: [UserService, AuthService, BookService],
+  providers: [
+    UserService, AuthService, BookService, GoalService, GroupService,
+    ReviewService, CommentService, AchievementService, MessagingService,
+    SearchService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
