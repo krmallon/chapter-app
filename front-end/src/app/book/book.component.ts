@@ -54,9 +54,9 @@ export class BookComponent implements OnInit {
   }
 
   postReview() {
-    // let book_id = this.bookService.getBookID(this.route.snapshot.params.id)
-    this.bookService.getBookID(this.route.snapshot.params.id)
-    this.reviewService.postReview(this.route.snapshot.params.id, this.bookService.bookID, this.reviewForm.value)
+    // this.bookService.getBookID(this.route.snapshot.params.id)
+    this.reviewService.postReview(this.route.snapshot.params.id, this.reviewForm.value)
+    this.reviewForm.reset()
   }
 
   isOwnReview(review) {
