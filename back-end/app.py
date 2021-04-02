@@ -193,6 +193,8 @@ def add_has_read(isbn, user_id):
             goal.current = goal.current + 1
 
     db.session.commit()
+    check_achievement(user_id, 'goal')
+    check_achievement(user_id, 'reading')
 
     return make_response( jsonify( "Successfully added to bookshelf"), 201 )
 
@@ -432,9 +434,9 @@ def add_review(ISBN):
 
     book = db.session.query(Book).filter(Book.ISBN==ISBN).first()
 
-    if "reviewer_id" in request.form and "book_id" in request.form and "text" in request.form and "rating" in request.form:
+    if "reviewer_id" in request.form and "text" in request.form and "rating" in request.form:
         reviewer_id = request.form["reviewer_id"]
-        book_id = request.form["book_id"]
+        book_id = book.book_id
         text = request.form["text"]
         rating = request.form["rating"]
     else:
@@ -455,6 +457,7 @@ def add_review(ISBN):
 
     if book is not None:
         db.session.add(Review(reviewer_id=reviewer_id, book_id=book_id, rating=rating, text=text, likes=0))
+        check_achievement(reviewer_id, 'review')
         # review_id = db.session.query(Review.review_id).filter_by(Review.reviewer_id=reviewer_id, Review.book_id=book_id, Review.rating=rating)
         db.session.commit()
         return make_response( jsonify( "Review successfully added" ), 201 )
@@ -706,6 +709,39 @@ def get_user_achievements(user_id):
     else:
         return make_response(jsonify({"error" : "No achievements found"}), 404)
 
+# def update_achievement_progress(user_id, achievement):
+#     if achievement == 1:
+
+
+
+def check_achievement(user_id, achievement_type):
+    if achievement_type == 'review':
+        first_review = db.session.query(Review).filter(Review.reviewer_id==user_id).one()
+        if first_review is not None:
+            db.session.add(UserAchievement(user_id=user_id, achievement_id=1, date_earned=datetime.date.today()))
+    if achievement_type == 'group':
+        first_group = db.session.query(Group).filter(Group.founder_id==user_id).one()
+        if first_group is not None:
+            db.session.add(UserAchievement(user_id=user_id, achievement_id=2, date_earned=datetime.date.today()))
+    if achievement_type == 'goal':
+        goals = db.session.query(Goal).filter(Goal.user_id==user_id).all()
+        count = db.session.query(Goal).filter(Goal.user_id==user_id).count()
+
+        if count == 0:
+            db.session.add(UserAchievement(user_id=user_id, achievement_id=3, date_earned=datetime.date.today()))
+
+        for goal in goals:
+            if goal.current == goal.target:
+                db.session.add(UserAchievement(user_id=user_id, achievement_id=4, date_earned=datetime.date.today()))
+
+    if achievement_type == 'reading':
+        count = db.session.query(HasRead).filter(HasRead.user_id==user_id).count()
+        if count == 10:
+            db.session.add(UserAchievement(user_id=user_id, achievement_id=5, date_earned=datetime.date.today()))
+
+    db.session.commit()
+
+
 # RECOMMENDATION ENDPOINTS
 
 @app.route("/api/v1.0/<string:user_id>/recommendations", methods=["GET"])
@@ -751,7 +787,9 @@ def set_new_reading_goal():
         target = request.form["target"],
         year = request.form["year"]
 
-    db.session.add(Goal(id=4, target=target, current=0, user_id=user_id, year=year))
+    check_achievement(user_id, 'goal')
+    # change so current reads from count of HasRead with dates within that year
+    db.session.add(Goal(target=target, current=0, user_id=user_id, year=year))
     db.session.commit()
 
     return make_response(jsonify({"success:" : "Reading goal successfully set"}), 200)
@@ -810,8 +848,10 @@ def create_new_group():
     if "name" in request.form and "description" in request.form:
         name = request.form["name"],
         description = request.form["description"]
+        founder_id = request.form["founder_id"]
 
-    db.session.add(Group(name=name, description=description))
+    db.session.add(Group(name=name, description=description, founder_id=founder_id))
+    check_achievement(founder_id, "group")
     db.session.commit()
 
     return make_response(jsonify({"success:" : "Group created"}), 200)
