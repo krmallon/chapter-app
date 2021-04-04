@@ -59,6 +59,10 @@ export class BookComponent implements OnInit {
     this.reviewForm.reset()
   }
 
+  deleteReview(review_id) {
+    this.reviewService.deleteReview(review_id)
+  }
+
   isOwnReview(review) {
     return review.reviewer_id == sessionStorage.user_id;
   }

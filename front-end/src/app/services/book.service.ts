@@ -7,10 +7,14 @@ import axios from 'axios';
   providedIn: 'root'
 })
 export class BookService {
-
+  
   private book_private;
   private bookSubject = new Subject();
   book = this.bookSubject.asObservable();
+
+  private user_book_private_list;
+  private userBookSubject = new Subject();
+  user_book_list = this.userBookSubject.asObservable();
 
   bookID;
   bookInDB;
@@ -69,4 +73,14 @@ getBook(isbn) {
         response => {}
       );
   }
+
+  getCurrentlyReadingByUser(user) {
+        return this.http.get('http://localhost:5000/api/v1.0/user/' + user + '/currentlyreading').subscribe(
+        response => {
+            this.user_book_private_list = response;
+            this.userBookSubject.next(this.user_book_private_list);
+
+            console.log(this.user_book_private_list)
+         })
+}
 }
