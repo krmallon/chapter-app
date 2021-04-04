@@ -47,7 +47,11 @@ var routes = [
     component: BookComponent
   },
   {
-    path: 'search/:query',
+    path: 'search/books/:query',
+    component: SearchComponent
+  },
+  {
+    path: 'search/users/:query',
     component: SearchComponent
   },
   {
@@ -56,6 +60,10 @@ var routes = [
   },
   {
     path: 'messages',
+    component: MessagesComponent
+  },
+  {
+    path: 'messages/:user_id',
     component: MessagesComponent
   },
   {

@@ -16,6 +16,16 @@ class Achievement(Base):
     badge = Column(String)
 
 
+class AchievementProgres(Base):
+    __tablename__ = 'Achievement_Progress'
+
+    user_id = Column(Integer, primary_key=True, nullable=False)
+    achievement_id = Column(Integer, primary_key=True, nullable=False)
+    target = Column(Integer)
+    current = Column(Integer)
+    date_earned = Column(Date)
+
+
 class Action(Base):
     __tablename__ = 'Action'
 
@@ -63,6 +73,7 @@ class Group(Base):
     id = Column(Integer, primary_key=True, server_default=text("nextval('group_id_seq'::regclass)"))
     name = Column(String)
     description = Column(String)
+    founder_id = Column(Integer)
 
 
 class Object(Base):
@@ -101,7 +112,7 @@ class User(Base):
 class BookRecommendation(Base):
     __tablename__ = 'BookRecommendation'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, server_default=text("nextval('book_rec_sequence'::regclass)"))
     rec_book_id = Column(ForeignKey('Book.book_id'))
     rec_source_id = Column(ForeignKey('Book.book_id'))
     user_id = Column(ForeignKey('User.user_id'))
