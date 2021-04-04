@@ -1,17 +1,16 @@
-<div class="container">
-    <h1>Details</h1>
-    <div class="card-deck">
-    <div *ngFor = "let group of groupService.group_list | async">
-        <div class="card card-custom mx-2 mb-3">
-            <div class="card-footer">
-        {{group.name}} <br>
-        {{group.description}}
+<div class="container mb-5 mt-5">
+    <div class="card">
+        <div *ngFor = "let group of groupService.group_list | async">
+        <div class="row">
+            <div class="col-md-12">
+                <h3 class="text-center mb-5"> {{group.name}}</h3>
+                <h4 class="text-center mb-5"> {{group.description}}</h4>
+            </div>
         </div>
-    </div>
-</div>
-</div>
+        </div>
 
-</div>
+
+
 
 <div class="container">
     <h1>Members</h1>
@@ -27,7 +26,7 @@
       </div>
     </div>
 
-    <div class="container">
+    <!-- <div class="container">
         <h1>Discussion</h1>
         <div class="card-deck">
         <div class="row mt-5 justify-content-center">
@@ -36,8 +35,97 @@
           style="cursor: pointer">
                  <div class="card-footer">
                   {{post.text}}
+                  <br>
+                  <br>
+                  <button (click)="this.getPostComments(post.id)">Show Replies</button>
+                  <div class="card card-custom mx-2 mb-3">
+                  <div *ngFor = "let comment of commentService.comment_list | async">
+                     {{comment.text}}
+                     <br>
+                     Posted by {{comment.commenter_name}}
+                  </div>
+                  </div>
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
+        <div class="container">
+            <h1>Discussion</h1>
+
+        <div class="media d-block d-md-flex mt-4" *ngFor = "let post of groupService.posts_list | async">
+            <img class="card-img-64 d-flex mx-auto mb-3"
+              src="{{post.author_image}}" alt="Generic placeholder image" style="cursor:pointer" routerLink='/user/{{post.author_id}}'>
+            <div class="media-body text-center text-md-left ml-md-3 ml-0">
+              <p class="font-weight-bold my-0">
+                {{post.author_name}}
+                <a href="" class="pull-right ml-1">
+                  <i class="fas"></i>
+                </a>
+              </p>
+              {{post.text}}
+              <button (click)="this.getPostComments(post.id)">Show Replies</button>
+              <div class="media d-block d-md-flex mt-4" *ngFor = "let comment of commentService.comment_list | async">
+                <img class="card-img-64 d-flex mx-auto mb-3"
+                  src="https://mdbootstrap.com/img/Photos/Avatars/img (27).jpg" alt="Generic placeholder image">
+                <div class="media-body text-center text-md-left ml-md-3 ml-0">
+                  <p class="font-weight-bold my-0">
+                    {{comment.commenter_name}}
+                    <a href="" class="pull-right ml-1">
+                      <i class="fas fa-reply"></i>
+                    </a>
+                  </p>
+                  {{comment.text}}
+                </div>
+              </div>
+              </div>
+              </div>
+
+
     
+              <div class="container mb-5 mt-5">
+                <div class="card">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3 class="text-center mb-5"> Discussion </h3>
+                            <div class="row" *ngFor = "let post of groupService.posts_list | async">
+                                <div class="col-md-12">
+                                    <div class="media"> <img class="mr-3 rounded-circle" alt="Bootstrap Media Preview" src="https://i.imgur.com/stD0Q19.jpg" />
+                                        <div class="media-body">
+                                            <div class="row">
+                                                <div class="col-8 d-flex">
+                                                    <h5>{{post.author_name}}</h5> <span>- 2 hours ago</span>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="pull-right reply"> <a href="#"><span><i class="fa fa-reply"></i> reply</span></a> </div>
+                                                </div>
+                                            </div> It is a long established fact that a reader will be distracted by the readable content of a page. <div class="media mt-4"> <a class="pr-3" href="#"><img class="rounded-circle" alt="Bootstrap Media Another Preview" src="https://i.imgur.com/xELPaag.jpg" /></a>
+                                                <div class="media-body">
+                                                    <div class="row">
+                                                        <div class="col-12 d-flex">
+                                                            <h5>Simona Disa</h5> <span>- 3 hours ago</span>
+                                                        </div>
+                                                    </div> letters, as opposed to using 'Content here, content here', making it look like readable English.
+                                                </div>
+                                            </div>
+                                            <div class="media mt-3"> <a class="pr-3" href="#"><img class="rounded-circle" alt="Bootstrap Media Another Preview" src="https://i.imgur.com/nAcoHRf.jpg" /></a>
+                                                <div class="media-body">
+                                                    <div class="row">
+                                                        <div class="col-12 d-flex">
+                                                            <h5>John Smith</h5> <span>- 4 hours ago</span>
+                                                        </div>
+                                                    </div> the majority have suffered alteration in some form, by injected humour, or randomised words.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+         
+        
