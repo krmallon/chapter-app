@@ -9,10 +9,19 @@ import { SearchService } from '../services/search.service';
 })
 export class SearchComponent implements OnInit {
 
-  constructor(private searchService: SearchService, private route: ActivatedRoute) { }
+  constructor(public searchService: SearchService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
-    this.searchService.searchBooks(this.route.snapshot.params.query)
+    // this.searchService.searchBooks(this.route.snapshot.params.query)
+    let url = this.route['_routerState'].snapshot.url;
+    let query = this.route.snapshot.params.query
+
+    if (url == '/search/books/' + query) {
+      this.searchService.searchBooks(query)
+    } 
+    else if (url == '/search/users/' + query) {
+      this.searchService.searchUsers(query)
+    }
   }
 
 }

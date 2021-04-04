@@ -1,14 +1,38 @@
-<div class="container" style="margin-top:200px;">
+<div class="container" style="margin-top:100px;">
     <div class="card-deck">
     <div class="row mt-5 justify-content-center">
       <div *ngFor = "let book of searchService.book_results_list | async">
       <div class="card card-custom mx-2 mb-3" routerLink='/books/{{book.ISBN}}'
       style="cursor: pointer">
-             <img src={{book.image}} alt="Book cover" class="card-img mx-auto">
+      <div class="card-img">
+        <img src={{book.image}} alt="Book cover">
+      </div>
+             <!-- <img src={{book.image}} alt="Book cover" class="card-img mx-auto"> -->
              <div class="card-footer">
-              <!-- {{ book.title }} -->
+             <!-- {{ book.title }}
+              {{ book.author }} -->
+              
           </div>
         
       </div>
       </div>
     </div>
+
+      <div class="row mt-5 justify-content-center">
+        <div *ngFor = "let user of searchService.user_results_list | async">
+        <div class="card card-custom mx-2 mb-3"
+        style="cursor: pointer" routerLink='/user/{{user.user_id}}'>
+        <div class="card-img">
+          <img src="{{user.image}}" alt="Profile Picture" style="width:65px;height:65px">
+        </div>
+               <div class="card-footer">
+               {{ user.name }}
+               <br>
+                {{ user.email }}
+                
+            </div>
+          
+        </div>
+        </div>
+      </div>
+    
