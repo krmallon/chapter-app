@@ -35,11 +35,11 @@ export class ReviewService {
     )
   }
 
-  postReview(isbn, book_id, review) {
+  postReview(isbn, review) {
     let postData = new FormData();
 
     postData.append("reviewer_id", sessionStorage.user_id);
-    postData.append("book_id", book_id);
+    // postData.append("book_id", book_id);
     postData.append("text", review.review);
     postData.append("rating", review.rating);
    
