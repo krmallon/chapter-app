@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FeedService } from '../services/feed.service';
 
 @Component({
   selector: 'app-feed',
@@ -7,9 +8,19 @@ import { Component, OnInit } from '@angular/core';
 })
 export class FeedComponent implements OnInit {
 
-  constructor() { }
+  public sessionStorage = sessionStorage;
+  
+  constructor(public feedService: FeedService) { }
 
   ngOnInit(): void {
+    this.feedService.getFollowedActivity(sessionStorage.user_id)
   }
 
+  actionType(activity) {
+    return activity.action
+  }
+  
+  objectType(activity) {
+    return activity.object_id
+  }
 }

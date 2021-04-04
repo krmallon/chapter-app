@@ -1,1 +1,80 @@
-<p>feed works!</p>
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+<div class="container bootstrap snippets bootdeys" style="margin-top:100px;">
+        <div class="panel panel-body">
+    		<!-- Timeline -->
+    		<!--===================================================-->
+    		<div class="timeline" *ngFor= "let activity of feedService.followed_activity_list | async">
+                <div class="timeline-entry" *ngIf="actionType(activity)=='followed'">
+                    <div class="timeline-stat">
+    					<div class="timeline-icon"><img src={{activity.user_image}} alt="Profile picture">
+    					</div>
+    					<div class="timeline-time">{{activity.date_created}}</div>
+    				</div>
+    				<div class="timeline-label">
+    					<p class="mar-no pad-btm"><a href="/user/{{activity.user_id}}" class="btn-link text-semibold">{{activity.user}}</a> {{activity.action}} <a href="/user/{{activity.target.user_id}}">{{activity.target.full_name}}</a></p>
+    					<div class="img-holder">
+                            <a href="/user/{{activity.target.user_id}}"><img src={{activity.target.image}} class="rounded-circle img-fluid profile-picture" alt="Image"></a>
+                        </div>
+    				</div>
+    			</div>
+                <div class="timeline-entry" *ngIf="actionType(activity)=='is reading'">
+                    <div class="timeline-stat">
+    					<div class="timeline-icon"><img src={{activity.user_image}} alt="Profile picture">
+    					</div>
+    					<div class="timeline-time">{{activity.date_created}}</div>
+    				</div>
+    				<div class="timeline-label">
+    					<p class="mar-no pad-btm"><a href="/user/{{activity.user_id}}" class="btn-link text-semibold">{{activity.user}}</a> {{activity.action}} <a href="/books/{{activity.target.ISBN}}">{{activity.target.title}}</a></p>
+                        <div class="img-holder">
+                            <a href="/books/{{activity.target.ISBN}}"><img src={{activity.target.image_link}} alt="Image"></a>
+                        </div>
+                    </div>
+    			</div>
+                <div class="timeline-entry" *ngIf="actionType(activity)=='wants to read'">
+                    <div class="timeline-stat">
+    					<div class="timeline-icon"><img src={{activity.user_image}} alt="Profile picture">
+    					</div>
+    					<div class="timeline-time">{{activity.date_created}}</div>
+    				</div>
+    				<div class="timeline-label">
+    					<p class="mar-no pad-btm"><a href="/user/{{activity.user_id}}" class="btn-link text-semibold">{{activity.user}}</a> {{activity.action}} <a href="/books/{{activity.target.ISBN}}">{{activity.target.title}}</a></p>
+    					<div class="img-holder">
+                            <a href="/books/{{activity.target.ISBN}}"><img src={{activity.target.image_link}} alt="Image"></a>
+                        </div>
+    				</div>
+    			</div>
+                <div class="timeline-entry" *ngIf="actionType(activity)=='posted a review'">
+                    <div class="timeline-stat">
+    					<div class="timeline-icon"><img src={{activity.user_image}} alt="Profile picture">
+    					</div>
+    					<div class="timeline-time">{{activity.date_created}}</div>
+    				</div>
+    				<div class="timeline-label">
+    					<p class="mar-no pad-btm"><a href="/user/{{activity.user_id}}" class="btn-link text-semibold">{{activity.user}}</a> {{activity.action}} 
+                            <br> {{activity.target.title}} - {{activity.target.author}}
+                        <br> <b>{{activity.target.rating}} stars</b></p>
+                    <blockquote class="bq-sm bq-open">{{activity.target.text}}</blockquote>
+                    <div class="img-holder">
+                        <img src={{activity.target.image_link}} alt="Image">
+                    </div>
+    				</div>
+    			</div>
+                <div class="timeline-entry" *ngIf="actionType(activity)=='liked'">
+                    <div class="timeline-stat">
+    					<div class="timeline-icon"><img src={{activity.user_image}} alt="Profile picture">
+    					</div>
+    					<div class="timeline-time">{{activity.date_created}}</div>
+    				</div>
+    				<div class="timeline-label" *ngIf="objectType(activity)==2">
+    					<p class="mar-no pad-btm"><a href="/user/{{activity.user_id}}" class="btn-link text-semibold">{{activity.user}}</a> {{activity.action}} <a href="/books/{{activity.target.ISBN}}/{{activity.target.id}}">{{activity.target.full_name}}'s review</a></p>
+                        {{activity.target.title}} - {{activity.target.author}} 
+                        <br> <b>{{activity.target.rating}} stars</b>
+                        <br> {{activity.target.text}}
+    				</div>
+    			</div>
+                
+    			
+    			
+    	</div>
+    </div>
+</div>
