@@ -1,4 +1,4 @@
-<div class="container">
+<!-- <div class="container">
     <div class="card-deck">
     <div class="row mt-5 justify-content-center" style="cursor:pointer" routerLink='/books/{{recommendation.rec_book.ISBN}}' *ngFor =
         "let recommendation of recommendationService.books_list | async">
@@ -8,4 +8,13 @@
             <img src={{recommendation.rec_book.image}} alt="Image" style="cursor:pointer" routerLink='/books/{{recommendation.rec_book.ISBN}}'>
         </div>
         <br>Because you enjoyed {{ recommendation.rec_source.title}}
-    </div>
+    </div> -->
+
+    <div class="container">
+        <div class="row mt-5 justify-content-center">
+            <div class="card card-custom mx-2 mb-3" style="cursor:pointer" routerLink='/books/{{recommendation.rec_book.ISBN}}' *ngFor =
+            "let recommendation of recommendationService.books_list | async">
+            <img src={{recommendation.rec_book.image}} alt="Image" style="cursor:pointer" routerLink='/books/{{recommendation.rec_book.ISBN}}' class="card-img">
+            <br>Because you enjoyed  <b>{{ recommendation.rec_source.title}} </b>
+        </div>
+        </div>
