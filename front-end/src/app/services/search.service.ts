@@ -17,8 +17,8 @@ export class SearchService {
 
   constructor(private http: HttpClient) { }
 
-  searchBooks(query) {
-    return this.http.get('http://localhost:5000/api/v1.0/search/books/' + query).subscribe(
+  searchBooks(query, startIndex) {
+    return this.http.get('http://localhost:5000/api/v1.0/search/books/' + query + '&?startIndex=' + startIndex).subscribe(
       response => {
         this.book_results_private_list = response;
         this.bookResultsSubject.next(this.book_results_private_list);

@@ -9,6 +9,9 @@ import { SearchService } from '../services/search.service';
 })
 export class SearchComponent implements OnInit {
 
+  page = 0;
+  startIndex = 0;
+
   constructor(public searchService: SearchService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
@@ -17,11 +20,20 @@ export class SearchComponent implements OnInit {
     let query = this.route.snapshot.params.query
 
     if (url == '/search/books/' + query) {
-      this.searchService.searchBooks(query)
+      this.searchService.searchBooks(query, this.startIndex)
     } 
     else if (url == '/search/users/' + query) {
       this.searchService.searchUsers(query)
     }
   }
 
+  nextPage() {
+    this.startIndex = this.startIndex + 30;
+    this.searchService.searchBooks(this.route.snapshot.params.query, this.startIndex)
+  }
+
+  previousPage() {
+    this.startIndex = this.startIndex - 30;
+    this.searchService.searchBooks(this.route.snapshot.params.query, this.startIndex)
+  }
 }

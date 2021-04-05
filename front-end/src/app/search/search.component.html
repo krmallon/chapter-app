@@ -17,6 +17,8 @@
       </div>
       </div>
     </div>
+    <button (click)="this.previousPage()">Previous</button>
+    <button (click)="this.nextPage()">Next</button>
 
       <div class="row mt-5 justify-content-center">
         <div *ngFor = "let user of searchService.user_results_list | async">
