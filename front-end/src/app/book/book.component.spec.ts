@@ -1,8 +1,8 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BrowserModule } from '@angular/platform-browser';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MDBBootstrapModule } from 'angular-bootstrap-md';
 import { AppRoutingModule } from '../app-routing.module';
-import { AppModule } from '../app.module';
 import { BookService } from '../services/book.service';
 
 import { BookComponent } from './book.component';
@@ -17,7 +17,9 @@ describe('BookComponent', () => {
       providers: [BookService],
       imports: [
         AppRoutingModule,
-        HttpClientModule
+        HttpClientModule,
+        ReactiveFormsModule,
+        MDBBootstrapModule.forRoot()
       ]
     })
     .compileComponents();

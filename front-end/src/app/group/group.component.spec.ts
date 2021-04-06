@@ -1,4 +1,6 @@
+import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { AppRoutingModule } from '../app-routing.module';
 
 import { GroupComponent } from './group.component';
 
@@ -8,7 +10,11 @@ describe('GroupComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ GroupComponent ]
+      declarations: [ GroupComponent ],
+      imports: [
+        AppRoutingModule,
+        HttpClientModule
+      ]
     })
     .compileComponents();
   });

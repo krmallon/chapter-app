@@ -1,4 +1,6 @@
+import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { AppRoutingModule } from '../app-routing.module';
 
 import { ProfileComponent } from './profile.component';
 
@@ -8,7 +10,11 @@ describe('ProfileComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ProfileComponent ]
+      declarations: [ ProfileComponent ],
+      imports: [
+        AppRoutingModule,
+        HttpClientModule
+      ]
     })
     .compileComponents();
   });
