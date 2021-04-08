@@ -45,7 +45,7 @@
                 <h5 class="mb-0">Currently Reading</h5>
             </div>
             <div class="row mt-5 justify-content-center">
-                <div class="card card-custom mx-2 mb-3" *ngFor="let book of bookService.user_book_list | async"><img src="{{book.image}}" alt="" width="128px" height="196px" class="img-fluid rounded shadow-sm" style="cursor: pointer" routerLink='/books/{{book.ISBN}}'></div>
+                <div class="card card-custom mx-2 mb-3" *ngFor="let book of bookService.user_reading_list | async"><img src="{{book.image}}" alt="" width="128px" height="196px" class="img-fluid rounded shadow-sm" style="cursor: pointer" routerLink='/books/{{book.ISBN}}'></div>
             </div>
             </div>
         
@@ -63,8 +63,35 @@
                 </div>
             </div>
             </div>
-        </div>
         
+
+        <div class="py-4 px-4">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="mb-0">Stats</h5>
+            </div>
+            <div class="row">
+                <div class="col-lg-6 mb-2 pr-lg-1">
+                    <h5>Most Read Authors</h5>
+                    <p *ngFor="let most_read of statService.most_read_list| async">
+                    Author: {{most_read.author}}
+                    <br>
+                    Books: {{most_read.num_books}}
+                    </p>
+                </div>
+             
+                    <div class="col-lg-6 mb-2 pr-lg-1">
+                        <h5>Pages Read</h5>
+                        <p *ngFor="let stat of statService.total_pages_list| async">
+                            {{stat.num_pages}}
+                        </p>
+
+                        </div>
+            
+
+            </div>
+            </div>
+        
+        </div>
     </div>
         
   

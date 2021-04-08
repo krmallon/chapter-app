@@ -5,6 +5,7 @@ import { AchievementService } from '../services/achievement.service';
 import { BookService } from '../services/book.service';
 import { GoalService } from '../services/goal.service';
 import { ReviewService } from '../services/review.service';
+import { StatService } from '../services/stat.service';
 import { UserService } from '../services/user.service';
 
 @Component({
@@ -14,7 +15,7 @@ import { UserService } from '../services/user.service';
 })
 export class ProfileComponent implements OnInit {
 
-  constructor(public authService: AuthService, public goalService: GoalService, public userService: UserService, public bookService: BookService, public reviewService: ReviewService, public achievementService: AchievementService, private route: ActivatedRoute) { }
+  constructor(public authService: AuthService, public statService: StatService, public goalService: GoalService, public userService: UserService, public bookService: BookService, public reviewService: ReviewService, public achievementService: AchievementService, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
     this.userService.getProfileDetails(this.route.snapshot.params.id)
@@ -23,6 +24,8 @@ export class ProfileComponent implements OnInit {
     this.userService.checkFollowing(this.route.snapshot.params.id, sessionStorage.user_id)
     this.bookService.getCurrentlyReadingByUser(this.route.snapshot.params.id)
     this.achievementService.getUserAchievements(this.route.snapshot.params.id)
+    this.statService.getMostRead(this.route.snapshot.params.id)
+    this.statService.getTotalPagesRead(this.route.snapshot.params.id)
   }
 
   getGoalCompletion(current, target) {
