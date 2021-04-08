@@ -3,7 +3,8 @@ from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from models import *
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, func, desc
+from sqlalchemy.sql import label
 import requests
 import book_recommender
 
@@ -169,6 +170,27 @@ def add_currently_reading(isbn, user_id):
 
     return make_response( jsonify( "Successfully added to bookshelf"), 201 )
 
+@app.route("/api/v1.0/user/<string:user_id>/currentlyreading", methods=["GET"])
+def get_currently_reading(user_id):
+    data_to_return = []
+    books = db.session.query(Reading.book_id, Book.ISBN, Book.title, Book.author, Book.image_link).join(Book, Reading.book_id==Book.book_id).filter(Reading.user_id==user_id).all()
+
+    for book in books:
+        book_id = book.book_id
+        ISBN = book.ISBN
+        title = book.title
+        author = book.author
+        image = book.image_link
+        bk = {"book_id" : book_id, "ISBN" : ISBN, "title" : title, "author" : author, "image" : image}
+        data_to_return.append(bk)
+    
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No books found"}), 404)
+
+
+
 @app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/wanttoread", methods=["POST"])
 def add_want_to_read(isbn, user_id):
     book = db.session.query(Book).filter_by(ISBN=isbn).first()
@@ -178,6 +200,25 @@ def add_want_to_read(isbn, user_id):
     db.session.commit()
 
     return make_response( jsonify( "Successfully added to bookshelf"), 201 )
+
+@app.route("/api/v1.0/user/<string:user_id>/wantstoread", methods=["GET"])
+def get_wants_to_read(user_id):
+    data_to_return = []
+    books = db.session.query(WantsToRead.book_id, Book.ISBN, Book.title, Book.author, Book.image_link).join(Book, WantsToRead.book_id==Book.book_id).filter(WantsToRead.user_id==user_id).all()
+
+    for book in books:
+        book_id = book.book_id
+        ISBN = book.ISBN
+        title = book.title
+        author = book.author
+        image = book.image_link
+        bk = {"book_id" : book_id, "ISBN" : ISBN, "title" : title, "author" : author, "image" : image}
+        data_to_return.append(bk)
+    
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No books found"}), 404)
 
 @app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/hasread", methods=["POST"])
 def add_has_read(isbn, user_id):
@@ -197,6 +238,25 @@ def add_has_read(isbn, user_id):
     check_achievement(user_id, 'reading')
 
     return make_response( jsonify( "Successfully added to bookshelf"), 201 )
+
+@app.route("/api/v1.0/user/<string:user_id>/hasread", methods=["GET"])
+def get_has_read(user_id):
+    data_to_return = []
+    books = db.session.query(HasRead.book_id, Book.ISBN, Book.title, Book.author, Book.image_link).join(Book, HasRead.book_id==Book.book_id).filter(HasRead.user_id==user_id).all()
+
+    for book in books:
+        book_id = book.book_id
+        ISBN = book.ISBN
+        title = book.title
+        author = book.author
+        image = book.image_link
+        bk = {"book_id" : book_id, "ISBN" : ISBN, "title" : title, "author" : author, "image" : image}
+        data_to_return.append(bk)
+    
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No books found"}), 404)
 
 # USER ENDPOINTS
 
@@ -230,7 +290,7 @@ def get_user_details(user_id):
 
 @app.route("/api/v1.0/search/users/<query>", methods=["GET"])
 def search_users(query):
-    url = 'https://dev-1spzh9o1.eu.auth0.com/api/v2/users?q=name:*' + query + '*'
+    url = 'https://dev-1spzh9o1.eu.auth0.com/api/v2/users?q=*' + query + '*'
     headers = {'authorization' : 'Bearer ' + auth0_access_token}
 
     req = requests.get(url, headers=headers)
@@ -240,7 +300,12 @@ def search_users(query):
 
     for result in js:
         try:
-            user = {"auth0_id" : result['user_id'], "name" : result['name'], "email" : result['email']}
+            auth0_id = result['user_id']
+            name = result['name']
+            email = result['email']
+
+            db_user = db.session.query(User).filter(User.auth0_id==auth0_id).first()
+            user = {"user_id" : db_user.user_id, "auth0_id" : auth0_id, "name" : name, "email" : email, "image" :db_user.image}
             data_to_return.append(user)
         except Exception:
             pass
@@ -250,9 +315,26 @@ def search_users(query):
     else:
         return make_response(jsonify({"error" : "No results for this query"}), 404)
 
-@app.route("/api/v1.0/search/<string:query>", methods=["GET"])
+@app.route("/api/v1.0/search/books/<string:query>", methods=["GET"])
 def search_books(query):
-    url = "https://www.googleapis.com/books/v1/volumes?q=" + query +'&startIndex=0&maxResults=40' # add pagination
+
+    # default settings
+    start_index = 0
+    page_size = 30
+    language = 'en'
+    order = 'relevance'
+
+    if request.args.get('startIndex'):
+        start_index = int(request.args.get('startIndex'))
+
+    if request.args.get('lang'):
+        language = request.args.get('lang')
+
+    if request.args.get('order'):
+        order = request.args.get('order')
+
+    url = "https://www.googleapis.com/books/v1/volumes?q=" + query + '&startIndex=' + str(start_index) + '&maxResults=' + str(page_size) + '&langRestrict=' + language + '&orderBy=' + order
+    # '&startIndex=0&maxResults=40' # add pagination
     r = requests.get(url)
     js = r.json()
 
@@ -716,13 +798,19 @@ def get_user_achievements(user_id):
 
 def check_achievement(user_id, achievement_type):
     if achievement_type == 'review':
-        first_review = db.session.query(Review).filter(Review.reviewer_id==user_id).one()
-        if first_review is not None:
-            db.session.add(UserAchievement(user_id=user_id, achievement_id=1, date_earned=datetime.date.today()))
+        try:
+            first_review = db.session.query(Review).filter(Review.reviewer_id==user_id).one()
+            if first_review is not None:
+                db.session.add(UserAchievement(user_id=user_id, achievement_id=1, date_earned=datetime.date.today()))
+        except Exception:
+            pass
     if achievement_type == 'group':
-        first_group = db.session.query(Group).filter(Group.founder_id==user_id).one()
-        if first_group is not None:
-            db.session.add(UserAchievement(user_id=user_id, achievement_id=2, date_earned=datetime.date.today()))
+        try:
+            first_group = db.session.query(Group).filter(Group.founder_id==user_id).one()
+            if first_group is not None:
+                db.session.add(UserAchievement(user_id=user_id, achievement_id=2, date_earned=datetime.date.today()))
+        except Exception:
+            pass
     if achievement_type == 'goal':
         goals = db.session.query(Goal).filter(Goal.user_id==user_id).all()
         count = db.session.query(Goal).filter(Goal.user_id==user_id).count()
@@ -1004,13 +1092,30 @@ def add_comment(object_id, target_id):
         db.session.commit()
 
     return make_response(jsonify({"success:" : "Comment posted"}), 200)
-    
-         
-        
 
+# STATS ENDPOINTS
 
+# @app.route("/api/v1.0/test/mostread", methods=["GET"])
+def get_most_read_author(user_id):
+    data_to_return =[]
+    authors = db.session.query(func.count(Book.author).label('count'), Book.author).join(HasRead, HasRead.book_id==Book.book_id).filter(HasRead.user_id==user_id).group_by(Book.author).order_by(desc('count')).limit(3).all()
 
-    
-    
+    for author in authors:
+        entry = {"author" : author[1], "num_books" : author[0]}
+        data_to_return.append(entry)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+
+# @app.route("/api/v1.0/test/totalpages", methods=["GET"])
+def get_total_pages_read(user_id):
+    data_to_return = []
+
+    num_pages = db.session.query(label('num_pages', func.sum(Book.page_count))).join(HasRead, HasRead.book_id==Book.book_id).filter(HasRead.user_id==user_id).all()
+
+    data_to_return.append(num_pages)
+
+    # return make_response(jsonify(data_to_return), 200)
+   
 if __name__ == "__main__":
     app.run(debug=True)
