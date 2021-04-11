@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
+import { SearchService } from '../services/search.service';
 
 @Component({
   selector: 'app-nav',
@@ -13,7 +14,7 @@ export class NavComponent implements OnInit {
   searchForm;
   brand = "Chapter"
 
-  constructor(public authService: AuthService, public formBuilder: FormBuilder) { }
+  constructor(public authService: AuthService, public formBuilder: FormBuilder, public searchService: SearchService) { }
 
   ngOnInit(): void {
     this.searchForm = this.formBuilder.group({

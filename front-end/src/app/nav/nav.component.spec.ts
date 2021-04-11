@@ -1,5 +1,6 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from '../app-routing.module';
 import { UserService } from '../services/user.service';
 
@@ -15,7 +16,8 @@ describe('NavComponent', () => {
       providers: [UserService],
       imports: [
         AppRoutingModule,
-        HttpClientModule
+        HttpClientModule,
+        ReactiveFormsModule
       ]
     })
     .compileComponents();
