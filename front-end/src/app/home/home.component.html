@@ -1,0 +1,187 @@
+<!-- <body> -->
+    <div class="container-fluid gedf-wrapper" *ngIf="this.authService.loggedIn">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card profile-card-3" *ngFor = "let user of userService.profile_details_list | async">
+    		        <div class="background-block">
+    		            <img src="https://images.unsplash.com/photo-1593430980369-68efc5a5eb34?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1363&q=80" alt="profile-sample1" class="background"/>
+    		        </div>
+    		        <div class="profile-thumb-block">
+    		            <img src="{{user.image}}" alt="profile-image" class="profile"/>
+    		        </div>
+    		        <div class="card-content">
+                    <h2>{{user.name}}</h2>
+                    </div>
+                </div>
+                <!-- <div class="card">
+    		        <div class="card-body">
+                    <h2>{{user.name}}</h2>
+                    </div>
+                </div> -->
+                <!-- <div class="card">
+                    <div class="card-header">
+                        <img class="rounded-circle" src="https://img.icons8.com/cotton/64/000000/administrator-male.png" alt="">
+                    </div>
+                    <div class="card-body">
+                        <div class="h5">Kevin M</div>
+                        <div class="h7 text-muted">XYZ</div>
+                        <div class="h7">.....................
+                        </div>
+                    </div>
+                </div> -->
+                <!-- <br>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="h5">Explore</div>
+                        <div class="h7">X</div>
+                        <div class="h7">Y</div>
+                        <div class="h7">Groups</div>
+                        <div class="h7">A</div>
+                        <div class="h7">B</div>
+                    </div>
+                </div> -->
+            </div>
+<!-- 
+            <div class="col-md-4">
+    		    <div class="card profile-card-3">
+    		        <div class="background-block">
+    		            <img src="https://images.unsplash.com/photo-1593430980369-68efc5a5eb34?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1363&q=80" alt="profile-sample1" class="background"/>
+    		        </div>
+    		        <div class="profile-thumb-block">
+    		            <img src="https://randomuser.me/api/portraits/men/41.jpg" alt="profile-image" class="profile"/>
+    		        </div>
+    		        <div class="card-content">
+                    <h2>Kevin M</h2>
+                    </div>
+                </div>
+    		</div> -->
+            <div class="col-md-6 gedf-main">
+
+                
+              
+                <!-- Post /////-->
+
+                <!--- \\\\\\\Post-->
+                <div class="card gedf-card" *ngFor= "let activity of feedService.followed_activity_list | async">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="mr-2">
+                                    <img class="rounded-circle" width="45" src="{{activity.user_image}}" alt="">
+                                </div>
+                                <div class="ml-2">
+                                    <div class="h5 m-0">{{activity.user}}</div>
+                                    <!-- <div class="h7 text-muted">Miracles Lee Cross</div> -->
+                                </div>
+                            </div>
+                            <div>
+                                
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="card-body" *ngIf="actionType(activity)=='followed'">
+                        <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>{{activity.date_created}}</div>
+                        <a class="card-link" href="user/{{activity.target.user_id}}">
+                            <h5 class="card-title">{{activity.user}} {{activity.action}} {{activity.target.full_name}}</h5>
+                        </a>
+                        <a href="/user/{{activity.target.user_id}}"><img src={{activity.target.image}} class="rounded-circle img-fluid profile-picture" style="width:100px; height:100px" alt="Image"></a>
+                        
+                        <!-- <p class="card-text">
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quo recusandae nulla rem eos ipsa praesentium esse magnam nemo dolor
+                            sequi fuga quia quaerat cum, obcaecati hic, molestias minima iste voluptates.
+                        </p> -->
+                    </div>
+                     <div class="card-body" *ngIf="actionType(activity)=='is reading'">
+                        <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>{{activity.date_created}}</div>
+                        <a class="card-link" href="books/{{activity.target.ISBN}}">
+                            <h5 class="card-title">{{activity.user}} {{activity.action}} {{activity.target.title}}</h5>
+                        </a>
+                        <a href="/books/{{activity.target.ISBN}}"><img src={{activity.target.image_link}} alt="Image"></a>
+                    </div>
+                    <div class="card-body" *ngIf="actionType(activity)=='wants to read'">
+                      <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>{{activity.date_created}}</div>
+                      <a class="card-link" href="books/{{activity.target.ISBN}}">
+                          <h5 class="card-title">{{activity.user}} {{activity.action}} {{activity.target.title}}</h5>
+                      </a>
+                      <a href="/books/{{activity.target.ISBN}}"><img src={{activity.target.image_link}} alt="Image"></a>
+                  </div>
+                  <div class="card-body" *ngIf="actionType(activity)=='has read'">
+                    <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>{{activity.date_created}}</div>
+                    <a class="card-link" href="books/{{activity.target.ISBN}}">
+                        <h5 class="card-title">{{activity.user}} {{activity.action}} {{activity.target.title}}</h5>
+                    </a>
+                    <a href="/books/{{activity.target.ISBN}}"><img src={{activity.target.image_link}} alt="Image"></a>
+                </div>
+                <div class="card-body" *ngIf="actionType(activity)=='posted a review'">
+                  <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>{{activity.date_created}}</div>
+                  <a class="card-link" href="books/{{activity.target.ISBN}}">
+                      <h5 class="card-title">{{activity.user}} {{activity.action}} for {{activity.target.title}}</h5>
+                  </a>
+                  <a href="/books/{{activity.target.ISBN}}"><img src={{activity.target.image_link}} alt="Image"></a>
+                   <p class="card-text">
+                            <b>{{activity.target.rating}} stars </b>
+                            <br>
+                            {{activity.target.text}}
+                        </p>
+              </div>
+              <div class="card-body" *ngIf="actionType(activity)=='liked'">
+                <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>{{activity.date_created}}</div>
+                <a class="card-link" href="books/{{activity.target.ISBN}}">
+                    <h5 class="card-title">{{activity.user}} {{activity.action}} {{activity.target.full_name}}'s review</h5>
+                </a>
+                <!-- <a href="/books/{{activity.target.ISBN}}"><img src={{activity.target.image_link}} alt="Image"></a> -->
+                <p class="card-text" *ngIf="objectType(activity)==2">
+                  <b>{{activity.target.rating}} stars </b>
+                  <br>
+                  {{activity.target.text}}
+              </p>
+            </div>
+
+
+
+                    <div class="card-footer">
+                        <a href="#" class="card-link"><i class="fa fa-gittip"></i> Like</a>
+                    </div>
+                </div>
+                <!-- Post /////-->
+
+            </div>
+            <div class="col-md-3">
+                <div class="card gedf-card">
+                        <div class="card-body">
+                            <img src="https://img.icons8.com/flat-round/64/000000/question-mark.png"/>
+                            <h5 class="card-title">Stuck for what to read next?</h5>
+                            <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
+                            <p class="card-text">Chapter provides personalised book recommendations. </p>
+                            <p class="card-text">Simply review some of your favourite books and we'll do the rest!</p>
+                            <a href="/recommendations" class="card-link">Recommendations</a>
+                            <a href="#" class="card-link">Popular Books</a>
+                        </div>
+                    </div>
+                    <div class="card gedf-card">
+                        <div class="card-body">
+                            <!-- <h5 class="card-title">Card title</h5> -->
+                            <img src="https://img.icons8.com/cotton/64/000000/new-year-2021--v1.png"/>
+                            <h5 class="card-title">Annual Reading Challenge</h5>
+                            <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
+                            <p class="card-text">Challenge yourself by setting a reading goal for the year.</p>
+                            <a href="#" class="card-link">Card link</a>
+                            <a href="#" class="card-link">Another link</a>
+                        </div>
+                    </div>
+                    <div class="card gedf-card">
+                        <div class="card-body">
+                            <!-- <h5 class="card-title">Card title</h5> -->
+                            <img src="https://img.icons8.com/bubbles/100/000000/prize.png"/>
+                             <h5 class="card-title">And the award goes to...</h5>
+                            <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
+                            <p class="card-text">Earn achievements by being part of the Chapter community</p>
+                            <a href="#" class="card-link">Achievements</a>
+                            <a href="#" class="card-link">Another link</a>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+<!-- </body> -->
