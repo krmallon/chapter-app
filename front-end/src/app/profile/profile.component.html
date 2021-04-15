@@ -38,32 +38,35 @@
                     <h2>{{user.name}}</h2>
                     </div>
                 </div>
-                
                 </div>
-                
 
-    
     <div class="col-md-6 gedf-main">
         <div class="jumbotron text-white jumbotron-image shadow" style="background-image: url(https://images.unsplash.com/photo-1512508561942-18fbe6d5d0cf?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80);"  *ngFor = "let user of userService.profile_details_list | async">
         </div>
 
         <div class="card gedf-card">
-            <div class="card-body">
+            <div class="card-header">
                 <h5 class="card-title">Currently Reading</h5>
+            </div>
+            <div class="card-body">
                 <a><img src="{{book.image}}" class="img-fluid rounded shadow-sm" style="width:128px; height:196px" alt="Image" *ngFor="let book of bookService.user_reading_list | async" routerLink='/books/{{book.ISBN}}'></a>
             </div>
         </div>
 
         <div class="card gedf-card">
-            <div class="card-body">
+            <div class="card-header">
                 <h5 class="card-title">Wants to Read</h5>
+            </div>
+            <div class="card-body">
                 <a><img src="{{book.image}}" class="img-fluid rounded shadow-sm" style="width:128px; height:196px" alt="Image" *ngFor="let book of bookService.user_reading_list | async" routerLink='/books/{{book.ISBN}}'></a>
             </div>
         </div>
 
         <div class="card gedf-card">
-            <div class="card-body">
+            <div class="card-header">
                 <h5 class="card-title">Read</h5>
+            </div>
+            <div class="card-body">
                 <a><img src="{{book.image}}" class="img-fluid rounded shadow-sm" style="width:128px; height:196px" alt="Image" *ngFor="let book of bookService.user_reading_list | async" routerLink='/books/{{book.ISBN}}'></a>
             </div>
         </div>
@@ -71,8 +74,10 @@
 
         <div class="col-md-3">
             <div class="card gedf-card">
+                <div class="card-header">
+                    <h5 class="card-title">Achievements</h5>
+                </div>
                     <div class="card-body">
-                        <h5 class="card-title">Achievements</h5>
                         <p *ngFor="let achievement of achievementService.user_achievement_list| async">
                             <img src="{{achievement.image}}" alt="" class="img-fluid rounded shadow-sm">
                             {{achievement.name}} - {{achievement.description}}
@@ -80,14 +85,36 @@
                     </div>
                 </div>
                 <div class="card gedf-card">
+                    <div class="card-header">
+                        <h5 class="card-title">2021 Reading Goal</h5>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">Reading Goal</h5>
                         <p *ngFor="let goal of goalService.goal_list| async">
                            Read {{goal.current}} of {{goal.target}}
                         </p>
                         <div class="progress" *ngFor = "let goal of goalService.goal_list | async">
                             <div class="progress-bar bg-success" role="progressbar" style="width: {{(goal.current / goal.target) * 100}}%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
+                    </div>
+                </div>
+                <div class="card gedf-card">
+                    <div class="card-header">
+                        <h5 class="card-title">Stats</h5>
+                    </div>
+                    <div class="card-body">
+                        <h5>Most read authors</h5>
+                        <br>
+                        <ol>
+                            <li *ngFor="let stat of statService.most_read_list| async">
+                                {{stat.author}} ({{stat.num_books}})
+                            </li>
+                        </ol>
+                        <h5>Reading total</h5>
+                        <ul>
+                            <li *ngFor="let stat of statService.total_pages_list| async">
+                                {{stat.num_pages}} pages
+                            </li>
+                        </ul>
                     </div>
                 </div>
 
