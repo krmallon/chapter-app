@@ -13,6 +13,7 @@ export class SearchComponent implements OnInit {
   startIndex = 0;
   lang = 'en';
   order = 'relevance'
+  type;
 
   constructor(public searchService: SearchService, private route: ActivatedRoute) { }
 
@@ -22,9 +23,11 @@ export class SearchComponent implements OnInit {
     let query = this.route.snapshot.params.query
 
     if (url.includes('/search/books/')) {
+      this.type = 'books'
       this.searchService.searchBooks(query, this.startIndex, this.lang, this.order)
     } 
     else if (url.includes('/search/users/')) {
+      this.type = 'users'
       this.searchService.searchUsers(query)
     }
   }

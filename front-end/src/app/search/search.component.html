@@ -1,11 +1,11 @@
 <div class="container" style="margin-top:100px;">
 
-  <ul class="list-group">
+  <ul class="list-group" *ngIf="this.type==='books'">
     <li class="list-group-item">Sorted: {{this.order}}</li>
     <li class="list-group-item"> Language: {{this.lang}}</li>
   </ul>
 
-  <div class="btn-group" mdbDropdown>
+  <div class="btn-group" *ngIf="this.type==='books'" mdbDropdown>
     <button mdbDropdownToggle type="button" mdbBtn color="primary" class="dropdown-toggle waves-light"
       mdbWavesEffect>
       Sort by
@@ -17,13 +17,13 @@
     </div>
     </div>
 
-    <div class="btn-group" mdbDropdown>
+    <div class="btn-group" *ngIf="this.type==='books'" mdbDropdown>
       <button mdbDropdownToggle type="button" mdbBtn color="primary" class="dropdown-toggle waves-light"
         mdbWavesEffect>
         Filter by language
       </button>
       <div class="dropdown-menu dropdown-primary">
-        <a class="dropdown-item" *ngIf="this.lang=='en'"(click)="setLang('en')">English (Default)</a>
+        <a class="dropdown-item" (click)="setLang('en')">English (Default)</a>
         <div class="divider dropdown-divider"></div>
         <a class="dropdown-item" (click)="setLang('fr')">French</a>
         <div class="divider dropdown-divider"></div>
