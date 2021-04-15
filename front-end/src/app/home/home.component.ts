@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
 import { FeedService } from '../services/feed.service';
+import { GoalService } from '../services/goal.service';
 import { UserService } from '../services/user.service';
 
 @Component({
@@ -11,12 +12,20 @@ import { UserService } from '../services/user.service';
 })
 export class HomeComponent implements OnInit {
 
-  constructor(public feedService: FeedService, public authService: AuthService, public userService: UserService) { }
+  goalForm;
+
+  public sessionStorage = sessionStorage;
+
+  constructor(public feedService: FeedService, public authService: AuthService, public userService: UserService, private formBuilder: FormBuilder, public goalService: GoalService) { }
 
   ngOnInit(): void {
     // this.userService.getCurrentUser(sessionStorage.getItem("user"))
     this.feedService.getFollowedActivity(sessionStorage.user_id)
     this.userService.getProfileDetails(sessionStorage.user_id)
+
+    this.goalForm = this.formBuilder.group({
+      goalFormControl: ['', Validators.required]
+    });
   }
 
   // maybe move these methods to feedService
