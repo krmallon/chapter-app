@@ -4,6 +4,18 @@
     object-fit: cover;
 }
 
+.jumbotron-image {
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.jumbotron {
+    min-height: 350px
+}
+
+
+
 @import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
 
 /* // fieldset, label { margin: 0; padding: 0; }

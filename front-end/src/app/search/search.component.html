@@ -1,81 +1,93 @@
-<div class="container" style="margin-top:100px;">
+<div class="container-fluid gedf-wrapper">
+  <div class="row">
+      <div class="col-md-3">
+          <div class="card gedf-card" *ngIf="this.type==='books'">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="mr-2">
+                          <h5>Settings</h5>
+                          <ul class="list-group">
+                            <li class="list-group-item">Sorted: {{this.order}}</li>
+                            <li class="list-group-item"> Language: {{this.lang}}</li>
+                          </ul>
 
-  <ul class="list-group" *ngIf="this.type==='books'">
-    <li class="list-group-item">Sorted: {{this.order}}</li>
-    <li class="list-group-item"> Language: {{this.lang}}</li>
-  </ul>
+                          <div class="btn-group" *ngIf="this.type==='books'" mdbDropdown>
+                            <button mdbDropdownToggle type="button" mdbBtn color="primary" class="dropdown-toggle waves-light"
+                              mdbWavesEffect>
+                              Sort by
+                            </button>
+                            <div class="dropdown-menu dropdown-primary">
+                              <a class="dropdown-item" value="relevance" (click)="this.setOrder('relevance')">Relevance (Default)</a>
+                              <div class="divider dropdown-divider"></div>
+                              <a class="dropdown-item" value='newest' (click)="this.setOrder('newest')">Newest</a>
+                            </div>
+                            </div>
 
-  <div class="btn-group" *ngIf="this.type==='books'" mdbDropdown>
-    <button mdbDropdownToggle type="button" mdbBtn color="primary" class="dropdown-toggle waves-light"
-      mdbWavesEffect>
-      Sort by
-    </button>
-    <div class="dropdown-menu dropdown-primary">
-      <a class="dropdown-item" value="relevance" (click)="this.setOrder('relevance')">Relevance (Default)</a>
-      <div class="divider dropdown-divider"></div>
-      <a class="dropdown-item" value='newest' (click)="this.setOrder('newest')">Newest</a>
-    </div>
-    </div>
+                            &nbsp;
 
-    <div class="btn-group" *ngIf="this.type==='books'" mdbDropdown>
-      <button mdbDropdownToggle type="button" mdbBtn color="primary" class="dropdown-toggle waves-light"
-        mdbWavesEffect>
-        Filter by language
-      </button>
-      <div class="dropdown-menu dropdown-primary">
-        <a class="dropdown-item" (click)="setLang('en')">English (Default)</a>
-        <div class="divider dropdown-divider"></div>
-        <a class="dropdown-item" (click)="setLang('fr')">French</a>
-        <div class="divider dropdown-divider"></div>
-        <a class="dropdown-item" (click)="setLang('es')">Spanish</a>
-        <div class="divider dropdown-divider"></div>
-        <a class="dropdown-item" (click)="setLang('de')">German</a>
-      </div>
+                            <div class="btn-group" *ngIf="this.type==='books'" mdbDropdown>
+                              <button mdbDropdownToggle type="button" mdbBtn color="primary" class="dropdown-toggle waves-light"
+                                mdbWavesEffect>
+                                Filter by language
+                              </button>
+                              <div class="dropdown-menu dropdown-primary">
+                                <a class="dropdown-item" (click)="setLang('en')">English (Default)</a>
+                                <div class="divider dropdown-divider"></div>
+                                <a class="dropdown-item" (click)="setLang('fr')">French</a>
+                                <div class="divider dropdown-divider"></div>
+                                <a class="dropdown-item" (click)="setLang('es')">Spanish</a>
+                                <div class="divider dropdown-divider"></div>
+                                <a class="dropdown-item" (click)="setLang('de')">German</a>
+                              </div>
 
-    
-
-  </div> 
-    <div class="card-deck">
-    <div class="row mt-5 justify-content-center">
-      <div *ngFor = "let book of searchService.book_results_list | async">
-      <div class="card card-custom mx-2 mb-3" routerLink='/books/{{book.ISBN}}'
-      style="cursor: pointer">
-      <div class="card-img">
-        <img src={{book.image}} alt="Book cover">
-      </div>
-             <!-- <img src={{book.image}} alt="Book cover" class="card-img mx-auto"> -->
-             <div class="card-footer">
-             <!-- {{ book.title }}
-              {{ book.author }} -->
-              
-          </div>
-        
-      </div>
-      </div>
-    </div>
-
-    <nav aria-label="Pagination">
-      <ul class="pagination pagination-lg justify-content-end">
-        <li class="page-item"><a class="page-link" (click)="this.previousPage()">Previous</a></li>
-        <li class="page-item"><a class="page-link" (click)="this.nextPage()">Next</a></li>
-      </ul>
-    </nav>
-
-      <div class="row mt-5 justify-content-center">
-        <div *ngFor = "let user of searchService.user_results_list | async">
-        <div class="card card-custom mx-2 mb-3"
-        style="cursor: pointer" routerLink='/user/{{user.user_id}}'>
-        <div class="card-img">
-          <img src="{{user.image}}" alt="Profile Picture" style="width:65px;height:65px">
-        </div>
-               <div class="card-footer">
-               {{ user.name }}
-               <br>
-                {{ user.email }}
-                
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+
+          <div class="col-md-6 gedf-main">
+            <div class="card gedf-card">
+                <div class="card-header">
+                    <h5 class="card-title">Results</h5>
+                </div>
+                <div class="card-body" *ngIf="this.type==='books'">
+                  <!-- <figure *ngFor = "let book of searchService.book_results_list | async">
+                    <img src="{{book.image}}" class="img-fluid rounded shadow-sm" style="width:128px; height:196px" alt="{{book.title}} Cover" title="{{book.title}}" routerLink='/books/{{book.ISBN}}'>
+                  <figcaption>{{book.title}}</figcaption>
+                  </figure> -->
+                    <a><img src="{{book.image}}" class="img-fluid rounded shadow-sm" style="width:128px; height:196px" alt="{{book.title}} Cover" title="{{book.title}}" *ngFor = "let book of searchService.book_results_list | async" routerLink='/books/{{book.ISBN}}'></a>
+                </div>
+                <div class="card-body" *ngIf="this.type==='users'">
+                  <div class="card card-custom mx-2 mb-3" *ngFor="let user of searchService.user_results_list | async" style="cursor: pointer" routerLink='/user/{{user.user_id}}'>
+                 <img src="{{user.image}}" alt="Profile Picture" style="width:65px;height:65px">
           
-        </div>
-        </div>
-      </div>
-    
+                    <h5>{{user.name}}</h5>
+                    <h5>{{user.email}}</h5>
+              </div>
+            </div>
+            <div class="card gedf-card" *ngIf="this.type==='books'">
+              <div class="card-body">
+                <nav aria-label="Pagination">
+                  <ul class="pagination pagination-lg justify-content-center">
+                    <li class="page-item"><a class="page-link" (click)="this.previousPage()">Previous</a></li>
+                    <li class="page-item"><a class="page-link" (click)="this.nextPage()">Next</a></li>
+                  </ul>
+                </nav>
+              </div>
+          </div>
+            </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="card gedf-card">
+                  <div class="card-header">
+                      <h5 class="card-title">Example Column</h5>
+                  </div>
+                      <div class="card-body">
+                         <p>Example example example</p>
+                      </div>
+                  </div>

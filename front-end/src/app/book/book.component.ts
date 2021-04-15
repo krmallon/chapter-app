@@ -3,6 +3,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { BookService } from '../services/book.service';
+import { LikeService } from '../services/like.service';
 import { ReviewService } from '../services/review.service';
 
 @Component({
@@ -13,8 +14,10 @@ import { ReviewService } from '../services/review.service';
 export class BookComponent implements OnInit {
 
   reviewForm;
+  dateForm;
+  reviewObjectID = 2
 
-  constructor(public authService: AuthService, public bookService: BookService, private route: ActivatedRoute, public reviewService: ReviewService,
+  constructor(public authService: AuthService, public bookService: BookService, public likeService: LikeService, private route: ActivatedRoute, public reviewService: ReviewService,
     private formBuilder: FormBuilder) { }
 
   ngOnInit(): void {
@@ -25,10 +28,16 @@ export class BookComponent implements OnInit {
       rating: 5 
     });
 
+    this.dateForm = this.formBuilder.group({
+      finishMonth: ['', Validators.required],
+      finishDay: ['', Validators.required]
+    })
+
     this.bookService.getBook(this.route.snapshot.params.id)
     this.reviewService.getReviews(this.route.snapshot.params.id)
     this.bookService.bookPresentInDB(this.route.snapshot.params.id)
   }
+  
 
   addToCurrentlyReading(book) {
     this.bookService.addToCurrentlyReading(book.isbn, sessionStorage.user_id)
@@ -66,4 +75,22 @@ export class BookComponent implements OnInit {
   isOwnReview(review) {
     return review.reviewer_id == sessionStorage.user_id;
   }
+
+  selectDate() {
+    console.log(this.dateForm.value)
+  }
+
+  likeReview(reviewID) {
+    this.likeService.addLike(this.reviewObjectID, reviewID)
+    this.reviewService.getReviews(this.route.snapshot.params.id)
+  }
+
+  // reviewLiked(reviewID) {
+  //   return 
+  // }
+
+  // getReviewLikes(reviewID) {
+  //   this.likeService.getLikes(this.reviewObjectID, reviewID)
+  //   this.reviewService.getReviews(this.route.snapshot.params.id)
+  // }
 }
