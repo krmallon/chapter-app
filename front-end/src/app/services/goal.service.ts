@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import axios from 'axios';
 import { Subject } from 'rxjs';
 
 @Injectable({
@@ -12,6 +13,7 @@ export class GoalService {
   goal_list = this.goalSubject.asObservable();
 
   percentageComplete;
+  currentYear = "2021";
 
   constructor(private http: HttpClient) { }
 
@@ -23,5 +25,14 @@ export class GoalService {
         this.goalSubject.next(this.goal_private_list);
     });
     
+  }
+
+  setGoal(goal) {
+    let goalData = new FormData();
+    goalData.append("user_id", sessionStorage.user_id)
+    goalData.append("target", goal.goalFormControl)
+    goalData.append("year", this.currentYear)
+
+    axios.post('http://localhost:5000/api/v1.0/goals/new', goalData)
   }
 }
