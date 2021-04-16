@@ -64,7 +64,7 @@
           <div class="card gedf-card">
             <div class="card-header">
                 <h5 class="card-title">Reviews</h5>
-                <button type="button" class="btn btn-success btn-sm">Add Review</button>
+                <button type="button" class="btn btn-success btn-sm" (click)="newReviewModal.show()">Add Review</button>
             </div>
             <div class="card-body" *ngFor = "let review of reviewService.reviews_list | async">
               <h6 class="card-subtitle">
@@ -82,35 +82,7 @@
 
           </div>
 
-          <!-- <div class="card gedf-card">
-            <div class="card-header">
-                <h5 class="card-title">Reviews</h5>
-            </div>
-            <div class="card-body">
-                <a><img src="{{book.image}}" class="img-fluid rounded shadow-sm" style="width:128px; height:196px" alt="{{book.title}} Cover" routerLink='/books/{{book.ISBN}}'></a>
-            </div>
-        </div> -->
-
-          <!-- <div class="card gedf-card">
-            <div class="card-header">
-                <h5 class="card-title">Reviews</h5>
-            </div>
-            <div class="card-body">
-              Reviews
-                <a>Hi</a>
-            </div>
-        </div> -->
-
-          <!-- <div class="card gedf-card">
-            <div class="card-header">
-                <h5 class="card-title">Reviews</h5>
-            </div>
-                <div class="card-body">
-                    <p *ngFor = "let review of reviewService.reviews_list | async">
-                        {{review.text}}
-                    </p>
-                </div>
-            </div> -->
+          
 
          
 
@@ -132,6 +104,49 @@
 </div>
 </div>
 </div>
+
+<div mdbModal #newReviewModal="mdbModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="newReviewModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close pull-right" aria-label="Close" (click)="newReviewModal.hide()">
+          <span aria-hidden="true">×</span>
+        </button>
+        <h4 class="modal-title w-100" id="myModalLabel">Review</h4>
+      </div>
+      <div class="modal-body">
+
+        <form [formGroup]="reviewForm">
+        <div class="form-group">
+          <fieldset class="rating">
+              <input type="radio" id="star5" name="rating" value="5" formControlName="rating"/><label class = "full" for="star5" title="Awesome - 5 stars"></label>
+              <input type="radio" id="star4half" name="rating" value="4.5" formControlName="rating"/><label class="half" for="star4half" title="Pretty good - 4.5 stars"></label>
+              <input type="radio" id="star4" name="rating" value="4" formControlName="rating"/><label class = "full" for="star4" title="Pretty good - 4 stars"></label>
+              <input type="radio" id="star3half" name="rating" value="3.5" formControlName="rating"/><label class="half" for="star3half" title="Meh - 3.5 stars"></label>
+              <input type="radio" id="star3" name="rating" value="3" formControlName="rating"/><label class = "full" for="star3" title="Meh - 3 stars"></label>
+              <input type="radio" id="star2half" name="rating" value="2.5" formControlName="rating" /><label class="half" for="star2half" title="Kinda bad - 2.5 stars"></label>
+              <input type="radio" id="star2" name="rating" value="2" formControlName="rating" /><label class = "full" for="star2" title="Kinda bad - 2 stars"></label>
+              <input type="radio" id="star1half" name="rating" value="1.5" formControlName="rating" /><label class="half" for="star1half" title="Meh - 1.5 stars"></label>
+              <input type="radio" id="star1" name="rating" value="1" formControlName="rating" /><label class = "full" for="star1" title="Sucks big time - 1 star"></label>
+              <input type="radio" id="starhalf" name="rating" value="0.5" formControlName="rating" /><label class="half" for="starhalf" title="Sucks big time - 0.5 stars"></label>
+          </fieldset>
+          </div>
+
+          <div class="form-group">
+            <textarea id="review" rows="3" name="review"
+            class="form-control"
+            formControlName="review">
+                        </textarea>
+            </div>
+        </form>
+
+      </div>
+      <div class="modal-footer" *ngFor="let book of bookService.book | async">
+        <button type="button" mdbBtn color="danger" class="waves-light" aria-label="Close" (click)="newReviewModal.hide()" mdbWavesEffect>Cancel</button>
+        <button type="button" mdbBtn color="primary" class="relative waves-light" (click)="this.reviewService.postReview(book.isbn, this.reviewForm.value); newReviewModal.hide()" mdbWavesEffect>Submit</button>
+      </div>
+    </div>
+  </div>
 <!-- </div> -->
 
 <!-- <div mdbModal #deleteModal="mdbModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myDeleteModalLabel" aria-hidden="true">

@@ -22,6 +22,7 @@ export class ReviewService {
         response => {
         this.reviews_private_list = response;
         this.reviewsSubject.next(this.reviews_private_list);
+        console.log(response)
         }
     )
 }
