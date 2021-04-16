@@ -1,16 +1,58 @@
-<!-- <div class="container">
-    <div class="card-deck">
-    <div class="row mt-5 justify-content-center" style="cursor:pointer" routerLink='/books/{{recommendation.rec_book.ISBN}}' *ngFor =
-        "let recommendation of recommendationService.books_list | async">
-        <div class="card-header">
-        <b>{{ recommendation.rec_book.title }}</b>
-        <div class="img-holder">
-            <img src={{recommendation.rec_book.image}} alt="Image" style="cursor:pointer" routerLink='/books/{{recommendation.rec_book.ISBN}}'>
-        </div>
-        <br>Because you enjoyed {{ recommendation.rec_source.title}}
-    </div> -->
+<div class="container-fluid gedf-wrapper">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card gedf-card">
+                <div class="card-header">
+                    <h5 class="card-title">How Recommendations Work</h5>
+                </div>
+                    <div class="card-body">
+                       <p>Chapter provides personalised recommendations based on your reading preferences.</p>
 
-    <div class="container">
+                       The more ratings and reviews you provide, the more accurate your recommendations will become. 
+                    </div>
+                </div>
+            
+              </div>
+              <div class="col-md-6 gedf-main">
+                <div class="card gedf-card">
+                  <div class="card-header">
+                      <h5 class="card-title">Recommendations</h5>
+                  </div>
+                  <div class="card-body" *ngFor =
+                  "let recommendation of recommendationService.books_list | async">
+                  <img src={{recommendation.rec_book.image}} alt="Image" style="cursor:pointer" routerLink='/books/{{recommendation.rec_book.ISBN}}' class="card-img">
+                  <h4>{{recommendation.rec_book.title}}</h4>
+                  <h6>{{recommendation.rec_book.author}}</h6>
+                  <h7>Because you enjoyed <b>{{ recommendation.rec_source.title}} </b></h7>
+                  <button type="button" class="btn btn-primary btn-sm" routerLink='/books/{{recommendation.rec_book.ISBN}}'>View</button>
+                  
+                  </div>
+              </div>
+    
+            </div>
+
+            <div class="col-md-3">
+                <div class="card gedf-card">
+                    <div class="card-header">
+                        <h5 class="card-title">Help Chapter Help You</h5>
+                    </div>
+                        <div class="card-body" style="cursor: pointer">
+                          <h5>Rate any of the following books to help us provide the best recommedations</h5>
+                          <ul>
+                              <li>1</li>
+                              <li>2</li>
+                              <li>3</li>
+                              <li>4</li>
+                              <li>5</li>
+                          </ul>
+                        
+                         
+                        </div>
+                    </div>
+            </div>
+
+
+    <!-- <div class="container">
         <div class="row mt-5 justify-content-center">
             <div class="card card-custom mx-2 mb-3" style="cursor:pointer" routerLink='/books/{{recommendation.rec_book.ISBN}}' *ngFor =
             "let recommendation of recommendationService.books_list | async">
@@ -18,3 +60,13 @@
             <br>Because you enjoyed  <b>{{ recommendation.rec_source.title}} </b>
         </div>
         </div>
+
+        <div class="container">
+            <div class="row mt-5 justify-content-center">
+                <div class="card card-custom mx-2 mb-3" style="cursor:pointer">
+                    Have you enjoyed any of the following books? 
+                    <br> Select at least one to start receiving personalised recommendations
+            </div>
+            </div> -->
+
+            <!-- *ngIf="!recommendationService.books_list.length > 0">  -->

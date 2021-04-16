@@ -11,8 +11,10 @@ export class RecommendationsComponent implements OnInit {
   constructor(public recommendationService: RecommendationService) { }
 
   ngOnInit(): void {
-    this.recommendationService.getRecommendations('9')
-    // this.recommendationService.getRecommendations(sessionStorage.user_id)
+    this.recommendationService.getRecommendations(sessionStorage.user_id)
   }
 
+  // recommendationsExist() {
+  //   return this.recommendationService.books_list.length > 0
+  // }
 }
