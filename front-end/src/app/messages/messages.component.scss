@@ -218,20 +218,22 @@ body{margin-top:20px;}
     font-weight: 700;
 }
 
-.chat-container {
+.gedf-card {
     position: relative;
     padding: 1rem;
+    // height:120px;
+    // overflow-y: scroll;
 }
 
-.chat-container li.chat-left,
-.chat-container li.chat-right {
+.gedf-card li.chat-left,
+.gedf-card li.chat-right {
     display: flex;
     flex: 1;
     flex-direction: row;
     margin-bottom: 40px;
 }
 
-.chat-container li img {
+.gedf-card li img {
     width: 48px;
     height: 48px;
     -webkit-border-radius: 30px;
@@ -239,26 +241,27 @@ body{margin-top:20px;}
     border-radius: 30px;
 }
 
-.chat-container li .chat-avatar {
+
+.gedf-card li .chat-avatar {
     margin-right: 20px;
 }
 
-.chat-container li.chat-right {
+.gedf-card li.chat-right {
     justify-content: flex-end;
 }
 
-.chat-container li.chat-right > .chat-avatar {
+.gedf-card li.chat-right > .chat-avatar {
     margin-left: 20px;
     margin-right: 0;
 }
 
-.chat-container li .chat-name {
+.gedf-card li .chat-name {
     font-size: .75rem;
     color: #999999;
     text-align: center;
 }
 
-.chat-container li .chat-text {
+.gedf-card li .chat-text {
     padding: .4rem 1rem;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
@@ -269,7 +272,7 @@ body{margin-top:20px;}
     position: relative;
 }
 
-.chat-container li .chat-text:before {
+.gedf-card li .chat-text:before {
     content: '';
     position: absolute;
     width: 0;
@@ -280,17 +283,17 @@ body{margin-top:20px;}
     border-color: transparent #ffffff transparent transparent;
 }
 
-.chat-container li.chat-right > .chat-text {
+.gedf-card li.chat-right > .chat-text {
     text-align: right;
 }
 
-.chat-container li.chat-right > .chat-text:before {
+.gedf-card li.chat-right > .chat-text:before {
     right: -20px;
     border-color: transparent transparent transparent #ffffff;
     left: inherit;
 }
 
-.chat-container li .chat-hour {
+.gedf-card li .chat-hour {
     padding: 0;
     margin-bottom: 10px;
     font-size: .75rem;
@@ -301,37 +304,37 @@ body{margin-top:20px;}
     margin: 0 0 0 15px;
 }
 
-.chat-container li .chat-hour > span {
+.gedf-card li .chat-hour > span {
     font-size: 16px;
     color: #9ec94a;
 }
 
-.chat-container li.chat-right > .chat-hour {
+.gedf-card li.chat-right > .chat-hour {
     margin: 0 15px 0 0;
 }
 
 @media (max-width: 767px) {
-    .chat-container li.chat-left,
-    .chat-container li.chat-right {
+    .gedf-card li.chat-left,
+    .gedf-card li.chat-right {
         flex-direction: column;
         margin-bottom: 30px;
     }
-    .chat-container li img {
+    .gedf-card li img {
         width: 32px;
         height: 32px;
     }
-    .chat-container li.chat-left .chat-avatar {
+    .gedf-card li.chat-left .chat-avatar {
         margin: 0 0 5px 0;
         display: flex;
         align-items: center;
     }
-    .chat-container li.chat-left .chat-hour {
+    .gedf-card li.chat-left .chat-hour {
         justify-content: flex-end;
     }
-    .chat-container li.chat-left .chat-name {
+    .gedf-card li.chat-left .chat-name {
         margin-left: 5px;
     }
-    .chat-container li.chat-right .chat-avatar {
+    .gedf-card li.chat-right .chat-avatar {
         order: -1;
         margin: 0 0 5px 0;
         align-items: center;
@@ -339,14 +342,14 @@ body{margin-top:20px;}
         justify-content: right;
         flex-direction: row-reverse;
     }
-    .chat-container li.chat-right .chat-hour {
+    .gedf-card li.chat-right .chat-hour {
         justify-content: flex-start;
         order: 2;
     }
-    .chat-container li.chat-right .chat-name {
+    .gedf-card li.chat-right .chat-name {
         margin-right: 5px;
     }
-    .chat-container li .chat-text {
+    .gedf-card li .chat-text {
         font-size: .8rem;
     }
 }
@@ -374,4 +377,20 @@ ul {
     border-radius: 2px;
     margin-bottom: 2rem;
     box-shadow: none;
+}
+
+.gedf-card li.chat-left,
+.gedf-card li.chat-right {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+    margin-bottom: 40px;
+}
+
+.gedf-card li img {
+    width: 48px;
+    height: 48px;
+    -webkit-border-radius: 30px;
+    -moz-border-radius: 30px;
+    border-radius: 30px;
 }

@@ -1,86 +1,72 @@
-<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
-<div class="container">
-
-    <!-- Content wrapper start -->
-    <div class="content-wrapper">
-
-        <!-- Row start -->
-        <div class="row gutters">
-
-            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-
-                <div class="card m-0">
-
-                    <!-- Row start -->
-                    <div class="row no-gutters">
-                        <div class="col-xl-4 col-lg-4 col-md-4 col-sm-3 col-3">
-                            <div class="users-container">
-                                <div class="chat-search-box">
-                                    <div class="input-group">
-                                        <input class="form-control" placeholder="Search">
-                                        <div class="input-group-btn">
-                                            <button type="button" class="btn btn-sm">
-                                                <i class="fa fa-search"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <ul class="users">
-                                    <li class="person" *ngFor= "let partner of messagingService.msg_partners_list | async" data-chat="person1">
-                                        <div class="user" (click)="loadChat(partner.id)" routerLink='/messages/{{partner.id}}'>
-                                            <img src="{{partner.image}}" alt="Profile Pic">
-                                            <span class="status busy"></span>
-                                        </div>
-                                        <p class="name-time" (click)="loadChat(partner.id)" routerLink='/messages/{{partner.id}}'>
-                                            <span class="name">{{partner.name}}</span>
-                                            <!-- <button type="button" (click)="loadChat(partner.id)">Open</button> -->
-                                        </p>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-xl-8 col-lg-8 col-md-8 col-sm-9 col-9">
-                            <div class="selected-user">
-                                <!-- <span>To: <span class="name">Emily Russell</span></span> -->
-                            </div>
-                            <div class="chat-container">
-                                <ul class="chat-box chatContainerScroll" *ngFor= "let msg of messagingService.convo_messages_list | async">
-                                    <li *ngIf="receivedMessage(msg)" class="chat-left">
-                                        <div class="chat-avatar">
-                                            <img src="{{msg.sender_image}}" alt="Profile Pic">
-                                            <div class="chat-name">{{msg.sender_name}}</div>
-                                        </div>
-                                        <div class="chat-text">{{msg.text}}</div>
-                                        <div class="chat-hour">{{msg.sent}}<span class="fa fa-check-circle"></span></div>
-                                    </li>
-                                    <li *ngIf="sentMessage(msg)" class="chat-right">
-                                        <div class="chat-hour">{{msg.sent}}<span class="fa fa-check-circle"></span></div>
-                                        <div class="chat-text">{{msg.text}}</div>
-                                        <div class="chat-avatar">
-                                            <img src="{{msg.sender_image}}" alt="Profile Pic">
-                                            <div class="chat-name">{{msg.sender_name}}</div>
-                                        </div>
-                                    </li>
-                                </ul>
-                                <form [formGroup]="newMessageForm" (ngSubmit)="onSend()">
-                                <div *ngIf="chatOpen()" class="form-group mt-3 mb-0">
-                                    <textarea class="form-control" id="message" name="message" formControlName="message" rows="3" placeholder="Type your message here..."></textarea>
-                                    <br>
-                                    <button type="submit" class="btn btn-primary btn-sm">Send</button>
-                                </div>
-                            </form>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Row end -->
+<div class="container-fluid gedf-wrapper">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card gedf-card">
+                <div class="card-header">
+                    <h5 class="card-title">Chats</h5>
                 </div>
+                    <div class="card-body"> 
+                       <ul class="users">
+                        <li class="person" *ngFor= "let partner of messagingService.msg_partners_list | async" data-chat="person1">
+                            <div class="user" (click)="loadChat(partner.id)" routerLink='/messages/{{partner.id}}'>
+                                <img src="{{partner.image}}" alt="Profile Pic">
+                            </div>
+                            <p class="name-time" (click)="loadChat(partner.id)" routerLink='/messages/{{partner.id}}'>
+                                <span class="name">{{partner.name}}</span>
+                            </p>
+                            <!-- <button type="button" class="btn btn-primary btn-sm">View</button> -->
 
+                        </li>
+                    </ul>
+                    </div>
+                </div>
+            
+              </div>
+              <div class="col-md-6 gedf-main">
+                <div class="card gedf-card">
+                  <div class="card-header">
+                      <h5 class="card-title">Conversation</h5>
+                  </div>
+                  <div class="card-body" *ngFor= "let msg of messagingService.convo_messages_list | async">
+                      <ul>
+                        <li *ngIf="receivedMessage(msg)" class="chat-left">
+                            <div class="chat-avatar">
+                                <img src="{{msg.sender_image}}" alt="Profile Pic">
+                                <div class="chat-name">{{msg.sender_name}}</div>
+                            </div>
+                            <div class="chat-text">{{msg.text}}</div>
+                            <div class="chat-hour">{{msg.sent}}<span class="fa fa-check-circle"></span></div>
+                        </li>
+                        <li *ngIf="sentMessage(msg)" class="chat-right">
+                            <div class="chat-hour">{{msg.sent}}<span class="fa fa-check-circle"></span></div>
+                            <div class="chat-text">{{msg.text}}</div>
+                            <div class="chat-avatar">
+                                <img src="{{msg.sender_image}}" alt="Profile Pic">
+                                <div class="chat-name">{{msg.sender_name}}</div>
+                            </div>
+                        </li>
+                    </ul>
+                 </div>
+                 <form [formGroup]="newMessageForm" (ngSubmit)="onSend()">
+                    <div *ngIf="chatOpen()" class="form-group mt-3 mb-0">
+                        <textarea class="form-control" id="message" name="message" formControlName="message" rows="3" placeholder="Type your message here..."></textarea>
+                        <br>
+                        <button type="submit" class="btn btn-primary btn-sm">Send</button>
+                    </div>
+                </form>
+              </div>
+    
             </div>
 
-        </div>
-        <!-- Row end -->
-
-    </div>
-    <!-- Content wrapper end -->
-
-</div>
+            <div class="col-md-3">
+                <div class="card gedf-card">
+                    <div class="card-header">
+                        <h5 class="card-title">Example</h5>
+                    </div>
+                        <div class="card-body">
+                          
+                        </div>
+                    </div>
+            </div>
+              </div>
+              </div>
