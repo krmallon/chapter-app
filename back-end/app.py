@@ -166,6 +166,7 @@ def add_currently_reading(isbn, user_id):
     book_id = book.book_id
 
     db.session.add(Reading(user_id=user_id, book_id=book_id, start_date=datetime.date.today()))
+    db.session.add(Activity(user_id=user_id, action_id=4, object_id=1, date_created=datetime.date.today(), target_id=book_id))
     db.session.commit()
 
     return make_response( jsonify( "Successfully added to bookshelf"), 201 )
@@ -197,6 +198,8 @@ def add_want_to_read(isbn, user_id):
     book_id = book.book_id
 
     db.session.add(WantsToRead(user_id=user_id, book_id=book_id, date_added=datetime.date.today()))
+    db.session.add(Activity(user_id=user_id, action_id=2, object_id=1, date_created=datetime.date.today(), target_id=book_id))
+    
     db.session.commit()
 
     return make_response( jsonify( "Successfully added to bookshelf"), 201 )
@@ -227,6 +230,7 @@ def add_has_read(isbn, user_id):
 
     # update date selection
     db.session.add(HasRead(user_id=user_id, book_id=book_id, start_date=datetime.date.today(), finish_date=datetime.date.today()))
+    db.session.add(Activity(user_id=user_id, action_id=3, object_id=1, date_created=datetime.date.today(), target_id=book_id))
     goals = db.session.query(Goal).filter(Goal.user_id==user_id).all()
 
     for goal in goals:
@@ -290,7 +294,7 @@ def get_user_details(user_id):
 
 @app.route("/api/v1.0/search/users/<query>", methods=["GET"])
 def search_users(query):
-    url = 'https://dev-1spzh9o1.eu.auth0.com/api/v2/users?q=*' + query + '*'
+    url = 'https://dev-1spzh9o1.eu.auth0.com/api/v2/users?q=name:*' + query + '*'
     headers = {'authorization' : 'Bearer ' + auth0_access_token}
 
     req = requests.get(url, headers=headers)
@@ -368,7 +372,7 @@ def search_books(query):
         try:
             imgLink = book['volumeInfo']['imageLinks']['thumbnail']
         except:
-            imgLink = ""
+            imgLink = "https://img.icons8.com/fluent/96/000000/no-image.png"
             # https://www.rit.edu/nsfadvance/sites/rit.edu.nsfadvance/files/default_images/photo-unavailable.png" # find free-use default 'Cover Unavailable' image to use here
         new_book = {"title" : title, "author" : author, "date" : date, "image" : imgLink, "ISBN" : ISBN}
         if ISBN != "N/A":
@@ -418,6 +422,7 @@ def get_followed_users(user_id):
 def follow_user(user_id, follower_id):
     if user_id_in_db(user_id) and user_id_in_db(follower_id):
         db.session.add(Follow(user_id=user_id, follower_id=follower_id, follow_date=datetime.date.today()))
+        db.session.add(Activity(user_id=follower_id, action_id=6, object_id=5, date_created=datetime.date.today(), target_id=user_id))
         db.session.commit()
         
         return make_response(jsonify({"success" : "Followed user"}), 200)
@@ -438,14 +443,14 @@ def unfollow_user(user_id, follower_id):
     else:
         return make_response(jsonify({"error" : "Relationship does not exist"}), 400)
 
-@app.route("/api/v1.0/userprofiletodb/", methods=["POST"])
+@app.route("/api/v1.0/userprofiletodb", methods=["POST"])
 def send_profile_to_db():
 
-    if "auth0_id" in request.form and "name" in request.form and "nickname" in request.form and "email" in request.form and "image" in request.form:
+    if "auth0_id" in request.form and "name" in request.form and "image" in request.form:
         auth0_id = request.form["auth0_id"]
         name = request.form["name"]
-        nickname = request.form["nickname"]
-        email = request.form["email"]
+        nickname = "nickname"
+        email = "email"
         image = request.form["image"]
     else:
         return make_response(jsonify({"error" : "Missing form data"}), 400)
@@ -453,6 +458,7 @@ def send_profile_to_db():
     
     if not user_auth0_in_db(auth0_id):
         db.session.add(User(auth0_id = auth0_id, full_name=name, nickname=nickname, email=email, image=image))
+        # db.session.add(User(auth0_id = auth0_id, full_name=name, image=image))
         db.session.commit()
         
         return make_response(jsonify("User added to DB"), 200)
@@ -468,10 +474,11 @@ def get_all_reviews(ISBN):
     book = db.session.query(Book).filter(Book.ISBN==ISBN).first()
 
     if book is not None:
-        reviews = db.session.query(Book.title, User.full_name, User.image, Review.id, Review.reviewer_id, Review.rating, Review.text, Review.likes).join(Review, Book.book_id==Review.book_id).join(User, User.user_id==Review.reviewer_id).filter(Book.ISBN==ISBN)
+        reviews = db.session.query(Book.title, User.full_name, User.image, Review.id, Review.reviewer_id, Review.rating, Review.text).join(Review, Book.book_id==Review.book_id).join(User, User.user_id==Review.reviewer_id).filter(Book.ISBN==ISBN)
         
         for review in reviews:
-            rev = {"review_id" : review.id, "book" : review.title, "reviewer_id" : review.reviewer_id, "reviewer_name" : review.full_name, "reviewer_image" : review.image, "rating" : review.rating, "text" : review.text, "likes" : review.likes}
+            likes = get_like_count(2, review.id)
+            rev = {"review_id" : review.id, "book" : review.title, "reviewer_id" : review.reviewer_id, "reviewer_name" : review.full_name, "reviewer_image" : review.image, "rating" : review.rating, "text" : review.text, "likes" : likes}
             data_to_return.append(rev)
 
         return make_response( jsonify(data_to_return), 200)
@@ -483,23 +490,24 @@ def get_all_reviews_by_user(user_id):
     data_to_return = []
     
     if user_id_in_db(user_id):
-        reviews = db.session.query(Book.book_id, Book.title, Book.ISBN, Review.id, Review.reviewer_id, Review.rating, Review.text, Review.likes).join(Review, Book.book_id==Review.book_id).filter(Review.reviewer_id==user_id)
+        reviews = db.session.query(Book.book_id, Book.title, Book.ISBN, Review.id, Review.reviewer_id, Review.rating, Review.text).join(Review, Book.book_id==Review.book_id).filter(Review.reviewer_id==user_id)
     
     else:
         return make_response( jsonify({"error":"Invalid user ID"}), 404)
         
     if reviews is not None:
         for review in reviews:
-            rev = {"book_id": review.book_id, "book title" : review.title, "review_id" : review.id, "reviewer_id" : review.reviewer_id, "rating" : review.rating, "text" : review.text, "likes" : review.likes}
+            rev = {"book_id": review.book_id, "book title" : review.title, "review_id" : review.id, "reviewer_id" : review.reviewer_id, "rating" : review.rating, "text" : review.text}
             data_to_return.append(rev)
         return make_response( jsonify(data_to_return), 200)
 
 @app.route("/api/v1.0/reviews/<string:review_id>", methods=["GET"])
 def get_one_review(review_id):
     review = db.session.query(Review.id, Review.reviewer_id, Review.book_id, Review.rating, Review.text, Review.likes).filter(Review.id==review_id).first()
+    num_likes = get_like_count(2, review_id)
 
     if review is not None:
-        rev = {"review_id" : review.id, "reviewer_id" : review.reviewer_id, "rating" : review.rating, "text" : review.text, "likes" : review.likes}
+        rev = {"review_id" : review.id, "reviewer_id" : review.reviewer_id, "rating" : review.rating, "text" : review.text, "likes" : num_likes}
         return make_response(jsonify(rev), 200)
     else:
         return make_response(jsonify({"error" : "Invalid review ID"}), 404)
@@ -538,7 +546,9 @@ def add_review(ISBN):
             # print(recs)
 
     if book is not None:
-        db.session.add(Review(reviewer_id=reviewer_id, book_id=book_id, rating=rating, text=text, likes=0))
+        db.session.add(Review(reviewer_id=reviewer_id, book_id=book_id, rating=rating, text=text))
+
+        db.session.add(Activity(user_id=reviewer_id, action_id=1, object_id=1, date_created=datetime.date.today(), target_id=book_id))
         check_achievement(reviewer_id, 'review')
         # review_id = db.session.query(Review.review_id).filter_by(Review.reviewer_id=reviewer_id, Review.book_id=book_id, Review.rating=rating)
         db.session.commit()
@@ -718,9 +728,10 @@ def get_activity_followed_users(user_id):
 
     followed = get_followed_users(user_id)
 
-    activities = db.session.query(Action.description, Activity.date_created, Activity.target_id, Activity.action_id, Activity.object_id, User.user_id, User.full_name, User.image).join(User, Activity.user_id==User.user_id).join(Action, Activity.action_id==Action.id).filter(Activity.user_id.in_([(f['user_id']) for f in followed])).order_by(Activity.date_created.desc()).all()
+    activities = db.session.query(Action.description, Activity.id, Activity.date_created, Activity.target_id, Activity.action_id, Activity.object_id, User.user_id, User.full_name, User.image).join(User, Activity.user_id==User.user_id).join(Action, Activity.action_id==Action.id).filter(Activity.user_id.in_([(f['user_id']) for f in followed])).order_by(Activity.date_created.desc()).all()
    
     for activity in activities:
+        likes = get_like_count(7, activity.id)
         if activity.action_id == 1:
             target = db.session.query(Book.title, Book.author, Book.ISBN, Book.image_link, Review.id, Review.rating, Review.text).join(Review, Book.book_id==Review.book_id).filter(Book.book_id==activity.target_id).first()
         elif activity.action_id == 2 or activity.action_id == 3 or activity.action_id == 4:
@@ -737,7 +748,7 @@ def get_activity_followed_users(user_id):
         elif activity.action_id == 7:
             target = db.session.query(Achievement.id, Achievement.name, Achievement.description, Achievement.badge).filter(Achievement.id==activity.target_id).first()
 
-        act = {"user_id" : activity.user_id, "user" : activity.full_name, "user_image" : activity.image, "action" : activity.description, "object_id" : activity.object_id, "target" : target, "date_created" : activity.date_created}
+        act = {"activity_id" : activity.id, "user_id" : activity.user_id, "user" : activity.full_name, "user_image" : activity.image, "action" : activity.description, "object_id" : activity.object_id, "target" : target, "date_created" : activity.date_created, "likes" : likes}
         data_to_return.append(act)
 
     if data_to_return:
@@ -802,6 +813,7 @@ def check_achievement(user_id, achievement_type):
             first_review = db.session.query(Review).filter(Review.reviewer_id==user_id).one()
             if first_review is not None:
                 db.session.add(UserAchievement(user_id=user_id, achievement_id=1, date_earned=datetime.date.today()))
+                db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.date.today(), target_id=1))
         except Exception:
             pass
     if achievement_type == 'group':
@@ -809,6 +821,7 @@ def check_achievement(user_id, achievement_type):
             first_group = db.session.query(Group).filter(Group.founder_id==user_id).one()
             if first_group is not None:
                 db.session.add(UserAchievement(user_id=user_id, achievement_id=2, date_earned=datetime.date.today()))
+                db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.date.today(), target_id=2))
         except Exception:
             pass
     if achievement_type == 'goal':
@@ -817,15 +830,18 @@ def check_achievement(user_id, achievement_type):
 
         if count == 0:
             db.session.add(UserAchievement(user_id=user_id, achievement_id=3, date_earned=datetime.date.today()))
+            db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.date.today(), target_id=3))
 
         for goal in goals:
             if goal.current == goal.target:
                 db.session.add(UserAchievement(user_id=user_id, achievement_id=4, date_earned=datetime.date.today()))
+                db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.date.today(), target_id=4))
 
     if achievement_type == 'reading':
         count = db.session.query(HasRead).filter(HasRead.user_id==user_id).count()
         if count == 10:
             db.session.add(UserAchievement(user_id=user_id, achievement_id=5, date_earned=datetime.date.today()))
+            db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.date.today(), target_id=5))
 
     db.session.commit()
 
@@ -835,12 +851,12 @@ def check_achievement(user_id, achievement_type):
 @app.route("/api/v1.0/<string:user_id>/recommendations", methods=["GET"])
 def get_recommendations_by_user_id(user_id):
     data_to_return = []
-    recs = db.session.query(BookRecommendation.id, BookRecommendation.rec_book_id, BookRecommendation.rec_source_id, Book.title, Book.ISBN, Book.image_link).join(Book, Book.book_id == BookRecommendation.rec_book_id).filter(BookRecommendation.user_id==user_id).all()
+    recs = db.session.query(BookRecommendation.id, BookRecommendation.rec_book_id, BookRecommendation.rec_source_id, Book.title, Book.ISBN, Book.author, Book.image_link).join(Book, Book.book_id == BookRecommendation.rec_book_id).filter(BookRecommendation.user_id==user_id).all()
 
     for rec in recs:
         rec_source_info = db.session.query(Book.title, Book.ISBN).filter(Book.book_id == rec.rec_source_id).first()
         rec_source = {"id" : rec.rec_source_id, "ISBN" : rec_source_info.ISBN, "title" : rec_source_info.title}
-        rec_book = {"id" : rec.rec_book_id, "ISBN" : rec.ISBN, "title" : rec.title, "image" : rec.image_link}
+        rec_book = {"id" : rec.rec_book_id, "ISBN" : rec.ISBN, "title" : rec.title, "author" : rec.author, "image" : rec.image_link}
         recommendation = {"id" : rec.id, "rec_book" : rec_book, "rec_source" : rec_source}
         data_to_return.append(recommendation)
 
@@ -987,10 +1003,10 @@ def get_group(group_id):
 @app.route("/api/v1.0/groups/<string:group_id>/members", methods=["GET"])
 def get_group_members(group_id):
     data_to_return = []
-    members = db.session.query(UserGroup.user_id, User.full_name).join(User, UserGroup.user_id==User.user_id).filter(UserGroup.group_id==group_id).all()
+    members = db.session.query(UserGroup.user_id, User.full_name, User.image).join(User, UserGroup.user_id==User.user_id).filter(UserGroup.group_id==group_id).all()
 
     for member in members:
-        memb = {"user_id" : member.user_id, "name" : member.full_name }
+        memb = {"user_id" : member.user_id, "name" : member.full_name, "image" : member.image}
         data_to_return.append(memb)
 
     if data_to_return:
@@ -1035,11 +1051,12 @@ def get_all_group_posts(group_id):
 
 @app.route("/api/v1.0/groups/<string:group_id>/posts", methods=["POST"])
 def add_group_post(group_id):
-    if "user_id" in request.form and "text" in request.form:
+    if "user_id" in request.form and "text" in request.form and "title" in request.form:
         user_id = request.form["user_id"]
         text = request.form["text"]
+        title = request.form["title"]
 
-    db.session.add(Post(id=3, group_id=group_id, author_id=user_id, text=text, title="title"))
+    db.session.add(Post(group_id=group_id, author_id=user_id, text=text, title=title))
     db.session.commit()
 
     return make_response(jsonify({"success:" : "Posted"}), 200)
@@ -1095,7 +1112,7 @@ def add_comment(object_id, target_id):
 
 # STATS ENDPOINTS
 
-# @app.route("/api/v1.0/test/mostread", methods=["GET"])
+@app.route("/api/v1.0/<string:user_id>/stats/mostread", methods=["GET"])
 def get_most_read_author(user_id):
     data_to_return =[]
     authors = db.session.query(func.count(Book.author).label('count'), Book.author).join(HasRead, HasRead.book_id==Book.book_id).filter(HasRead.user_id==user_id).group_by(Book.author).order_by(desc('count')).limit(3).all()
@@ -1107,7 +1124,7 @@ def get_most_read_author(user_id):
     if data_to_return:
         return make_response(jsonify(data_to_return), 200)
 
-# @app.route("/api/v1.0/test/totalpages", methods=["GET"])
+@app.route("/api/v1.0/<string:user_id>/stats/totalpages", methods=["GET"])
 def get_total_pages_read(user_id):
     data_to_return = []
 
@@ -1115,7 +1132,40 @@ def get_total_pages_read(user_id):
 
     data_to_return.append(num_pages)
 
-    # return make_response(jsonify(data_to_return), 200)
+    return make_response(jsonify(num_pages), 200)
    
+# LIKES ENDPOINTS
+@app.route("/api/v1.0/<string:user_id>/likes", methods=["POST"])
+def add_like(user_id):
+    if request.args.get('objectID') and request.args.get('targetID'):
+        object_id = request.args.get('objectID')
+        target_id = request.args.get('targetID')
+        # add constants file and have LIKE_ID as 5 instead of hard coding like this
+        db.session.add(Activity(user_id=user_id, action_id=5, object_id=object_id, date_created=datetime.date.today(), target_id=target_id))
+        db.session.commit()
+
+    return make_response(jsonify("Successfully added like"), 200)
+
+@app.route("/api/v1.0/likes", methods=["GET"])
+def get_like_count():
+    if request.args.get('objectID') and request.args.get('targetID'):
+        object_id = request.args.get('objectID')
+        target_id = request.args.get('targetID')
+        num_likes = db.session.query(label('num_likes', func.count(Activity.id))).filter(Activity.action_id==5, Activity.object_id==object_id,Activity.target_id==target_id).all()
+
+        return make_response(jsonify(num_likes), 200)
+
+def get_like_count(object_id, target_id):
+    likes = db.session.query(label('count', func.count(Activity.id))).filter(Activity.action_id==5, Activity.object_id==object_id,Activity.target_id==target_id).all()
+
+    # for lk in likes:
+    #     num_likes = lk['num_likes']
+
+    return likes[0]
+
+    # return likes.num_likes
+    # return num_likes
+
+
 if __name__ == "__main__":
     app.run(debug=True)
