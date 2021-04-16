@@ -3,15 +3,26 @@
       <div class="col-md-3">
           <div class="card gedf-card">
               <div class="card-header">
-                  <h5 class="card-title">My Groups</h5>
+                  <h5 class="card-title">New Group</h5>
               </div>
-                  <div class="card-body" *ngFor="let group of groupService.user_groups_list | async" style="cursor: pointer;" routerLink="/group/{{group.id}}">
-                      <h4>{{group.name}}</h4>
-                      <button type="button" class="btn btn-primary btn-sm">View</button>
+                  <div class="card-body" style="cursor: pointer;">
+                      <h4>Got an idea for a new group?</h4>
+                      <button type="button" class="btn btn-success btn-sm" (click)="newGroupModal.show()">Create Group</button>
           
                           
                   </div>
               </div>
+              <div class="card gedf-card">
+                <div class="card-header">
+                    <h5 class="card-title">My Groups</h5>
+                </div>
+                    <div class="card-body" *ngFor="let group of groupService.user_groups_list | async" style="cursor: pointer;" routerLink="/group/{{group.id}}">
+                        <h4>{{group.name}}</h4>
+                        <button type="button" class="btn btn-primary btn-sm">View</button>
+            
+                            
+                    </div>
+                </div>
             </div>
 
           <div class="col-md-6 gedf-main">
@@ -43,3 +54,37 @@
                     </div>
                 </div>
         </div>
+
+        <div mdbModal #newGroupModal="mdbModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="newGroupModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close pull-right" aria-label="Close" (click)="newGroupModal.hide()">
+                  <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title w-100" id="myModalLabel">Group Details</h4>
+              </div>
+              <div class="modal-body">
+  
+                <form [formGroup]="newGroupForm">
+  
+                  <div class="form-group">
+                    <h5>Name</h5>
+                    <textarea id="name" rows="1" name="name"
+                    class="form-control"
+                    formControlName="name">
+                                </textarea>
+                    <h5>Description</h5>
+                    <textarea id="description" rows="1" name="description"
+                    class="form-control"
+                    formControlName="description">
+                                </textarea>
+                    </div>
+                    </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" mdbBtn color="danger" class="waves-light" aria-label="Close" (click)="newGroupModal.hide()" mdbWavesEffect>Cancel</button>
+                <button type="button" mdbBtn color="primary" class="relative waves-light" (click)="this.groupService.createGroup(this.newGroupForm.value); newGroupModal.hide();" mdbWavesEffect>Submit</button>
+              </div>
+            </div>
+            </div>

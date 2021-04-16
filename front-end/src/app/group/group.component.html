@@ -1,11 +1,11 @@
-<div class="container-fluid gedf-wrapper">
+<div class="container-fluid gedf-wrapper" *ngFor="let group of groupService.group_list | async">
   <div class="row">
       <div class="col-md-3">
           <div class="card gedf-card">
               <div class="card-header">
                   <h5 class="card-title">Details</h5>
               </div>
-                  <div class="card-body" *ngFor="let group of groupService.group_list | async">
+                  <div class="card-body">
                       <h4>{{group.name}}</h4>
                       <h6>{{group.description}}</h6>
           
@@ -18,6 +18,7 @@
             <div class="card gedf-card">
               <div class="card-header">
                   <h5 class="card-title">Discussion</h5>
+                  <button type="button" class="btn btn-success btn-sm" (click)="newPostModal.show()">Post</button>
               </div>
               <div class="card-body" *ngFor = "let post of groupService.posts_list | async">
                 <h5 class="card-title">{{post.title}}</h5>
@@ -49,7 +50,42 @@
               </div>
       </div>
 
-     
+      <div mdbModal #newPostModal="mdbModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="newPostModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close pull-right" aria-label="Close" (click)="newPostModal.hide()">
+                <span aria-hidden="true">×</span>
+              </button>
+              <h4 class="modal-title w-100" id="myModalLabel">New Post</h4>
+            </div>
+            <div class="modal-body">
+
+              <form [formGroup]="newPostForm">
+
+                <div class="form-group">
+                  <h5>Title</h5>
+                  <textarea id="title" rows="1" name="title"
+                  class="form-control"
+                  formControlName="title">
+                              </textarea>
+                  <h5>Text</h5>
+                  <textarea id="text" rows="1" name="text"
+                  class="form-control"
+                  formControlName="text">
+                              </textarea>
+                  </div>
+                  </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" mdbBtn color="danger" class="waves-light" aria-label="Close" (click)="newPostModal.hide()" mdbWavesEffect>Cancel</button>
+              <button type="button" mdbBtn color="primary" class="relative waves-light" (click)= "this.groupService.createPost(group.id, this.newPostForm.value) ;newPostModal.hide();" mdbWavesEffect>Submit</button>
+            </div>
+          </div>
+          </div>
+
+     </div>
+     </div>
 
 
 <!-- <div class="container mb-5 mt-5">

@@ -13,6 +13,7 @@ export class GroupsComponent implements OnInit {
 
   public sessionStorage = sessionStorage;
   userSearchForm;
+  newGroupForm;
 
   constructor(public groupService: GroupService, public searchService: SearchService, public authService: AuthService, private formBuilder: FormBuilder) { }
 
@@ -20,6 +21,11 @@ export class GroupsComponent implements OnInit {
 
     this.userSearchForm = this.formBuilder.group({
       query: ['', Validators.required]
+    })
+
+    this.newGroupForm = this.formBuilder.group({
+      name: ['', Validators.required],
+      description: ['', Validators.required]
     })
 
     this.groupService.getAllGroups()
