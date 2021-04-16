@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
 import { GroupService } from '../services/group.service';
+import { SearchService } from '../services/search.service';
 
 @Component({
   selector: 'app-groups',
@@ -9,9 +11,16 @@ import { GroupService } from '../services/group.service';
 })
 export class GroupsComponent implements OnInit {
 
-  constructor(public groupService: GroupService, public authService: AuthService) { }
+  userSearchForm;
+
+  constructor(public groupService: GroupService, public searchService: SearchService, public authService: AuthService, private formBuilder: FormBuilder) { }
 
   ngOnInit(): void {
+
+    this.userSearchForm = this.formBuilder.group({
+      query: ['', Validators.required]
+    })
+
     this.groupService.getAllGroups()
     this.groupService.getGroupsByUser(sessionStorage.user_id)
   }

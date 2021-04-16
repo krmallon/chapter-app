@@ -1,33 +1,44 @@
-<div class="container">
-    <h1>All Groups</h1>
-    <div class="card-deck">
-    <div class="row mt-5 justify-content-center">
-      <div *ngFor = "let group of groupService.groups_list | async">
-      <div class="card card-custom mx-2 mb-3"
-      style="cursor: pointer" routerLink='/group/{{group.id}}'>
-             <div class="card-footer">
-              {{ group.name }}
-              <br>
-              {{ group.description}}
-          </div>
-        
-      </div>
-      </div>
-    </div>
-
-    <div class="container">
-        <h1 *ngIf="authService.loggedIn">My Groups</h1>
-        <div class="card-deck">
-        <div class="row mt-5 justify-content-center">
-          <div *ngFor = "let group of groupService.user_groups_list | async">
-          <div class="card card-custom mx-2 mb-3"
-          style="cursor: pointer" routerLink='/group/{{group.id}}'>
-                 <div class="card-footer">
-                  {{ group.name }}
-                  <br>
-                  {{ group.description}}
+<div class="container-fluid gedf-wrapper" style="margin:100px">
+  <div class="row">
+      <div class="col-md-3">
+          <div class="card gedf-card">
+              <div class="card-header">
+                  <h5 class="card-title">My Groups</h5>
               </div>
-            
+                  <div class="card-body" *ngFor="let group of groupService.user_groups_list | async" style="cursor: pointer;" routerLink="/group/{{group.id}}">
+                      <h4>{{group.name}}</h4>
+                      <button type="button" class="btn btn-primary btn-sm">View</button>
+          
+                          
+                  </div>
+              </div>
+            </div>
+
+          <div class="col-md-6 gedf-main">
+            <div class="card gedf-card">
+              <div class="card-header">
+                  <h5 class="card-title">All Groups</h5>
+              </div>
+              <div class="card-body" *ngFor="let group of groupService.groups_list | async" style="cursor: pointer;" routerLink="/group/{{group.id}}">
+              <h4>{{group.name}}</h4>
+              <h6>{{group.description}}</h6>
+              <button type="button" class="btn btn-primary btn-sm">View</button>
+              </div>
           </div>
-          </div>
+
+        </div>
+
+        <div class="col-md-3">
+            <div class="card gedf-card">
+                <div class="card-header">
+                    <h5 class="card-title">Member Search</h5>
+                </div>
+                    <div class="card-body">
+                      <form class="form-inline md-form form-sm active-pink-2" [formGroup]="userSearchForm">
+                        <input class="form-control form-control-sm mr-3 w-75" name="query" formControlName="query" type="text" placeholder="Search users" aria-label="Search"
+                          mdbInput>
+                        <mdb-icon fas icon="search" aria-hidden="true" (click)="this.searchService.searchUsers(this.userSearchForm.value.query)" routerLink='/search/users/{{this.userSearchForm.value.query}}'></mdb-icon>
+                      </form> 
+                    </div>
+                </div>
         </div>
