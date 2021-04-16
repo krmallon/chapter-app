@@ -35,6 +35,7 @@ export class BookComponent implements OnInit {
 
     this.bookService.getBook(this.route.snapshot.params.id)
     this.reviewService.getReviews(this.route.snapshot.params.id)
+    // this.reviewService.getReviews('0755379926')
     this.bookService.bookPresentInDB(this.route.snapshot.params.id)
   }
   
