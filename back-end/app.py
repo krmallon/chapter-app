@@ -827,8 +827,9 @@ def check_achievement(user_id, achievement_type):
     if achievement_type == 'goal':
         goals = db.session.query(Goal).filter(Goal.user_id==user_id).all()
         count = db.session.query(Goal).filter(Goal.user_id==user_id).count()
+        exists = db.session.query(UserAchievement).filter(UserAchievement.user_id==user_id, UserAchievement.achievement_id==3).scalar() is not None
 
-        if count == 0:
+        if count == 0 and not exists:
             db.session.add(UserAchievement(user_id=user_id, achievement_id=3, date_earned=datetime.date.today()))
             db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.date.today(), target_id=3))
 

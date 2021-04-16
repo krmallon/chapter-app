@@ -23,6 +23,8 @@ export class ProfileComponent implements OnInit {
     this.goalService.getGoal(this.route.snapshot.params.id)
     this.userService.checkFollowing(this.route.snapshot.params.id, sessionStorage.user_id)
     this.bookService.getCurrentlyReadingByUser(this.route.snapshot.params.id)
+    this.bookService.getWantsToReadByUser(this.route.snapshot.params.id)
+    this.bookService.getHasReadByUser(this.route.snapshot.params.id)
     this.achievementService.getUserAchievements(this.route.snapshot.params.id)
     this.statService.getMostRead(this.route.snapshot.params.id)
     this.statService.getTotalPagesRead(this.route.snapshot.params.id)
