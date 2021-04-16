@@ -1,4 +1,58 @@
-<div class="container mb-5 mt-5">
+<div class="container-fluid gedf-wrapper">
+  <div class="row">
+      <div class="col-md-3">
+          <div class="card gedf-card">
+              <div class="card-header">
+                  <h5 class="card-title">Details</h5>
+              </div>
+                  <div class="card-body" *ngFor="let group of groupService.group_list | async">
+                      <h4>{{group.name}}</h4>
+                      <h6>{{group.description}}</h6>
+          
+                          
+                  </div>
+              </div>
+            </div>
+
+          <div class="col-md-6 gedf-main">
+            <div class="card gedf-card">
+              <div class="card-header">
+                  <h5 class="card-title">Discussion</h5>
+              </div>
+              <div class="card-body" *ngFor = "let post of groupService.posts_list | async">
+                <h5 class="card-title">{{post.title}}</h5>
+                <h6 class="card-subtitle">
+                  <img class="rounded-circle profile-picture" src="{{post.author_image}}" style="width:50px; height:50px">
+                  {{post.author_name}}</h6>
+              
+              <p>{{post.text}}</p>
+
+          
+
+              
+          </div>
+
+        </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card gedf-card">
+              <div class="card-header">
+                  <h5 class="card-title">Members</h5>
+              </div>
+                  <div class="card-body" *ngFor = "let member of groupService.members_list | async" style="cursor: pointer" routerLink='/user/{{member.user_id}}'>
+                    <img class="rounded-circle profile-picture" src="{{member.image}}" style="width:50px; height:50px">
+                    {{member.name}}
+                  
+                   
+                  </div>
+              </div>
+      </div>
+
+     
+
+
+<!-- <div class="container mb-5 mt-5">
     <div class="card">
         <div *ngFor = "let group of groupService.group_list | async">
         <div class="row">
@@ -26,29 +80,7 @@
       </div>
     </div>
 
-    <!-- <div class="container">
-        <h1>Discussion</h1>
-        <div class="card-deck">
-        <div class="row mt-5 justify-content-center">
-          <div *ngFor = "let post of groupService.posts_list | async">
-          <div class="card card-custom mx-2 mb-3"
-          style="cursor: pointer">
-                 <div class="card-footer">
-                  {{post.text}}
-                  <br>
-                  <br>
-                  <button (click)="this.getPostComments(post.id)">Show Replies</button>
-                  <div class="card card-custom mx-2 mb-3">
-                  <div *ngFor = "let comment of commentService.comment_list | async">
-                     {{comment.text}}
-                     <br>
-                     Posted by {{comment.commenter_name}}
-                  </div>
-                  </div>
-              </div>
-            </div>
-          </div>
-        </div> -->
+    
         <div class="container">
             <h1>Discussion</h1>
 
@@ -128,4 +160,4 @@
             </div>
 
          
-        
+         -->

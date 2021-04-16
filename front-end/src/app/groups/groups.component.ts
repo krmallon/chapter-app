@@ -11,6 +11,7 @@ import { SearchService } from '../services/search.service';
 })
 export class GroupsComponent implements OnInit {
 
+  public sessionStorage = sessionStorage;
   userSearchForm;
 
   constructor(public groupService: GroupService, public searchService: SearchService, public authService: AuthService, private formBuilder: FormBuilder) { }

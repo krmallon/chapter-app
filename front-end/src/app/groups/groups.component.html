@@ -1,4 +1,4 @@
-<div class="container-fluid gedf-wrapper" style="margin:100px">
+<div class="container-fluid gedf-wrapper">
   <div class="row">
       <div class="col-md-3">
           <div class="card gedf-card">
@@ -19,10 +19,11 @@
               <div class="card-header">
                   <h5 class="card-title">All Groups</h5>
               </div>
-              <div class="card-body" *ngFor="let group of groupService.groups_list | async" style="cursor: pointer;" routerLink="/group/{{group.id}}">
+              <div class="card-body" *ngFor="let group of groupService.groups_list | async">
               <h4>{{group.name}}</h4>
               <h6>{{group.description}}</h6>
-              <button type="button" class="btn btn-primary btn-sm">View</button>
+              <button type="button" class="btn btn-primary btn-sm" routerLink="/group/{{group.id}}">View</button>
+              <button type="button" class="btn btn-success btn-sm" (click)="this.groupService.joinGroup(group.id)">Join</button>
               </div>
           </div>
 
