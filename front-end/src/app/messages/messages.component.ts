@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MessagingService } from '../services/messaging.service';
+import { SearchService } from '../services/search.service';
 
 @Component({
   selector: 'app-messages',
@@ -11,15 +12,20 @@ import { MessagingService } from '../services/messaging.service';
 export class MessagesComponent implements OnInit {
 
   newMessageForm;
+  userSearchForm;
   partner;
 
-  constructor(public messagingService: MessagingService, private formBuilder : FormBuilder, private route: ActivatedRoute) { }
+  constructor(public messagingService: MessagingService, private formBuilder : FormBuilder, private route: ActivatedRoute, public searchService: SearchService) { }
 
   ngOnInit(): void {
 
     this.newMessageForm = this.formBuilder.group({
       message: ['', Validators.required]
     });
+
+    this.userSearchForm = this.formBuilder.group({
+      query: ['', Validators.required]
+    })
 
     this.messagingService.getReceivedMessages(sessionStorage.user_id)
     this.messagingService.getChatPartners(sessionStorage.user_id)

@@ -3,6 +3,7 @@
         <div class="col-md-3">
             <div class="card gedf-card">
                 <div class="card-header">
+                    <img src="https://img.icons8.com/officel/40/000000/chat.png"/>
                     <h5 class="card-title">Chats</h5>
                 </div>
                     <div class="card-body"> 
@@ -27,7 +28,9 @@
                   <div class="card-header">
                       <h5 class="card-title">Conversation</h5>
                   </div>
-                  <div class="card-body" *ngFor= "let msg of messagingService.convo_messages_list | async">
+                  <div class="card-body">
+
+                  <div *ngFor= "let msg of messagingService.convo_messages_list | async">
                       <ul>
                         <li *ngIf="receivedMessage(msg)" class="chat-left">
                             <div class="chat-avatar">
@@ -55,18 +58,24 @@
                     </div>
                 </form>
               </div>
+              </div>
     
             </div>
 
             <div class="col-md-3">
                 <div class="card gedf-card">
                     <div class="card-header">
-                        <h5 class="card-title">Example</h5>
-                    </div>
-                        <div class="card-body">
-                          
-                        </div>
-                    </div>
-            </div>
+                        <img src="https://img.icons8.com/dusk/64/000000/badge.png"/>
+                          <h5 class="card-title">Member Search</h5>
+                      </div>
+                          <div class="card-body">
+                              <h6>Find other users to contact</h6>
+                            <form class="form-inline md-form form-sm active-pink-2" [formGroup]="userSearchForm">
+                              <input class="form-control form-control-sm mr-3 w-75" name="query" formControlName="query" type="text" placeholder="Search users" aria-label="Search"
+                                mdbInput>
+                              <mdb-icon fas icon="search" aria-hidden="true" (click)="this.searchService.searchUsers(this.userSearchForm.value.query)" routerLink='/search/users/{{this.userSearchForm.value.query}}'></mdb-icon>
+                            </form> 
+                          </div>
+                      </div>
               </div>
               </div>
