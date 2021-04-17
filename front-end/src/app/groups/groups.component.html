@@ -3,6 +3,7 @@
       <div class="col-md-3">
           <div class="card gedf-card">
               <div class="card-header">
+                <img src="https://img.icons8.com/cute-clipart/64/000000/new.png"/>
                   <h5 class="card-title">New Group</h5>
               </div>
                   <div class="card-body" style="cursor: pointer;">
@@ -14,6 +15,7 @@
               </div>
               <div class="card gedf-card">
                 <div class="card-header">
+                  <img src="https://img.icons8.com/doodle/50/000000/group.png"/>
                     <h5 class="card-title">My Groups</h5>
                 </div>
                     <div class="card-body" *ngFor="let group of groupService.user_groups_list | async" style="cursor: pointer;" routerLink="/group/{{group.id}}">
@@ -28,13 +30,14 @@
           <div class="col-md-6 gedf-main">
             <div class="card gedf-card">
               <div class="card-header">
+                <img src="https://img.icons8.com/doodle/50/000000/group.png"/>
                   <h5 class="card-title">All Groups</h5>
               </div>
               <div class="card-body" *ngFor="let group of groupService.groups_list | async">
               <h4>{{group.name}}</h4>
               <h6>{{group.description}}</h6>
               <button type="button" class="btn btn-primary btn-sm" routerLink="/group/{{group.id}}">View</button>
-              <button type="button" class="btn btn-success btn-sm" (click)="this.groupService.joinGroup(group.id)">Join</button>
+              <!-- <button type="button" class="btn btn-success btn-sm" (click)="this.groupService.joinGroup(group.id)">Join</button> -->
               </div>
           </div>
 
@@ -43,6 +46,7 @@
         <div class="col-md-3">
             <div class="card gedf-card">
                 <div class="card-header">
+                  <img src="https://img.icons8.com/dusk/64/000000/badge.png"/>
                     <h5 class="card-title">Member Search</h5>
                 </div>
                     <div class="card-body">

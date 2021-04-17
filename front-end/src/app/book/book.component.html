@@ -64,11 +64,12 @@
           <div class="card gedf-card">
             <div class="card-header">
                 <h5 class="card-title">Reviews</h5>
-                <button type="button" class="btn btn-success btn-sm" (click)="newReviewModal.show()">Add Review</button>
+                <button type="button" class="btn btn-success btn-sm" *ngIf="authService.loggedIn" (click)="newReviewModal.show()">Add Review</button>
+                <h7 *ngIf="!authService.loggedIn">Sign in to add a review</h7>
             </div>
             <div class="card-body" *ngFor = "let review of reviewService.reviews_list | async">
               <h6 class="card-subtitle">
-                <img class="rounded-circle profile-picture" src="{{review.reviewer_image}}" style="width:50px; height:50px" routerLink="/user/">
+                <img class="rounded-circle profile-picture" src="{{review.reviewer_image}}" style="width:40px; height:40px" routerLink="/user/{{review.reviewer_id}}">
                 {{review.reviewer_name}}</h6>
 
                   <p>{{review.text}}
@@ -76,6 +77,8 @@
                     <b>{{review.rating}} stars </b>
                     <br>
                   </p>
+                  <button class="btn btn-primary btn-sm" (click)="likeReview(review.review_id)"><img src="https://img.icons8.com/dusk/50/000000/facebook-like.png" style="width:25px; height:25px"/></button>
+                  {{review.likes.count}} likes
         </div>
 
       </div>
@@ -92,7 +95,7 @@
                <div class="d-flex justify-content-between align-items-center">
                   <div class="d-flex justify-content-between align-items-center">
                      <div class="ml-2">
-                        <div class="h5 m-0" *ngFor = "let review of reviewService.reviews_list | async"> Description</div>
+                        <div class="h5 m-0">Description</div>
                         <p>{{book.description}}</p>
                      </div>
                   </div>
