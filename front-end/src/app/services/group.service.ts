@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import axios from 'axios';
 import { Subject } from 'rxjs';
 
 @Injectable({
@@ -66,7 +67,30 @@ export class GroupService {
     .subscribe(response => {
       this.posts_private_list = response;
       this.postsSubject.next(this.posts_private_list)
+      console.log(response)
     })
+  }
 
+  createGroup(group) {
+    let groupData = new FormData()
+    groupData.append("name", group.name)
+    groupData.append("description", group.description)
+    groupData.append("founder_id", sessionStorage.user_id)
+    axios.post('http://localhost:5000/api/v1.0/groups/new', groupData)
+  }
+
+  joinGroup(group_id) {
+    let joinData = new FormData();
+    joinData.append("user_id", sessionStorage.user_id)
+    axios.post('http://localhost:5000/api/v1.0/groups/' + group_id + '/join', joinData)
+  }
+
+  createPost(group_id, post) {
+    let postData = new FormData();
+    postData.append("title", post.title)
+    postData.append("text", post.text)
+    postData.append("user_id", sessionStorage.user_id)
+
+    axios.post('http://localhost:5000/api/v1.0/groups/' + group_id + '/posts', postData)
   }
 }
