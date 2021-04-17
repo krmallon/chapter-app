@@ -17,7 +17,7 @@ export class AuthService {
     createAuth0Client({
       domain: config.domain,
       client_id: config.client_id,
-      redirect_uri: "http://localhost:4200"
+      redirect_uri: config.redirect_uri
     })
   ) as Observable<Auth0Client>).pipe(
     shareReplay(1), // Every subscription receives the same shared value
@@ -111,7 +111,13 @@ export class AuthService {
       authComplete$.subscribe(([user, loggedIn]) => {
         sessionStorage.setItem("user", user.sub)
         console.log(sessionStorage.getItem("user"))
-        this.userService.getCurrentUser(sessionStorage.getItem("user"))
+
+        // if new user, add to DB
+        if (!this.userService.existingUser(user.sub)) {
+          this.userService.addUserToDB(user)
+        }
+        this.userService.getCurrentUser(user.sub)
+        // this.feedService.getFollowedActivity(sessionStorage.user_id)
         this.router.navigate([targetRoute]);
       });
     }

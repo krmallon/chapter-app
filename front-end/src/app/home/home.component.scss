@@ -24,6 +24,19 @@ body {
     }
 }
 
+.gedf-card .card-body {
+    width: 100%;
+    padding: 15px 25px;
+    color:#232323;
+    float:left;
+    background:#efefef;
+    height:50%;
+    border-radius:0 0 5px 5px;
+    position: relative;
+    z-index: 9999;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
 /**Reset Bootstrap*/
 .dropdown-toggle::after {
     content: none;

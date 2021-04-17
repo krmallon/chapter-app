@@ -11,8 +11,42 @@
     		        </div>
     		        <div class="card-content">
                     <h2>{{user.name}}</h2>
+                    <br>
+                    <h5>Following</h5>
+                    <img class="rounded-circle profile-picture" src="{{followed.image}}" style="width:50px; height:50px; cursor:pointer" title="{{followed.name}}" *ngFor = "let followed of userService.followed_users_list | async" routerLink="/user/{{followed.user_id}}">
+                    </div>
+                    
+                </div>
+                
+                <!-- <div class="card profile-card-3">
+                    <div class="card-header">Following</div>
+                    <div class="card-content">
+                        <h3>Following</h3>
+                    <img class="rounded-circle profile-picture" src="{{followed.image}}" style="width:50px; height:50px; cursor:pointer" title="{{followed.name}}" *ngFor = "let followed of userService.followed_users_list | async" routerLink="/user/{{followed.user_id}}">
+                 </div>
+                    
+                </div>
+
+                <br>
+                <br> -->
+                
+                <!-- <div class="card profile-card-3" *ngFor = "let user of userService.profile_details_list | async">
+    		        
+                </div> -->
+
+                <!-- <div class="col-md-3"> -->
+                <!-- <div class="card gedf-card">
+                    <div class="card-body">
+                        <img src="https://img.icons8.com/flat-round/64/000000/question-mark.png"/>
+                        <h5 class="card-title">Stuck for what to read next?</h5>
+                        <p class="card-text">Chapter provides personalised book recommendations. </p>
+                        <p class="card-text">Simply review some of your favourite books and we'll do the rest!</p>
+                        
+                        <a href="/recommendations" class="card-link">Recommendations</a>
+                        <a href="#" class="card-link">Popular Books</a>
                     </div>
                 </div>
+                </div> -->
                   
                 <!-- <div class="card">
     		        <div class="card-body">
@@ -58,7 +92,6 @@
                                 </div>
                                 <div class="ml-2">
                                     <div class="h5 m-0">{{activity.user}}</div>
-                                    <!-- <div class="h7 text-muted">Miracles Lee Cross</div> -->
                                 </div>
                             </div>
                             <div>
@@ -69,40 +102,35 @@
                     </div>
                     <div class="card-body" *ngIf="actionType(activity)=='followed'">
                         <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>{{activity.date_created}}</div>
-                        <a class="card-link" href="user/{{activity.target.user_id}}">
+                        <a class="card-link">
                             <h5 class="card-title">{{activity.user}} {{activity.action}} {{activity.target.full_name}}</h5>
                         </a>
                         <a href="/user/{{activity.target.user_id}}"><img src={{activity.target.image}} class="rounded-circle img-fluid profile-picture" style="width:100px; height:100px" alt="Image"></a>
-                        
-                        <!-- <p class="card-text">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Quo recusandae nulla rem eos ipsa praesentium esse magnam nemo dolor
-                            sequi fuga quia quaerat cum, obcaecati hic, molestias minima iste voluptates.
-                        </p> -->
                     </div>
                      <div class="card-body" *ngIf="actionType(activity)=='is reading'">
                         <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>{{activity.date_created}}</div>
-                        <a class="card-link" href="books/{{activity.target.ISBN}}">
+                        <a class="card-link">
                             <h5 class="card-title">{{activity.user}} {{activity.action}} {{activity.target.title}}</h5>
                         </a>
                         <a href="/books/{{activity.target.ISBN}}"><img src={{activity.target.image_link}} alt="Image"></a>
                     </div>
                     <div class="card-body" *ngIf="actionType(activity)=='wants to read'">
                       <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>{{activity.date_created}}</div>
-                      <a class="card-link" href="books/{{activity.target.ISBN}}">
+                      <a class="card-link">
                           <h5 class="card-title">{{activity.user}} {{activity.action}} {{activity.target.title}}</h5>
                       </a>
                       <a href="/books/{{activity.target.ISBN}}"><img src={{activity.target.image_link}} alt="Image"></a>
                   </div>
                   <div class="card-body" *ngIf="actionType(activity)=='has read'">
                     <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>{{activity.date_created}}</div>
-                    <a class="card-link" href="books/{{activity.target.ISBN}}">
+                    <a class="card-link">
                         <h5 class="card-title">{{activity.user}} {{activity.action}} {{activity.target.title}}</h5>
                     </a>
                     <a href="/books/{{activity.target.ISBN}}"><img src={{activity.target.image_link}} alt="Image"></a>
                 </div>
                 <div class="card-body" *ngIf="actionType(activity)=='posted a review'">
                   <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>{{activity.date_created}}</div>
-                  <a class="card-link" href="books/{{activity.target.ISBN}}">
+                  <a class="card-link">
                       <h5 class="card-title">{{activity.user}} {{activity.action}} for {{activity.target.title}}</h5>
                   </a>
                   <a href="/books/{{activity.target.ISBN}}"><img src={{activity.target.image_link}} alt="Image"></a>
@@ -114,21 +142,47 @@
               </div>
               <div class="card-body" *ngIf="actionType(activity)=='liked'">
                 <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>{{activity.date_created}}</div>
-                <a class="card-link" href="books/{{activity.target.ISBN}}">
-                    <h5 class="card-title">{{activity.user}} {{activity.action}} {{activity.target.full_name}}'s review</h5>
+                <a class="card-link">
+                    <h5 class="card-title" *ngIf="objectType(activity)==2">{{activity.user}} {{activity.action}} {{activity.target.full_name}}'s review</h5>
+                    <h5 class="card-title" *ngIf="objectType(activity)==7" routerLink="user/{{activity.target.user_id}}">{{activity.user}} {{activity.action}} <a href="user/{{activity.target.user_id}}">{{activity.target.full_name}}'s </a>update</h5>
                 </a>
-                <!-- <a href="/books/{{activity.target.ISBN}}"><img src={{activity.target.image_link}} alt="Image"></a> -->
                 <p class="card-text" *ngIf="objectType(activity)==2">
                   <b>{{activity.target.rating}} stars </b>
                   <br>
                   {{activity.target.text}}
               </p>
+              <!-- <p class="card-text" *ngIf="objectType(activity)==7">
+                <b>{{activity.target.rating}} stars </b>
+                <br>
+                {{activity.target.text}}
+            </p> -->
             </div>
+            <div class="card-body" *ngIf="actionType(activity)=='earned an achievement'">
+                <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>{{activity.date_created}}</div>
+                <a class="card-link">
+                    <h5 class="card-title">{{activity.user}} {{activity.action}}</h5>
+                    <p class="card-text">
+                        <b>{{activity.target.name}}</b>
+                        <br>
+                        <a href="/books/{{activity.target.ISBN}}"><img src={{activity.target.badge}} alt="Image"></a>
+                        <br>
+                        {{activity.target.description}}
+                        <br>
+                        <!-- <a href="/books/{{activity.target.ISBN}}"><img src={{activity.target.badge}} alt="Image"></a> -->
+                        <!-- {{activity.target.text}} -->
+                    </p>
+                    <!-- <h5 class="card-title" *ngIf="objectType(activity)==7" routerLink="user/{{activity.target.user_id}}">{{activity.user}} {{activity.action}} <a href="user/{{activity.target.user_id}}">{{activity.target.full_name}}'s </a>update</h5> -->
+                </a>
+                
+              </div>
 
 
 
                     <div class="card-footer">
-                        <a href="#" class="card-link"><i class="fa fa-gittip"></i> Like</a>
+                        <!-- <button class="btn btn-primary btn-sm" (click)="likeUpdate(activity)"><img src="https://img.icons8.com/dusk/50/000000/facebook-like.png" style="width:20px; height:20px"/></button> -->
+                        <!-- <button class="btn btn-primary btn-sm" (click)="this.likeService.addLike(this.feedObjectID, activity.activity_id); this.likeService.getLikes(this.feedObjectID, activity.activity_id)" ><img src="https://img.icons8.com/dusk/50/000000/facebook-like.png" style="width:20px; height:20px"/></button> -->
+                        <!-- Likes: {{activity.likes.count}} -->
+                        <!-- <a href="#" class="card-link"><i class="fa fa-gittip"></i> Like</a> -->
                     </div>
                 </div>
                 <!-- Post /////-->
