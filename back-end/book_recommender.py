@@ -23,12 +23,11 @@ ratings = pd.read_sql_table('Ratings', con=engine)
 
 # updates books CSV to correct date formatting and append leading zeroes to ISBN values
 def modify_csv():
-    df = pd.read_csv('data/books_modified.csv')
+    df = pd.read_csv('../data/books_modified.csv')
 
     print(df.head())
 
     # read data and append leading zero(es) to any ISBN values that have fewer than 10 digits
-    df['isbn'] = df['isbn'].where(df['isbn'].str.len() ==9, "00" + df['isbn'])
     df['isbn'] = df['isbn'].where(df['isbn'].str.len() ==10, "0" + df['isbn'])
 
     # remove decimal place from date e.g. 2008.0 -> 2008
@@ -36,8 +35,10 @@ def modify_csv():
 
     print(df.head())
 
+    print(df['isbn'].str.len())
+
     # # save updated data to file
-    df.to_csv('data/books_updated.csv', encoding='utf-8', index=False)
+    df.to_csv('../data/books_updated.csv', encoding='utf-8', index=False)
 
 def get_rating_stats(ratings):
     n_ratings = len(ratings)
@@ -224,3 +225,5 @@ def recommend(isbn):
     recs = get_recommendations(isbn, matrix, book_mapper, book_inv_mapper)
     return recs
 
+def main():
+    modify_csv()
