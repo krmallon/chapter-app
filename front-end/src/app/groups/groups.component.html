@@ -50,10 +50,10 @@
                     <h5 class="card-title">Member Search</h5>
                 </div>
                     <div class="card-body">
-                      <form class="form-inline md-form form-sm active-pink-2" [formGroup]="userSearchForm">
+                      <form class="form-inline md-form form-sm active-pink-2" [formGroup]="userSearchForm" [ngClass]="{ 'error': searchFormInvalid('query')}">
                         <input class="form-control form-control-sm mr-3 w-75" name="query" formControlName="query" type="text" placeholder="Search users" aria-label="Search"
                           mdbInput>
-                        <mdb-icon fas icon="search" aria-hidden="true" (click)="this.searchService.searchUsers(this.userSearchForm.value.query)" routerLink='/search/users/{{this.userSearchForm.value.query}}'></mdb-icon>
+                        <mdb-icon fas icon="search" aria-hidden="true" *ngIf="!searchFormIncomplete()" (click)="this.searchService.searchUsers(this.userSearchForm.value.query)" routerLink='/search/users/{{this.userSearchForm.value.query}}'></mdb-icon>
                       </form> 
                     </div>
                 </div>
@@ -76,19 +76,21 @@
                     <h5>Name</h5>
                     <textarea id="name" rows="1" name="name"
                     class="form-control"
-                    formControlName="name">
+                    formControlName="name" [ngClass]="{ 'error': isInvalid('name')}">
                                 </textarea>
                     <h5>Description</h5>
                     <textarea id="description" rows="1" name="description"
                     class="form-control"
-                    formControlName="description">
+                    formControlName="description" [ngClass]="{ 'error': isInvalid('description')}">
                                 </textarea>
                     </div>
+                    <span *ngIf="isIncomplete()">
+                      Note: You must complete both fields</span>
                     </form>
               </div>
               <div class="modal-footer">
-                <button type="button" mdbBtn color="danger" class="waves-light" aria-label="Close" (click)="newGroupModal.hide()" mdbWavesEffect>Cancel</button>
-                <button type="button" mdbBtn color="primary" class="relative waves-light" (click)="this.groupService.createGroup(this.newGroupForm.value); newGroupModal.hide();" mdbWavesEffect>Submit</button>
+                <button type="button" mdbBtn color="danger" class="waves-light" aria-label="Close" *ngIf="!isIncomplete()" (click)="newGroupModal.hide()" mdbWavesEffect>Cancel</button>
+                <button type="button" mdbBtn color="primary" class="relative waves-light" *ngIf="!isIncomplete()" (click)="this.groupService.createGroup(this.newGroupForm.value); newGroupModal.hide();" mdbWavesEffect>Submit</button>
               </div>
             </div>
             </div>

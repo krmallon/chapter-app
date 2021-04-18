@@ -32,4 +32,32 @@ export class GroupsComponent implements OnInit {
     this.groupService.getGroupsByUser(sessionStorage.user_id)
   }
 
+  isInvalid(control) {
+    return this.newGroupForm.controls[control].invalid &&
+           this.newGroupForm.controls[control].touched;
+  }
+
+  isIncomplete() {
+    return this.isInvalid('name') || this.isInvalid('description') || this.isUnTouched();
+  }
+
+  isUnTouched() {
+    return this.newGroupForm.controls.name.pristine && this.newGroupForm.controls.description.pristine
+  }
+
+  searchFormInvalid(control) {
+    return this.userSearchForm.controls[control].invalid &&
+           this.userSearchForm.controls[control].touched;
+  }
+
+  searchFormIncomplete() {
+    return this.searchFormInvalid('query') || this.searchFormUnTouched();
+  }
+
+  searchFormUnTouched() {
+    return this.userSearchForm.controls.query.pristine
+  }
+
+
+
 }
