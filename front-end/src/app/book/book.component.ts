@@ -94,4 +94,22 @@ export class BookComponent implements OnInit {
   //   this.likeService.getLikes(this.reviewObjectID, reviewID)
   //   this.reviewService.getReviews(this.route.snapshot.params.id)
   // }
+
+  isInvalid(control) {
+    return this.reviewForm.controls[control].invalid &&
+           this.reviewForm.controls[control].touched;
+  }
+
+  isIncomplete() {
+    return this.isInvalid('review') || this.isUnTouched();
+  }
+
+  reviewIsIncomplete() {
+    return this.isInvalid('review') || this.isUnTouched();
+  }
+
+  isUnTouched() {
+    return this.reviewForm.controls.review.pristine
+  }
+
 }

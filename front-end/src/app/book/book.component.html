@@ -122,6 +122,7 @@
         <form [formGroup]="reviewForm">
         <div class="form-group">
           <fieldset class="rating">
+            <!-- <legend>Select your rating</legend> -->
               <input type="radio" id="star5" name="rating" value="5" formControlName="rating"/><label class = "full" for="star5" title="5 stars"></label>
               <input type="radio" id="star4half" name="rating" value="4.5" formControlName="rating"/><label class="half" for="star4half" title="4.5 stars"></label>
               <input type="radio" id="star4" name="rating" value="4" formControlName="rating"/><label class = "full" for="star4" title="4 stars"></label>
@@ -138,15 +139,17 @@
           <div class="form-group">
             <textarea id="review" rows="3" name="review"
             class="form-control"
-            formControlName="review">
+            formControlName="review" [ngClass]="{ 'error': isInvalid('review')}">
                         </textarea>
             </div>
+            <span *ngIf="isIncomplete()">
+              Note: You must complete both fields</span>
         </form>
 
       </div>
       <div class="modal-footer" *ngFor="let book of bookService.book | async">
-        <button type="button" mdbBtn color="danger" class="waves-light" aria-label="Close" (click)="newReviewModal.hide()" mdbWavesEffect>Cancel</button>
-        <button type="button" mdbBtn color="primary" class="relative waves-light" (click)="this.reviewService.postReview(book.isbn, this.reviewForm.value); newReviewModal.hide()" mdbWavesEffect>Submit</button>
+        <button type="button" mdbBtn color="danger" class="waves-light" aria-label="Close" *ngIf="!isIncomplete()" (click)="newReviewModal.hide()" mdbWavesEffect>Cancel</button>
+        <button type="button" mdbBtn color="primary" class="relative waves-light" *ngIf="!isIncomplete()" (click)="this.reviewService.postReview(book.isbn, this.reviewForm.value); newReviewModal.hide()" mdbWavesEffect>Submit</button>
       </div>
     </div>
   </div>
