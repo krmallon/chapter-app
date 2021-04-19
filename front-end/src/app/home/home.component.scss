@@ -10,6 +10,23 @@ body {
     font-size: 0.8rem;
 }
 
+.modal-backdrop {
+    z-index: -1;
+  }
+
+#goalModal {
+    z-index: -1;
+}
+
+#mdbModal {
+    z-index: -1;
+}
+
+.gedf-card {
+    z-index: 1;
+}
+
+
 .gedf-wrapper {
     // margin-top: 0.97rem;
 }

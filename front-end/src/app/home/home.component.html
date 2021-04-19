@@ -6,11 +6,11 @@
     		        <div class="background-block">
     		            <img src="https://images.unsplash.com/photo-1593430980369-68efc5a5eb34?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1363&q=80" alt="profile-sample1" class="background"/>
     		        </div>
-    		        <div class="profile-thumb-block">
+    		        <div class="profile-thumb-block" routerLink="/user/{{user.user_id}}" style="cursor: pointer;">
     		            <img src="{{user.image}}" alt="profile-image" class="profile"/>
     		        </div>
     		        <div class="card-content">
-                    <h2>{{user.name}}</h2>
+                    <h2 routerLink="/user/{{user.user_id}}" style="cursor: pointer;"> {{user.name}}</h2>
                     <br>
                     <h5>Following</h5>
                     <img class="rounded-circle profile-picture" src="{{followed.image}}" style="width:50px; height:50px; cursor:pointer" title="{{followed.name}}" *ngFor = "let followed of userService.followed_users_list | async" routerLink="/user/{{followed.user_id}}">
@@ -83,7 +83,7 @@
                 <!-- Post /////-->
 
                 <!--- \\\\\\\Post-->
-                <div class="card gedf-card" *ngFor= "let activity of feedService.followed_activity_list | async">
+                <div class="card gedf-card" *ngFor= "let activity of userService.followed_activity_list | async">
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex justify-content-between align-items-center">
@@ -180,9 +180,9 @@
 
                     <div class="card-footer">
                         <!-- <button class="btn btn-primary btn-sm" (click)="likeUpdate(activity)"><img src="https://img.icons8.com/dusk/50/000000/facebook-like.png" style="width:20px; height:20px"/></button> -->
-                        <!-- <button class="btn btn-primary btn-sm" (click)="this.likeService.addLike(this.feedObjectID, activity.activity_id); this.likeService.getLikes(this.feedObjectID, activity.activity_id)" ><img src="https://img.icons8.com/dusk/50/000000/facebook-like.png" style="width:20px; height:20px"/></button> -->
-                        <!-- Likes: {{activity.likes.count}} -->
-                        <!-- <a href="#" class="card-link"><i class="fa fa-gittip"></i> Like</a> -->
+                        <button class="btn btn-primary btn-sm" (click)="this.likeService.addLike(this.feedObjectID, activity.activity_id); this.likeService.getLikes(this.feedObjectID, activity.activity_id)" ><img src="https://img.icons8.com/dusk/50/000000/facebook-like.png" style="width:20px; height:20px"/></button>
+                        Likes: {{activity.likes.count}}
+                    
                     </div>
                 </div>
                 <!-- Post /////-->
@@ -196,9 +196,10 @@
                             <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
                             <p class="card-text">Chapter provides personalised book recommendations. </p>
                             <p class="card-text">Simply review some of your favourite books and we'll do the rest!</p>
+
+                            <button type="button" class="btn btn-primary btn-sm" routerLink="/recommendations">View</button>
                             
-                            <a href="/recommendations" class="card-link">Recommendations</a>
-                            <a href="#" class="card-link">Popular Books</a>
+                            <!-- <a href="#" class="card-link">Popular Books</a> -->
                         </div>
                     </div>
                     <div class="card gedf-card">
@@ -208,8 +209,7 @@
                             <h5 class="card-title">Annual Reading Challenge</h5>
                             <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
                             <p class="card-text">Challenge yourself by setting a reading goal for the year.</p>
-                            <a href="#" class="card-link" (click)="goalModal.show()">Set goal</a>
-                            <!-- <a href="#" class="card-link">Another link</a> -->
+                            <button type="button" class="btn btn-success btn-sm" (click)="goalModal.show()">Set goal</button>
                         </div>
                     </div>
                     <div class="card gedf-card">
@@ -219,15 +219,17 @@
                              <h5 class="card-title">And the award goes to...</h5>
                             <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
                             <p class="card-text">Earn achievements by being part of the Chapter community</p>
-                            <a href="#" class="card-link">Achievements</a>
-                            <a href="#" class="card-link">Another link</a>
+                            <div class="card-footer" *ngFor="let achievement of achievementService.achievement_list | async">
+                                "{{achievement.name}}" - {{achievement.description}}
+                            </div>
                         </div>
                     </div>
             </div>
         </div>
-    </div>
+        
+    <!-- </div> -->
 
-    <div mdbModal #goalModal="mdbModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myGoalModalLabel" aria-hidden="true">
+     <div mdbModal #goalModal="mdbModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myGoalModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -253,4 +255,4 @@
           </div>
         </div>
       </div>
-<!-- </body> -->
+
