@@ -20,16 +20,41 @@
                     <img src="https://img.icons8.com/color/50/000000/story-book.png"/>
                       <h5 class="card-title">Recommendations</h5>
                   </div>
-                  <div class="card-body" *ngFor =
-                  "let recommendation of recommendationService.books_list | async">
+                  <!-- <div class="card-body" *ngFor =
+                  "let recommendation of recommendationService.books_list | async"> -->
+                  <div class="row mt-5 justify-content-center">
+                    <div class="card card-custom mx-2 mb-3" style="width:128px;" *ngFor =
+                    "let recommendation of recommendationService.books_list | async"> 
                   <img src={{recommendation.rec_book.image}} alt="Image" style="cursor:pointer" routerLink='/books/{{recommendation.rec_book.ISBN}}' class="card-img">
-                  <h4>{{recommendation.rec_book.title}}</h4>
-                  <h6>{{recommendation.rec_book.author}}</h6>
-                  <h7>Because you enjoyed <b>{{ recommendation.rec_source.title}} </b></h7>
+                  <!-- <h4>{{recommendation.rec_book.title}}</h4>
+                  <h6>{{recommendation.rec_book.author}}</h6> -->
+                  <!-- <h7>Because you enjoyed <a href="/books/{{recommendation.rec_source.ISBN}}"><b>{{ recommendation.rec_source.title}} </b></a></h7> -->
+                  <!-- {{recommendation.rec_book.title}} -->
                   <button type="button" class="btn btn-primary btn-sm" routerLink='/books/{{recommendation.rec_book.ISBN}}'>View</button>
+                  <br>
+                  <b>Title:</b>{{recommendation.rec_book.title}}
+                  <br> <br>
+                  <b>Author:</b>{{recommendation.rec_book.author}}
+                  <br> <br>
+                  <p>Because you enjoyed <a href="/books/{{recommendation.rec_source.ISBN}}"><b>{{ recommendation.rec_source.title}} </b></a></p>
+                  
+                
                   
                   </div>
+                  </div>
               </div>
+
+              <!-- <div class="card gedf-card" *ngIf="!this.recommendationService.recommendationsExist">
+                <div class="card-header">
+                  <img src="https://img.icons8.com/color/50/000000/story-book.png"/>
+                    <h5 class="card-title">sdsds</h5>
+                </div>
+                <div class="card-body">
+                <button type="button" class="btn btn-primary btn-sm">View</button>
+                
+                </div>
+                
+            </div> -->
     
             </div>
 
@@ -40,9 +65,9 @@
                         <h5 class="card-title">Help Chapter Help You</h5>
                     </div>
                         <div class="card-body" style="cursor: pointer">
-                          <h5>Rate any of the following books to help us provide the best recommedations</h5>
+                          <h5>Rate any of the following books to help us provide the best recommendations</h5>
                           <ul>
-                              <li>1</li>
+                              <li>1<button type="button" class="btn btn-primary btn-sm" routerLink='/books'>View</button></li>
                               <li>2</li>
                               <li>3</li>
                               <li>4</li>

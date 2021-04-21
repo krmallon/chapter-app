@@ -46,8 +46,11 @@
                       </div>
                     </div>
                   </div>
+                  
                 </div>
+                
               </div>
+              
             </div>
 
           <div class="col-md-6 gedf-main">
@@ -56,13 +59,21 @@
                   <img src="https://img.icons8.com/fluent/48/000000/summary-list.png"/>
                     <h5 class="card-title">Results</h5>
                 </div>
-                <div class="card-body" *ngIf="this.type==='books'">
-                  <!-- <figure *ngFor = "let book of searchService.book_results_list | async">
-                    <img src="{{book.image}}" class="img-fluid rounded shadow-sm" style="width:128px; height:196px" alt="{{book.title}} Cover" title="{{book.title}}" routerLink='/books/{{book.ISBN}}'>
-                  <figcaption>{{book.title}}</figcaption>
-                  </figure> -->
+                <!-- <div class="card-body" *ngIf="this.type==='books'">
                     <a><img src="{{book.image}}" class="img-fluid rounded shadow-sm" style="width:128px; height:196px" alt="{{book.title}} Cover" title="{{book.title}}" *ngFor = "let book of searchService.book_results_list | async" routerLink='/books/{{book.ISBN}}'></a>
-                </div>
+                </div> -->
+                <div class="row mt-5 justify-content-center" *ngIf="this.type==='books'">
+                  <div class="card card-custom mx-2 mb-3" style="width:128px;" *ngFor = "let book of searchService.book_results_list | async">
+                    <img src={{book.image}} alt="Image" style="cursor:pointer" routerLink='/books/{{book.ISBN}}' class="card-img">
+                    <button type="button" class="btn btn-primary btn-sm" routerLink='/books/{{book.ISBN}}'>View</button>
+                  <br>
+                  <b>Title:</b>{{book.title}}
+                  <br> <br>
+                  <b>Author:</b>{{book.author}}
+                  <br> <br>
+                  </div> 
+                  </div>
+
                 <div class="card-body" *ngIf="this.type==='users'">
                   <div class="card card-custom mx-2 mb-3" *ngFor="let user of searchService.user_results_list | async" style="cursor: pointer" routerLink='/user/{{user.user_id}}'>
                  <img src="{{user.image}}" alt="Profile Picture" style="width:65px;height:65px">
@@ -75,8 +86,8 @@
               <div class="card-body">
                 <nav aria-label="Pagination">
                   <ul class="pagination pagination-lg justify-content-center">
-                    <li class="page-item"><a class="page-link" (click)="this.previousPage()">Previous</a></li>
-                    <li class="page-item"><a class="page-link" (click)="this.nextPage()">Next</a></li>
+                    <li class="page-item"><button class="btn btn-primary btn-sm" (click)="this.previousPage()">Previous</button></li>
+                    <li class="page-item"><button class="btn btn-primary btn-sm" (click)="this.nextPage()">Next</button></li>
                   </ul>
                 </nav>
               </div>
@@ -93,3 +104,30 @@
                          <p>Example example example</p>
                       </div>
                   </div>
+
+                  <!-- <div class="card" *ngFor = "let book of searchService.book_results_list | async">
+                    <div class="row no-gutters">
+                      <div class="col-sm-2">
+                        <img
+                          src="{{book.image
+                          }}"
+                          style="width:128px; height:196px"
+                        />
+                      </div>
+                      <div class="col-sm-5 text-left">
+                        <div class="card-body">
+                          <h5 class="text-card-title">{{ book.title}}</h5>
+                          <p class="text-card-text my-2">
+                            <span class="text-card-title">Authors:</span>
+                            {{ book.author}}
+                          </p>
+                          <a
+                            [routerLink]='/books/{{book.ISBN}}'
+                            class="stretched-link btn btn-primary btn-sm card-button-text btn-card"
+                            >More
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div> -->

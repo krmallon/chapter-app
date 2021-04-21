@@ -1,0 +1,184 @@
+<div class="container-fluid gedf-wrapper">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card gedf-card">
+                <div class="card-header">
+                    <!-- <img src="https://img.icons8.com/flat-round/64/000000/info.png"/> -->
+                    <h5 class="card-title">{{this.shelf}}</h5>
+                </div>
+                    <div class="card-body">
+                        <div class="btn-group" mdbDropdown>
+                            <button mdbDropdownToggle type="button" mdbBtn color="primary" class="dropdown-toggle waves-light btn-sm"
+                              mdbWavesEffect>
+                              Select Shelf
+                            </button>
+                            <div class="dropdown-menu dropdown-primary">
+                              <a class="dropdown-item" (click)="setShelf('Currently Reading');getShelf(this.shelf)">Currently Reading</a>
+                              <div class="divider dropdown-divider"></div>
+                              <a class="dropdown-item" id="Want to Read" (click)="setShelf('Want to Read');getShelf(this.shelf)">Want to Read</a>
+                              <div class="divider dropdown-divider"></div>
+                              <a class="dropdown-item" (click)="setShelf('Read');getShelf(this.shelf)">Read</a>
+                            </div>
+                        
+                       </div>
+                    </div>
+                </div>
+            
+              </div>
+              <div class="col-md-6 gedf-main">
+                <div class="card gedf-card">
+                  <div class="card-header">
+                    <!-- <img src="https://img.icons8.com/color/50/000000/story-book.png"/> -->
+                      <h5 class="card-title">Books</h5>
+                  </div>
+                  <div class="row mt-5 justify-content-center" *ngIf="this.shelf=='Currently Reading'">
+                        <div class="card card-custom mx-2 mb-3" style="width:128px;" *ngFor = "let book of bookService.user_reading_list | async">
+                            <img src={{book.image}} alt="Image" style="cursor:pointer" routerLink='/books/{{book.ISBN}}' class="card-img">
+                            <button type="button" class="btn btn-primary btn-sm" routerLink='/books/{{book.ISBN}}'>View</button>
+                            <button class="btn btn-danger btn-sm" (click)="this.bookService.deleteFromShelf(book.ISBN, sessionStorage.user_id, 'currentlyreading');this.ngOnInit()">Remove</button>              
+                  </div>
+                  </div>
+                  <div class="row mt-5 justify-content-center" *ngIf="this.shelf=='Read'">
+                    <div class="card card-custom mx-2 mb-3" style="width:128px;" *ngFor = "let book of bookService.user_has_read_list | async">
+                        <img src={{book.image}} alt="Image" style="cursor:pointer" routerLink='/books/{{book.ISBN}}' class="card-img">
+                        <button type="button" class="btn btn-primary btn-sm" routerLink='/books/{{book.ISBN}}'>View</button>
+                        <button class="btn btn-danger btn-sm" (click)="this.bookService.deleteFromShelf(book.ISBN, sessionStorage.user_id, 'hasread');this.ngOnInit()">Remove</button>              
+              </div>
+              </div>
+              <div class="row mt-5 justify-content-center" *ngIf="this.shelf=='Want to Read'">
+                <div class="card card-custom mx-2 mb-3" style="width:128px;" *ngFor="let book of bookService.user_wants_to_read_list | async">
+                    <img src={{book.image}} alt="Image" style="cursor:pointer" routerLink='/books/{{book.ISBN}}' class="card-img">
+                    <button type="button" class="btn btn-primary btn-sm" routerLink='/books/{{book.ISBN}}'>View</button>
+                    <button class="btn btn-danger btn-sm" (click)="this.bookService.deleteFromShelf(book.ISBN, sessionStorage.user_id, 'wanttoread');this.ngOnInit()">Remove</button>              
+          </div>
+          </div>
+              </div>
+
+              <!-- </div> -->
+
+              <!-- <div class="card gedf-card" *ngIf="!this.recommendationService.recommendationsExist">
+                <div class="card-header">
+                  <img src="https://img.icons8.com/color/50/000000/story-book.png"/>
+                    <h5 class="card-title">sdsds</h5>
+                </div>
+                <div class="card-body">
+                <button type="button" class="btn btn-primary btn-sm">View</button>
+                
+                </div>
+                
+            </div> -->
+    
+            </div>
+
+            <div class="col-md-3">
+                <div class="card gedf-card">
+                    <div class="card-header">
+                        <!-- <img src="https://img.icons8.com/fluent/48/000000/helping-hand.png"/> -->
+                        <h5 class="card-title">Example Column</h5>
+                    </div>
+                        <div class="card-body" style="cursor: pointer">
+                        
+                         
+                        </div>
+                    </div>
+            </div>
+
+
+<!--         
+
+<div class="container-fluid gedf-wrapper">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card gedf-card">
+              <div class="card-header">
+                  {{this.shelf}}</div>
+            <div class="card-body">
+                <div class="btn-group" mdbDropdown>
+                    <button mdbDropdownToggle type="button" mdbBtn color="primary" class="dropdown-toggle waves-light btn-sm"
+                      mdbWavesEffect>
+                      Select Shelf
+                    </button>
+                    <div class="dropdown-menu dropdown-primary">
+                      <a class="dropdown-item" (click)="setShelf('Currently Reading');getShelf(this.shelf)">Currently Reading</a>
+                      <div class="divider dropdown-divider"></div>
+                      <a class="dropdown-item" id="Want to Read" (click)="setShelf('Want to Read');getShelf(this.shelf)">Want to Read</a>
+                      <div class="divider dropdown-divider"></div>
+                      <a class="dropdown-item" (click)="setShelf('Read');getShelf(this.shelf)">Read</a>
+                    </div>
+                
+                </div>
+            </div>
+            </div>
+            <div class="btn-group" mdbDropdown>
+                <button mdbDropdownToggle type="button" mdbBtn color="primary" class="dropdown-toggle waves-light btn-sm"
+                  mdbWavesEffect>
+                  Select Shelf
+                </button>
+                <div class="dropdown-menu dropdown-primary">
+                  <a class="dropdown-item" (click)="setShelf('Currently Reading');getShelf(this.shelf)">Currently Reading</a>
+                  <div class="divider dropdown-divider"></div>
+                  <a class="dropdown-item" id="Want to Read" (click)="setShelf('Want to Read');getShelf(this.shelf)">Want to Read</a>
+                  <div class="divider dropdown-divider"></div>
+                  <a class="dropdown-item" (click)="setShelf('Read');getShelf(this.shelf)">Read</a>
+                </div>
+            
+            </div>
+            </div>
+            </div>
+
+
+<div class="col-md-6 gedf-main">
+    <div class="card gedf-card">
+    <div class="card-header">
+       <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex justify-content-between align-items-center">
+             <div class="ml-2">
+                <div class="h5 m-0"> Description</div>
+                <p>book.description</p>
+             </div>
+          </div>
+          <div>
+          </div>
+       </div>
+    </div>
+    </div>
+    </div>
+    </div>
+
+
+
+<div class="py-4 px-4" *ngIf="this.shelf=='Currently Reading'">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h5 class="mb-0">Currently Reading</h5>
+    </div>
+    <div class="row mt-5 justify-content-center">
+        <div class="card card-custom mx-2 mb-3" *ngFor="let book of bookService.user_reading_list | async"><img src="{{book.image}}" alt="" width="128px" height="196px" class="img-fluid rounded shadow-sm" style="cursor: pointer" routerLink='/books/{{book.ISBN}}'>
+            <button class="btn btn-primary btn-sm" routerLink="/books/{{book.ISBN}}">View</button>
+            <button class="btn btn-danger btn-sm" (click)="this.bookService.deleteFromShelf(book.ISBN, sessionStorage.user_id, 'currentlyreading');this.ngOnInit()">Remove</button>
+    </div>
+    </div>
+    </div>
+
+    <div class="py-4 px-4" *ngIf="this.shelf=='Read'">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="mb-0">Read</h5>
+        </div>
+        <div class="row mt-5 justify-content-center">
+            <div class="card card-custom mx-2 mb-3" *ngFor="let book of bookService.user_has_read_list | async"><img src="{{book.image}}" alt="" width="128px" height="196px" class="img-fluid rounded shadow-sm center" style="cursor: pointer" routerLink='/books/{{book.ISBN}}'>
+                <button class="btn btn-primary btn-sm" routerLink="/books/{{book.ISBN}}">View</button>
+                <button class="btn btn-danger btn-sm" (click)="this.bookService.deleteFromShelf(book.ISBN, sessionStorage.user_id, 'hasread');this.ngOnInit()">Remove</button>
+            </div>
+        </div>
+        </div>
+
+        <div class="py-4 px-4" *ngIf="this.shelf=='Want to Read'">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="mb-0">Want To Read</h5>
+            </div>
+            <div class="row mt-5 justify-content-center">
+                <div class="card card-custom mx-2 mb-3" *ngFor="let book of bookService.user_wants_to_read_list | async"><img src="{{book.image}}" alt="" width="128px" height="196px" class="img-fluid rounded shadow-sm" style="cursor: pointer" routerLink='/books/{{book.ISBN}}'>
+                    <button class="btn btn-primary btn-sm" routerLink="/books/{{book.ISBN}}">View</button>
+                    <button class="btn btn-danger btn-sm" (click)="this.bookService.deleteFromShelf(book.ISBN, sessionStorage.user_id, 'wanttoread');this.ngOnInit()">Remove</button>
+                </div>
+            </div>
+            </div> -->
