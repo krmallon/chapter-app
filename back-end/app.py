@@ -27,6 +27,16 @@ def user_id_in_db(user):
 def user_auth0_in_db(user):
     return db.session.query(User.user_id).filter_by(auth0_id=user).scalar() is not None
 
+@app.route("/api/v1.0/userinDB/<string:auth0_id>", methods=["GET"])
+def user_auth0_in_db(auth0_id):
+    exists = db.session.query(User.user_id).filter_by(auth0_id=auth0_id).scalar() is not None
+
+    if exists:
+        return make_response(jsonify(exists), 200)
+    else:
+        return make_response(jsonify(exists), 404)
+
+
 def isbn_in_bookRecData(isbn):
     return db.session.query(BookRecDatum).filter_by(isbn=isbn).scalar() is not None
 
@@ -125,7 +135,7 @@ def get_one_book(isbn):
     
     title = "N/A"
     author = "N/A"
-    image = "N/A"
+    image = "https://img.icons8.com/bubbles/100/000000/no-image.png"
     description = "Description unavailable"
     page_count = 0
     publish_date = "N/A"
@@ -162,14 +172,17 @@ def get_one_book(isbn):
 
 @app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/currentlyreading", methods=["POST"])
 def add_currently_reading(isbn, user_id):
-    book = db.session.query(Book).filter_by(ISBN=isbn).first()
-    book_id = book.book_id
+    try:
+        book = db.session.query(Book).filter_by(ISBN=isbn).first()
+        book_id = book.book_id
 
-    db.session.add(Reading(user_id=user_id, book_id=book_id, start_date=datetime.date.today()))
-    db.session.add(Activity(user_id=user_id, action_id=4, object_id=1, date_created=datetime.date.today(), target_id=book_id))
-    db.session.commit()
+        db.session.add(Reading(user_id=user_id, book_id=book_id, start_date=datetime.date.today()))
+        db.session.add(Activity(user_id=user_id, action_id=4, object_id=1, date_created=datetime.date.today(), target_id=book_id))
+        db.session.commit()
 
-    return make_response( jsonify( "Successfully added to bookshelf"), 201 )
+        return make_response( jsonify( {"success" : "Added to bookshelf"}), 201 )
+    except Exception:
+        return make_response( jsonify( {"error" : "Failed to add to shelf"}), 404)
 
 @app.route("/api/v1.0/user/<string:user_id>/currentlyreading", methods=["GET"])
 def get_currently_reading(user_id):
@@ -191,18 +204,38 @@ def get_currently_reading(user_id):
         return make_response(jsonify({"error" : "No books found"}), 404)
 
 
+@app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/currentlyreading", methods=["DELETE"])
+def delete_currently_reading(isbn, user_id):
+    try:
+        book_id = db.session.query(Book.book_id).filter(Book.ISBN==isbn).first()
+        deleted_rows = db.session.query(Reading).filter(Reading.user_id==user_id, Reading.book_id==book_id).delete()
+        
+        if deleted_rows == 1:
+            db.session.commit()
+            return make_response( jsonify( {"success" : "Removed from bookshelf"} ), 204)
+        else:
+            return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
+    except Exception:
+        return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
+
+
+        
+
 
 @app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/wanttoread", methods=["POST"])
 def add_want_to_read(isbn, user_id):
-    book = db.session.query(Book).filter_by(ISBN=isbn).first()
-    book_id = book.book_id
+    try:
+        book = db.session.query(Book).filter_by(ISBN=isbn).first()
+        book_id = book.book_id
 
-    db.session.add(WantsToRead(user_id=user_id, book_id=book_id, date_added=datetime.date.today()))
-    db.session.add(Activity(user_id=user_id, action_id=2, object_id=1, date_created=datetime.date.today(), target_id=book_id))
-    
-    db.session.commit()
+        db.session.add(WantsToRead(user_id=user_id, book_id=book_id, date_added=datetime.date.today()))
+        db.session.add(Activity(user_id=user_id, action_id=2, object_id=1, date_created=datetime.date.today(), target_id=book_id))
+        db.session.commit()
+        
+        return make_response( jsonify( {"success" : "Added to bookshelf"}), 201 )
+    except Exception:
+        return make_response( jsonify( {"error" : "Failed to add to shelf"}), 404)
 
-    return make_response( jsonify( "Successfully added to bookshelf"), 201 )
 
 @app.route("/api/v1.0/user/<string:user_id>/wantstoread", methods=["GET"])
 def get_wants_to_read(user_id):
@@ -222,26 +255,43 @@ def get_wants_to_read(user_id):
         return make_response(jsonify(data_to_return), 200)
     else:
         return make_response(jsonify({"error" : "No books found"}), 404)
+        
+@app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/wanttoread", methods=["DELETE"])
+def delete_wants_to_read(isbn, user_id):
+    try:
+        book_id = db.session.query(Book.book_id).filter(Book.ISBN==isbn).first()
+        deleted_rows = db.session.query(WantsToRead).filter(WantsToRead.user_id==user_id, WantsToRead.book_id==book_id).delete()
+        
+        if deleted_rows == 1:
+            db.session.commit()
+            return make_response( jsonify( {"success" : "Removed from bookshelf"} ), 204)
+        else:
+            return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
+    except Exception:
+        return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
+
 
 @app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/hasread", methods=["POST"])
 def add_has_read(isbn, user_id):
-    book = db.session.query(Book).filter_by(ISBN=isbn).first()
-    book_id = book.book_id
+    try:
+        book = db.session.query(Book).filter_by(ISBN=isbn).first()
+        book_id = book.book_id
 
-    # update date selection
-    db.session.add(HasRead(user_id=user_id, book_id=book_id, start_date=datetime.date.today(), finish_date=datetime.date.today()))
-    db.session.add(Activity(user_id=user_id, action_id=3, object_id=1, date_created=datetime.date.today(), target_id=book_id))
-    goals = db.session.query(Goal).filter(Goal.user_id==user_id).all()
+        # update date selection
+        db.session.add(HasRead(user_id=user_id, book_id=book_id, start_date=datetime.date.today(), finish_date=datetime.date.today()))
+        db.session.add(Activity(user_id=user_id, action_id=3, object_id=1, date_created=datetime.date.today(), target_id=book_id))
+        goals = db.session.query(Goal).filter(Goal.user_id==user_id).all()
 
-    for goal in goals:
-        if str(goal.year) in str(datetime.date.today()):
-            goal.current = goal.current + 1
+        for goal in goals:
+            if str(goal.year) in str(datetime.date.today()):
+                goal.current = goal.current + 1
 
-    db.session.commit()
-    check_achievement(user_id, 'goal')
-    check_achievement(user_id, 'reading')
-
-    return make_response( jsonify( "Successfully added to bookshelf"), 201 )
+        db.session.commit()
+        check_achievement(user_id, 'goal')
+        check_achievement(user_id, 'reading')
+        return make_response( jsonify( {"success" : "Added to bookshelf"}), 201 )
+    except Exception:
+        return make_response( jsonify( {"error" : "Failed to add to shelf"}), 404)
 
 @app.route("/api/v1.0/user/<string:user_id>/hasread", methods=["GET"])
 def get_has_read(user_id):
@@ -261,6 +311,20 @@ def get_has_read(user_id):
         return make_response(jsonify(data_to_return), 200)
     else:
         return make_response(jsonify({"error" : "No books found"}), 404)
+
+@app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/hasread", methods=["DELETE"])
+def delete_has_read(isbn, user_id):
+    try:
+        book_id = db.session.query(Book.book_id).filter(Book.ISBN==isbn).first()
+        deleted_rows = db.session.query(HasRead).filter(HasRead.user_id==user_id, HasRead.book_id==book_id).delete()
+        
+        if deleted_rows == 1:
+            db.session.commit()
+            return make_response( jsonify( {"success" : "Removed from bookshelf"} ), 204)
+        else:
+            return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
+    except Exception:
+        return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
 
 # USER ENDPOINTS
 
@@ -345,52 +409,56 @@ def search_books(query):
     data_to_return = []
 
     # add what to do if no results i.e. no books in js['items']
-    for book in js['items']:
-        title = book['volumeInfo']['title']
-        try:
-            author = book['volumeInfo']['authors'][0]
-        except:
-            author = "N/A"
-        gb_id = book['id']
-        try:
-            # use ISBN_10 if present, otherwise use ISBN_13 or mark as N/A
-            # clean up code here
-            if book['volumeInfo']['industryIdentifiers'][0]['type'] == "ISBN_10":
-                ISBN = book['volumeInfo']['industryIdentifiers'][0]['identifier']
-            elif book['volumeInfo']['industryIdentifiers'][1]['type'] and book['volumeInfo']['industryIdentifiers'][1]['type'] == "ISBN_10":
-                ISBN = book['volumeInfo']['industryIdentifiers'][1]['identifier']
-            elif book['volumeInfo']['industryIdentifiers'][0]['type'] == "ISBN_13":
-                ISBN = book['volumeInfo']['industryIdentifiers'][0]['identifier']
-            else:
+    try:
+        for book in js['items']:
+            title = book['volumeInfo']['title']
+            try:
+                author = book['volumeInfo']['authors'][0]
+            except Exception:
+                author = "N/A"
+            gb_id = book['id']
+            try:
+                # use ISBN_10 if present, otherwise use ISBN_13 or mark as N/A
+                # clean up code here
+                if book['volumeInfo']['industryIdentifiers'][0]['type'] == "ISBN_10":
+                    ISBN = book['volumeInfo']['industryIdentifiers'][0]['identifier']
+                elif book['volumeInfo']['industryIdentifiers'][1]['type'] and book['volumeInfo']['industryIdentifiers'][1]['type'] == "ISBN_10":
+                    ISBN = book['volumeInfo']['industryIdentifiers'][1]['identifier']
+                elif book['volumeInfo']['industryIdentifiers'][0]['type'] == "ISBN_13":
+                    ISBN = book['volumeInfo']['industryIdentifiers'][0]['identifier']
+                else:
+                    ISBN = "N/A"
+            except Exception:
                 ISBN = "N/A"
-        except:
-            ISBN = "N/A"
-        try:
-            date = book['volumeInfo']['publishedDate']
-        except:
-            date = "N/A"
-        try:
-            imgLink = book['volumeInfo']['imageLinks']['thumbnail']
-        except:
-            imgLink = "https://img.icons8.com/fluent/96/000000/no-image.png"
-            # https://www.rit.edu/nsfadvance/sites/rit.edu.nsfadvance/files/default_images/photo-unavailable.png" # find free-use default 'Cover Unavailable' image to use here
-        new_book = {"title" : title, "author" : author, "date" : date, "image" : imgLink, "ISBN" : ISBN}
-        if ISBN != "N/A":
-            data_to_return.append(new_book)
+            try:
+                date = book['volumeInfo']['publishedDate']
+            except Exception:
+                date = "N/A"
+            try:
+                imgLink = book['volumeInfo']['imageLinks']['thumbnail']
+            except Exception:
+                # imgLink = "https://img.icons8.com/fluent/96/000000/no-image.png"
+                imgLink = "https://img.icons8.com/bubbles/100/000000/no-image.png"
+                # https://www.rit.edu/nsfadvance/sites/rit.edu.nsfadvance/files/default_images/photo-unavailable.png" # find free-use default 'Cover Unavailable' image to use here
+            new_book = {"title" : title, "author" : author, "date" : date, "image" : imgLink, "ISBN" : ISBN}
+            if ISBN != "N/A":
+                data_to_return.append(new_book)
 
-    if data_to_return:
-        return make_response( jsonify(data_to_return), 200 )
-    else:
-        return make_response( jsonify({"error" : "No results"}), 404 )
+        if data_to_return:
+            return make_response( jsonify(data_to_return), 200 )
+        else:
+            return make_response( jsonify({"error" : "No results"}), 404 )
+    except Exception:
+         return make_response( jsonify({"error" : "No results"}), 404 )
+
+        
+# FOLLOW ENDPOINTS
 
 @app.route("/api/v1.0/user/<string:user_id>/followedby/<string:follower_id>", methods=["GET"])
 def check_following(user_id, follower_id):
     exists = db.session.query(Follow.id).filter_by(user_id=user_id, follower_id=follower_id).scalar() is not None
     
-    if exists:
-        return make_response(jsonify(exists), 200)
-    else:
-        return make_response(jsonify(exists), 404)
+    return make_response(jsonify(exists), 200)
 
 @app.route("/api/v1.0/user/<string:user_id>/followers", methods=["GET"])
 def get_followers(user_id):
@@ -408,24 +476,41 @@ def get_followers(user_id):
         return make_response(jsonify({"error" : "This user has 0 followers or does not exist"}), 404)
 
 def get_followed_users(user_id):
-    results = db.session.query(Follow.user_id, Follow.follow_date).filter(Follow.follower_id==user_id)
+    results = db.session.query(Follow.user_id, Follow.follow_date, User.full_name, User.image).join(User, User.user_id==Follow.user_id).filter(Follow.follower_id==user_id)
 
     data_to_return = []
 
     for follower in results:
-        user = {"user_id" : follower.user_id, "follow_date" : follower.follow_date, "followed_by" : user_id}
+        user = {"user_id" : follower.user_id, "name" : follower.full_name, "image" : follower.image, "follow_date" : follower.follow_date, "followed_by" : user_id}
         data_to_return.append(user)
 
     return data_to_return
 
+@app.route("/api/v1.0/user/<string:user_id>/followed", methods=["GET"])
+def get_followed(user_id):
+    data_to_return = get_followed_users(user_id)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No followed users"}), 404)
+
+
 @app.route("/api/v1.0/user/<string:user_id>/follow/<string:follower_id>", methods=["POST"])
 def follow_user(user_id, follower_id):
     if user_id_in_db(user_id) and user_id_in_db(follower_id):
-        db.session.add(Follow(user_id=user_id, follower_id=follower_id, follow_date=datetime.date.today()))
-        db.session.add(Activity(user_id=follower_id, action_id=6, object_id=5, date_created=datetime.date.today(), target_id=user_id))
-        db.session.commit()
+        exists = db.session.query(Follow).filter(Follow.user_id==user_id, Follow.follower_id==follower_id).first() is not None
+
+        if not exists:
+            db.session.add(Follow(user_id=user_id, follower_id=follower_id, follow_date=datetime.date.today()))
+            follow_id = db.session.query(Follow.id).filter_by(user_id=user_id, follower_id=follower_id).first()
+            db.session.add(Activity(user_id=follower_id, action_id=6, object_id=5, date_created=datetime.date.today(), target_id=user_id))
+            db.session.commit()
         
-        return make_response(jsonify({"success" : "Followed user"}), 200)
+            return make_response(jsonify({"success" : "Followed user", "data" : follow_id}), 200)
+        else:
+            return make_response(jsonify({"error" : "Follow relationship already exists"}), 400)
+
 
     else:
         return make_response(jsonify({"error" : "Invalid user"}), 400)
@@ -439,9 +524,22 @@ def unfollow_user(user_id, follower_id):
         db.session.delete(relationship)
         db.session.commit()
 
-        return make_response(jsonify({}), 204)
+        return make_response(jsonify({"success" : "Unfollowed user"}), 204)
     else:
         return make_response(jsonify({"error" : "Relationship does not exist"}), 400)
+
+# @app.route("/api/v1.0/unfollow/<string:follow_id>", methods=["DELETE"])
+# def unfollow_user(follow_id):
+#     exists = db.session.query(Follow).filter_by(follow_id=follow_id).scalar() is not None
+
+#     if exists:
+#         relationship = db.session.query(Follow).filter_by(follow_id=follow_id)).first()
+#         db.session.delete(relationship)
+#         db.session.commit()
+
+#         return make_response(jsonify({}), 204)
+#     else:
+#         return make_response(jsonify({"error" : "Relationship does not exist"}), 400)
 
 @app.route("/api/v1.0/userprofiletodb", methods=["POST"])
 def send_profile_to_db():
@@ -497,13 +595,13 @@ def get_all_reviews_by_user(user_id):
         
     if reviews is not None:
         for review in reviews:
-            rev = {"book_id": review.book_id, "book title" : review.title, "review_id" : review.id, "reviewer_id" : review.reviewer_id, "rating" : review.rating, "text" : review.text}
+            rev = {"book_id": review.book_id, "book_ISBN" : review.ISBN, "book title" : review.title, "review_id" : review.id, "reviewer_id" : review.reviewer_id, "rating" : review.rating, "text" : review.text}
             data_to_return.append(rev)
         return make_response( jsonify(data_to_return), 200)
 
 @app.route("/api/v1.0/reviews/<string:review_id>", methods=["GET"])
 def get_one_review(review_id):
-    review = db.session.query(Review.id, Review.reviewer_id, Review.book_id, Review.rating, Review.text, Review.likes).filter(Review.id==review_id).first()
+    review = db.session.query(Review.id, Review.reviewer_id, Review.book_id, Review.rating, Review.text).filter(Review.id==review_id).first()
     num_likes = get_like_count(2, review_id)
 
     if review is not None:
@@ -541,18 +639,23 @@ def add_review(ISBN):
             rec_source_id = db.session.query(Book.book_id).filter(Book.ISBN==ISBN).first()
             for rec in recs:
                 addBookToDB(rec)
-                rec_book_id = db.session.query(Book.book_id).filter(Book.ISBN==rec).first()
-                addRecToDB(rec_book_id, rec_source_id, reviewer_id)
+                rec_book = db.session.query(Book).filter(Book.ISBN==rec).first()
+                rec_book_id = rec_book.book_id
+                if not rec_book.title == "N/A":
+                    addRecToDB(rec_book_id, rec_source_id, reviewer_id)
+                # rec_book_id = db.session.query(Book.book_id).filter(Book.ISBN==rec).first()
+                # addRecToDB(rec_book_id, rec_source_id, reviewer_id)
             # print(recs)
 
     if book is not None:
         db.session.add(Review(reviewer_id=reviewer_id, book_id=book_id, rating=rating, text=text))
+        review_id = db.session.query(Review.id).filter(Review.reviewer_id==reviewer_id, Review.book_id==book_id, Review.rating==rating, Review.text==text).first()
 
         db.session.add(Activity(user_id=reviewer_id, action_id=1, object_id=1, date_created=datetime.date.today(), target_id=book_id))
         check_achievement(reviewer_id, 'review')
         # review_id = db.session.query(Review.review_id).filter_by(Review.reviewer_id=reviewer_id, Review.book_id=book_id, Review.rating=rating)
         db.session.commit()
-        return make_response( jsonify( "Review successfully added" ), 201 )
+        return make_response( jsonify( {"review" : review_id} ), 201 )
     else:
         return make_response( jsonify({"error" : "Failed to add review"}), 404)
 
@@ -572,11 +675,13 @@ def edit_review(review_id):
 
 @app.route("/api/v1.0/reviews/<string:review_id>", methods=["DELETE"])
 def delete_review(review_id):
+    book_id = db.session.query(Review.book_id).filter(Review.id==review_id).first()
     deleted_rows = db.session.query(Review).filter(Review.id==review_id).delete()
 
     if deleted_rows == 1:
+        db.session.query(Activity).filter(Activity.object_id==1, Activity.target_id==book_id).delete()
         db.session.commit()
-        return make_response( jsonify( {} ), 204)
+        return make_response( jsonify( {"success" : "Review deleted"} ), 204)
     else:
         return make_response( jsonify( {"error" : "Invalid review ID"} ), 400)
 
@@ -586,7 +691,8 @@ def delete_review(review_id):
 def get_chat_partners(user_id):
     data_to_return = []
 
-    messages = db.session.query(Message.msg_id, Message.msg_text, Message.sender_id, Message.recipient_id, Message.time_sent).filter(or_(Message.sender_id==user_id, Message.recipient_id==user_id)).all()
+    # gets chat partners by most recent 
+    messages = db.session.query(Message.msg_id, Message.msg_text, Message.sender_id, Message.recipient_id, Message.time_sent).filter(or_(Message.sender_id==user_id, Message.recipient_id==user_id)).order_by(Message.time_sent.desc()).all()
 
     for message in messages:
         if message.sender_id == int(user_id):
@@ -625,9 +731,15 @@ def get_all_messages_by_user_id(user_id):
 def get_all_received_messages_by_user_id(user_id):
     data_to_return = []
 
-    messages = db.session.query(Message.msg_id, Message.msg_text, Message.sender_id, Message.recipient_id, Message.time_sent, User.full_name, User.image).join(User, User.user_id==Message.sender_id).filter(Message.recipient_id==user_id)
+    messages = db.session.query(Message.msg_id, Message.msg_text, Message.sender_id, Message.recipient_id, Message.time_sent, Message.read, User.full_name, User.image).join(User, User.user_id==Message.sender_id).filter(Message.recipient_id==user_id)
 
     for message in messages:
+        msg = db.session.query(Message).filter(Message.msg_id==message.msg_id).first()
+        msg.read = True
+        # print(msg.read)
+        # mark_as_read(message.msg_id)
+        db.session.commit()
+        print(message.read)
         msg = {"id" : message.msg_id, "text" : message.msg_text, "sender" : message.sender_id, "sender_name" : message.full_name, "sender_image" : message.image, "recipient" : message.recipient_id, "sent" : message.time_sent }
         data_to_return.append(msg)
 
@@ -635,6 +747,29 @@ def get_all_received_messages_by_user_id(user_id):
         return make_response(jsonify(data_to_return), 200)
     else:
         return make_response(jsonify({"error" : "No messages found"}), 404)
+
+def mark_as_read(msg_id):
+    message = db.session.query(Message).filter(Message.msg_id==msg_id).first()
+    message.read = True
+    # print(message.read)
+    # db.session.commit()
+
+@app.route("/api/v1.0/user/<string:user_id>/messages/unread", methods=["GET"])
+def get_unread_count(user_id):
+    data_to_return = []
+    num_unread = 0
+    messages = db.session.query(Message).filter(Message.recipient_id==user_id).all()
+
+    for message in messages:
+        if message.read == False:
+            num_unread = num_unread + 1
+    
+    data_to_return.append(num_unread)
+    
+    # return make_response(jsonify({"num_unread" : num_unread}), 200)
+    return make_response(jsonify(data_to_return), 200)
+
+
 
 @app.route("/api/v1.0/user/<string:user_id>/messages/sent", methods=["GET"])
 def get_all_sent_messages_by_user_id(user_id):
@@ -689,7 +824,8 @@ def send_message(user_id):
         return make_response(jsonify({"error" : "Missing form data"}), 400)
 
 
-    db.session.add(Message(msg_text=msg_text, sender_id=sender_id, recipient_id=recipient_id, time_sent=time_sent))
+    # db.session.add(Message(msg_text=msg_text, sender_id=sender_id, recipient_id=recipient_id, time_sent=time_sent))
+    db.session.add(Message(msg_text=msg_text, sender_id=sender_id, recipient_id=recipient_id, time_sent=time_sent, read=False))
     db.session.commit()
 
     return make_response(jsonify({"success" : "Message sent successfully"}), 200)
@@ -732,6 +868,7 @@ def get_activity_followed_users(user_id):
    
     for activity in activities:
         likes = get_like_count(7, activity.id)
+        target = ""
         if activity.action_id == 1:
             target = db.session.query(Book.title, Book.author, Book.ISBN, Book.image_link, Review.id, Review.rating, Review.text).join(Review, Book.book_id==Review.book_id).filter(Book.book_id==activity.target_id).first()
         elif activity.action_id == 2 or activity.action_id == 3 or activity.action_id == 4:
@@ -743,6 +880,9 @@ def get_activity_followed_users(user_id):
                 target = db.session.query(Comment.comment_id, Comment.commenter_id, Comment.text, Comment.time_submitted, User.user_id, User.full_name).join(User, Comment.commenter_id==User.user_id).filter(Comment.comment_id==activity.target_id).first()
             if activity.object_id == 4:
                 target = db.session.query(Achievement.id, Achievement.name, Achievement.description, Achievement.badge).filter(Achievement.id==activity.target_id).first()
+            if activity.object_id == 7:
+                activity_user = db.session.query(Activity.user_id).filter(Activity.id==activity.target_id).first()
+                target = db.session.query(User.full_name, User.user_id, User.image).filter(User.user_id==activity_user).first()
         elif activity.action_id == 6:
             target = db.session.query(User.user_id, User.full_name, User.image).filter(User.user_id==activity.target_id).first()
         elif activity.action_id == 7:
@@ -813,7 +953,7 @@ def check_achievement(user_id, achievement_type):
             first_review = db.session.query(Review).filter(Review.reviewer_id==user_id).one()
             if first_review is not None:
                 db.session.add(UserAchievement(user_id=user_id, achievement_id=1, date_earned=datetime.date.today()))
-                db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.date.today(), target_id=1))
+                db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.datetime.now(), target_id=1))
         except Exception:
             pass
     if achievement_type == 'group':
@@ -821,7 +961,7 @@ def check_achievement(user_id, achievement_type):
             first_group = db.session.query(Group).filter(Group.founder_id==user_id).one()
             if first_group is not None:
                 db.session.add(UserAchievement(user_id=user_id, achievement_id=2, date_earned=datetime.date.today()))
-                db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.date.today(), target_id=2))
+                db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.datetime.now(), target_id=2))
         except Exception:
             pass
     if achievement_type == 'goal':
@@ -831,18 +971,18 @@ def check_achievement(user_id, achievement_type):
 
         if count == 0 and not exists:
             db.session.add(UserAchievement(user_id=user_id, achievement_id=3, date_earned=datetime.date.today()))
-            db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.date.today(), target_id=3))
+            db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.datetime.now(), target_id=3))
 
         for goal in goals:
             if goal.current == goal.target:
                 db.session.add(UserAchievement(user_id=user_id, achievement_id=4, date_earned=datetime.date.today()))
-                db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.date.today(), target_id=4))
+                db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.datetime.now(), target_id=4))
 
     if achievement_type == 'reading':
         count = db.session.query(HasRead).filter(HasRead.user_id==user_id).count()
         if count == 10:
             db.session.add(UserAchievement(user_id=user_id, achievement_id=5, date_earned=datetime.date.today()))
-            db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.date.today(), target_id=5))
+            db.session.add(Activity(user_id=user_id, action_id=7, object_id=4, date_created=datetime.datetime.now(), target_id=5))
 
     db.session.commit()
 
@@ -852,7 +992,7 @@ def check_achievement(user_id, achievement_type):
 @app.route("/api/v1.0/<string:user_id>/recommendations", methods=["GET"])
 def get_recommendations_by_user_id(user_id):
     data_to_return = []
-    recs = db.session.query(BookRecommendation.id, BookRecommendation.rec_book_id, BookRecommendation.rec_source_id, Book.title, Book.ISBN, Book.author, Book.image_link).join(Book, Book.book_id == BookRecommendation.rec_book_id).filter(BookRecommendation.user_id==user_id).all()
+    recs = db.session.query(BookRecommendation.id, BookRecommendation.rec_book_id, BookRecommendation.rec_source_id, Book.title, Book.ISBN, Book.author, Book.image_link).join(Book, Book.book_id == BookRecommendation.rec_book_id).filter(BookRecommendation.user_id==user_id).order_by(BookRecommendation.id.desc()).all()
 
     for rec in recs:
         rec_source_info = db.session.query(Book.title, Book.ISBN).filter(Book.book_id == rec.rec_source_id).first()
@@ -892,12 +1032,19 @@ def set_new_reading_goal():
         target = request.form["target"],
         year = request.form["year"]
 
-    check_achievement(user_id, 'goal')
-    # change so current reads from count of HasRead with dates within that year
-    db.session.add(Goal(target=target, current=0, user_id=user_id, year=year))
-    db.session.commit()
+        check_achievement(user_id, 'goal')
+        # change so current reads from count of HasRead with dates within that year
+        # current = db.session.query(func.count(HasRead).label('current')).filter(HasRead.user_id==user_id, HasRead.finish_date.between(year + '-01-01', year + '-12-31')).all()
+        # authors = db.session.query(func.count(Book.author).label('count'), Book.author).join(HasRead, HasRead.book_id==Book.book_id).filter(HasRead.user_id==user_id).group_by(Book.author).order_by(desc('count')).limit(3).all()
+        existing_goal = db.session.query(Goal).filter(Goal.user_id==user_id, Goal.year==year).scalar() is not None
 
-    return make_response(jsonify({"success:" : "Reading goal successfully set"}), 200)
+        if not existing_goal:
+            db.session.add(Goal(target=target, current=0, user_id=user_id, year=year))
+            db.session.commit()
+
+        return make_response(jsonify({"success:" : "Reading goal successfully set"}), 200)
+    else:
+        return make_response(jsonify({"error:" : "Failed to set goal"}), 404)
 
 @app.route("/api/v1.0/goals/<string:goal_id>", methods=["PUT"])
 def edit_reading_goal(goal_id):
@@ -914,9 +1061,11 @@ def edit_reading_goal(goal_id):
 @app.route("/api/v1.0/goals/<string:goal_id>", methods=["DELETE"])
 def delete_reading_goal(goal_id):
     goal = db.session.query(Goal).filter(Goal.id==goal_id).first()
-    db.session.delete(goal)
-
-    return make_response(jsonify({}), 204)
+    if goal:
+        db.session.delete(goal)
+        return make_response(jsonify({}), 204)
+    else:
+        return make_response(jsonify({"error" : "Failed to delete goal"}), 404)
 
 # GROUP ENDPOINTS
 
@@ -950,17 +1099,22 @@ def get_groups_by_user(user_id):
 
 @app.route("/api/v1.0/groups/new", methods=["POST"])
 def create_new_group():
-    if "name" in request.form and "description" in request.form:
+    if "name" in request.form and "description" in request.form and "founder_id" in request.form:
         name = request.form["name"],
         description = request.form["description"]
         founder_id = request.form["founder_id"]
 
-    db.session.add(Group(name=name, description=description, founder_id=founder_id))
-    check_achievement(founder_id, "group")
-    db.session.commit()
+        db.session.add(Group(name=name, description=description, founder_id=founder_id))
+        group_id = db.session.query(Group.id).filter(Group.name==name, Group.description==description, Group.founder_id==founder_id).first()
+        check_achievement(founder_id, "group")
+        db.session.commit()
 
-    return make_response(jsonify({"success:" : "Group created"}), 200)
+        return make_response(jsonify({"success:" : "Group created", "data" : group_id}), 200)
+    else:
+        return make_response(jsonify({"error:" : "Failed to create group"}), 404)
 
+
+# probably won't implement this
 @app.route("/api/v1.0/groups/edit", methods=["PUT"])
 def edit_group():
     if "group_id" in request.form:
@@ -976,6 +1130,7 @@ def edit_group():
 
     return make_response(jsonify({"success:" : "Group edited"}), 200)
 
+# probably won't implement this
 @app.route("/api/v1.0/groups/delete", methods=["DELETE"])
 def delete_group():
     if "group_id" in request.form:
@@ -991,15 +1146,19 @@ def delete_group():
 def get_group(group_id):
     data_to_return = []
 
-    group = db.session.query(Group).filter(Group.id==group_id).first()
-    gr = {"id" : group.id, "name" : group.name, "description" : group.description}
+    try:
+        group = db.session.query(Group).filter(Group.id==group_id).first()
+        gr = {"id" : group.id, "name" : group.name, "description" : group.description}
 
-    data_to_return.append(gr)
+        data_to_return.append(gr)
 
-    if data_to_return:
-        return make_response(jsonify(data_to_return), 200)
-    else:
+        if data_to_return:
+            return make_response(jsonify(data_to_return), 200)
+        else:
+            return make_response(jsonify({"error" : "No group information available"}), 404)
+    except Exception:
         return make_response(jsonify({"error" : "No group information available"}), 404)
+
 
 @app.route("/api/v1.0/groups/<string:group_id>/members", methods=["GET"])
 def get_group_members(group_id):
@@ -1020,11 +1179,15 @@ def join_group(group_id):
     if "user_id" in request.form:
         user_id = request.form["user_id"]
 
-    db.session.add(UserGroup(user_id=user_id, group_id=group_id, join_date=datetime.date.today()))
-    db.session.commit()
+    try:
+        db.session.add(UserGroup(user_id=user_id, group_id=group_id, join_date=datetime.date.today()))
+        db.session.commit()
 
-    return make_response(jsonify({"success:" : "Group joined"}), 200)
+        return make_response(jsonify({"success:" : "Group joined"}), 200)
+    except Exception:
+        return make_response(jsonify({"error:" : "Failed to join group"}), 404)
 
+# probably won't implement this
 @app.route("/api/v1.0/groups/<string:group_id>/leave", methods=["DELETE"])
 def leave_group(group_id):
     if "user_id" in request.form:
@@ -1057,12 +1220,15 @@ def add_group_post(group_id):
         text = request.form["text"]
         title = request.form["title"]
 
-    db.session.add(Post(group_id=group_id, author_id=user_id, text=text, title=title))
-    db.session.commit()
+        db.session.add(Post(group_id=group_id, author_id=user_id, text=text, title=title))
+        db.session.commit()
 
-    return make_response(jsonify({"success:" : "Posted"}), 200)
+        return make_response(jsonify({"success:" : "Posted"}), 200)
+    else:
+        return make_response(jsonify({"error:" : "Failed to add post"}), 404)
 
 
+# probably won't implement this
 @app.route("/api/v1.0/groups/posts/<string:post_id>", methods=["PUT"])
 def edit_group_post(post_id):
     post = db.session.query(Post).filter(Post.id==post_id).first()
@@ -1077,6 +1243,7 @@ def edit_group_post(post_id):
     # change so it only returns this if successful
     return make_response(jsonify({"success:" : "Post edited"}), 200)
 
+# probably won't implement this
 @app.route("/api/v1.0/groups/posts", methods=["DELETE"])
 def delete_group_post(): 
     if "post_id" in request.form:
@@ -1124,16 +1291,19 @@ def get_most_read_author(user_id):
 
     if data_to_return:
         return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No author data available for this user"}), 404)
 
 @app.route("/api/v1.0/<string:user_id>/stats/totalpages", methods=["GET"])
 def get_total_pages_read(user_id):
     data_to_return = []
 
     num_pages = db.session.query(label('num_pages', func.sum(Book.page_count))).join(HasRead, HasRead.book_id==Book.book_id).filter(HasRead.user_id==user_id).all()
-
-    data_to_return.append(num_pages)
-
+    
     return make_response(jsonify(num_pages), 200)
+    # else:
+    #     return make_response(jsonify({"error" : "No page data available"}), 404)
+
    
 # LIKES ENDPOINTS
 @app.route("/api/v1.0/<string:user_id>/likes", methods=["POST"])
@@ -1142,10 +1312,17 @@ def add_like(user_id):
         object_id = request.args.get('objectID')
         target_id = request.args.get('targetID')
         # add constants file and have LIKE_ID as 5 instead of hard coding like this
-        db.session.add(Activity(user_id=user_id, action_id=5, object_id=object_id, date_created=datetime.date.today(), target_id=target_id))
-        db.session.commit()
+        liked = db.session.query(Activity).filter(Activity.user_id==user_id, Activity.action_id==5, Activity.target_id==target_id).scalar() is not None
 
-    return make_response(jsonify("Successfully added like"), 200)
+        if not liked:
+            db.session.add(Activity(user_id=user_id, action_id=5, object_id=object_id, date_created=datetime.date.today(), target_id=target_id))
+            db.session.commit()
+            
+            return make_response(jsonify({"success" : "Added like"}), 201)
+        else:
+            return make_response(jsonify({"error" : "Failed to add like"}), 404)
+    else:
+        return make_response(jsonify({"error" : "Failed to add like"}), 404)
 
 @app.route("/api/v1.0/likes", methods=["GET"])
 def get_like_count():
@@ -1155,6 +1332,9 @@ def get_like_count():
         num_likes = db.session.query(label('num_likes', func.count(Activity.id))).filter(Activity.action_id==5, Activity.object_id==object_id,Activity.target_id==target_id).all()
 
         return make_response(jsonify(num_likes), 200)
+    else:
+        return make_response(jsonify({"error" : "Failed to return like count"}), 404)
+
 
 def get_like_count(object_id, target_id):
     likes = db.session.query(label('count', func.count(Activity.id))).filter(Activity.action_id==5, Activity.object_id==object_id,Activity.target_id==target_id).all()
