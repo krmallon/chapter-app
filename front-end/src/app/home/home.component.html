@@ -1,7 +1,10 @@
-<!-- <body> -->
-    <div class="container-fluid gedf-wrapper" *ngIf="this.authService.loggedIn">
+
+ 
+
+<div class="container-fluid gedf-wrapper" *ngIf="this.authService.loggedIn">
         <div class="row">
             <div class="col-md-3">
+                <br>
                 <div class="card profile-card-3" *ngFor = "let user of userService.profile_details_list | async">
     		        <div class="background-block">
     		            <img src="https://images.unsplash.com/photo-1593430980369-68efc5a5eb34?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1363&q=80" alt="profile-sample1" class="background"/>
@@ -15,7 +18,9 @@
                     <h5>Following</h5>
                     <img class="rounded-circle profile-picture" src="{{followed.image}}" style="width:50px; height:50px; cursor:pointer" title="{{followed.name}}" *ngFor = "let followed of userService.followed_users_list | async" routerLink="/user/{{followed.user_id}}">
                     </div>
-                    
+                   <!-- <div *ngFor="let count of messagingService.unread_count">
+                       {{count.num_unread}}
+                   </div> -->
                 </div>
                 
                 <!-- <div class="card profile-card-3">
@@ -77,13 +82,8 @@
                 </div> -->
             </div>
             <div class="col-md-6 gedf-main">
-
-                
-              
-                <!-- Post /////-->
-
-                <!--- \\\\\\\Post-->
-                <div class="card gedf-card" *ngFor= "let activity of userService.followed_activity_list | async">
+                <br>
+                 <div class="card gedf-card" *ngFor= "let activity of userService.followed_activity_list | async">
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="d-flex justify-content-between align-items-center">
@@ -137,7 +137,7 @@
                    <p class="card-text">
                             <b>{{activity.target.rating}} stars </b>
                             <br>
-                            {{activity.target.text}}
+                            "{{activity.target.text}}"
                         </p>
               </div>
               <div class="card-body" *ngIf="actionType(activity)=='liked'">
@@ -147,9 +147,12 @@
                     <h5 class="card-title" *ngIf="objectType(activity)==7" routerLink="user/{{activity.target.user_id}}">{{activity.user}} {{activity.action}} <a href="user/{{activity.target.user_id}}">{{activity.target.full_name}}'s </a>update</h5>
                 </a>
                 <p class="card-text" *ngIf="objectType(activity)==2">
+                    <!-- <img src={{activity.target.image_link}} alt="Image"></a> -->
+                    {{activity.target.title}}
+                    <br>
                   <b>{{activity.target.rating}} stars </b>
                   <br>
-                  {{activity.target.text}}
+                  "{{activity.target.text}}"
               </p>
               <!-- <p class="card-text" *ngIf="objectType(activity)==7">
                 <b>{{activity.target.rating}} stars </b>
@@ -180,18 +183,29 @@
 
                     <div class="card-footer">
                         <!-- <button class="btn btn-primary btn-sm" (click)="likeUpdate(activity)"><img src="https://img.icons8.com/dusk/50/000000/facebook-like.png" style="width:20px; height:20px"/></button> -->
-                        <button class="btn btn-primary btn-sm" (click)="this.likeService.addLike(this.feedObjectID, activity.activity_id); this.likeService.getLikes(this.feedObjectID, activity.activity_id)" ><img src="https://img.icons8.com/dusk/50/000000/facebook-like.png" style="width:20px; height:20px"/></button>
+                        <button class="btn btn-primary btn-sm" (click)="this.likeService.addLike(this.feedObjectID, activity.activity_id); this.likeService.getLikes(this.feedObjectID, activity.activity_id);this.notifyService.showSuccess('Update liked', 'Success')" ><img src="https://img.icons8.com/dusk/50/000000/facebook-like.png" style="width:20px; height:20px"/></button>
                         Likes: {{activity.likes.count}}
                     
                     </div>
                 </div>
+                <div style="text-align: center;">
+                    <button type="button" class="btn btn-primary btn-sm" (click)="refresh()">Refresh Timeline</button>
+                    <!-- <input type="button" value="button"> -->
+                  </div>
+           
+            
                 <!-- Post /////-->
 
             </div>
             <div class="col-md-3">
+                <br>
                 <div class="card gedf-card">
+                    <!-- <div class="card-header"> -->
+                        <!-- <img src="https://img.icons8.com/flat-round/64/000000/question-mark.png"/> -->
+                        <!-- <h5 class="card-title">Stuck for what to read next?</h5> -->
+                    <!-- </div> -->
                         <div class="card-body">
-                            <img src="https://img.icons8.com/flat-round/64/000000/question-mark.png"/>
+                            <img src="https://img.icons8.com/flat-round/64/000000/question-mark.png"/> 
                             <h5 class="card-title">Stuck for what to read next?</h5>
                             <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
                             <p class="card-text">Chapter provides personalised book recommendations. </p>
@@ -227,7 +241,7 @@
             </div>
         </div>
         
-    <!-- </div> -->
+    </div>
 
      <div mdbModal #goalModal="mdbModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myGoalModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -242,17 +256,23 @@
                 
                 <form [formGroup]="goalForm">
                 <div class="form-group">
+                    <!-- <label for="goalFormControl">How many books do you want to read this year?</label> -->
+                    <!-- <textarea class="form-control" id="goalFormControl" name="goalFormControl" formControlName="goalFormControl"rows="1"></textarea> -->
                     <label for="goalFormControl">How many books do you want to read this year?</label>
-                    <textarea class="form-control" id="goalFormControl" name="goalFormControl" formControlName="goalFormControl"rows="1"></textarea>
-                  </div>
+                    <select class="form-control" id="goalFormControl" name="goalFormControl" formControlName="goalFormControl">
+                      
+                    <option *ngFor="let option of this.goalOptions">{{option}}</option>
+                    </select>
+                </div>
                 </form>
               
             </div>
             <div class="modal-footer">
               <button type="button" mdbBtn color="danger" class="waves-light" aria-label="Close" (click)="goalModal.hide()" mdbWavesEffect>Cancel</button>
-              <button type="button" mdbBtn color="primary" class="relative waves-light" (click)="this.goalService.setGoal(this.goalForm.value); goalModal.hide()" routerLink="user/{{sessionStorage.user_id}}" mdbWavesEffect>Submit</button>
+              <button type="button" mdbBtn color="primary" class="relative waves-light" (click)="this.goalService.setGoal(this.goalForm.value); goalModal.hide(); this.notifyService.showSuccess('Goal set', 'Success')" routerLink="user/{{sessionStorage.user_id}}" mdbWavesEffect>Submit</button>
             </div>
           </div>
         </div>
       </div>
+    
 

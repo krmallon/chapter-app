@@ -1,10 +1,11 @@
 <div class="container-fluid gedf-wrapper">
     <div class="row">
         <div class="col-md-3">
+            <br>
             <div class="card gedf-card">
                 <div class="card-header">
                     <!-- <img src="https://img.icons8.com/flat-round/64/000000/info.png"/> -->
-                    <h5 class="card-title">{{this.shelf}}</h5>
+                    <h5 class="card-title"> Shelf: {{this.shelf}}</h5>
                 </div>
                     <div class="card-body">
                         <div class="btn-group" mdbDropdown>
@@ -26,32 +27,73 @@
             
               </div>
               <div class="col-md-6 gedf-main">
+                <br>
                 <div class="card gedf-card">
                   <div class="card-header">
                     <!-- <img src="https://img.icons8.com/color/50/000000/story-book.png"/> -->
                       <h5 class="card-title">Books</h5>
                   </div>
                   <div class="row mt-5 justify-content-center" *ngIf="this.shelf=='Currently Reading'">
+                 
                         <div class="card card-custom mx-2 mb-3" style="width:128px;" *ngFor = "let book of bookService.user_reading_list | async">
                             <img src={{book.image}} alt="Image" style="cursor:pointer" routerLink='/books/{{book.ISBN}}' class="card-img">
                             <button type="button" class="btn btn-primary btn-sm" routerLink='/books/{{book.ISBN}}'>View</button>
-                            <button class="btn btn-danger btn-sm" (click)="this.bookService.deleteFromShelf(book.ISBN, sessionStorage.user_id, 'currentlyreading');this.ngOnInit()">Remove</button>              
-                  </div>
+                            <button class="btn btn-danger btn-sm" (click)="this.bookService.deleteFromShelf(book.ISBN, sessionStorage.user_id, 'currentlyreading');this.ngOnInit();this.notifyService.showSuccess('Book removed from shelf', 'Success')">Remove</button>              
+                            <br>
+                            <b>Title:</b>{{book.title}}
+                            <br> <br>
+                            <b>Author:</b>{{book.author}}
+                            <br> <br>
+                        </div>
                   </div>
                   <div class="row mt-5 justify-content-center" *ngIf="this.shelf=='Read'">
                     <div class="card card-custom mx-2 mb-3" style="width:128px;" *ngFor = "let book of bookService.user_has_read_list | async">
                         <img src={{book.image}} alt="Image" style="cursor:pointer" routerLink='/books/{{book.ISBN}}' class="card-img">
                         <button type="button" class="btn btn-primary btn-sm" routerLink='/books/{{book.ISBN}}'>View</button>
                         <button class="btn btn-danger btn-sm" (click)="this.bookService.deleteFromShelf(book.ISBN, sessionStorage.user_id, 'hasread');this.ngOnInit()">Remove</button>              
-              </div>
+                        <br>
+                        <b>Title:</b>{{book.title}}
+                        <br> <br>
+                        <b>Author:</b>{{book.author}}
+                        <br> <br>
+                    </div>
               </div>
               <div class="row mt-5 justify-content-center" *ngIf="this.shelf=='Want to Read'">
                 <div class="card card-custom mx-2 mb-3" style="width:128px;" *ngFor="let book of bookService.user_wants_to_read_list | async">
                     <img src={{book.image}} alt="Image" style="cursor:pointer" routerLink='/books/{{book.ISBN}}' class="card-img">
                     <button type="button" class="btn btn-primary btn-sm" routerLink='/books/{{book.ISBN}}'>View</button>
-                    <button class="btn btn-danger btn-sm" (click)="this.bookService.deleteFromShelf(book.ISBN, sessionStorage.user_id, 'wanttoread');this.ngOnInit()">Remove</button>              
+                    <button class="btn btn-danger btn-sm" (click)="this.bookService.deleteFromShelf(book.ISBN, sessionStorage.user_id, 'wanttoread');this.ngOnInit(); this.notifyService.showSuccess('Book removed from shelf', 'Success')">Remove</button>              
+                    <br>
+                    <b>Title:</b>{{book.title}}
+                    <br> <br>
+                    <b>Author:</b>{{book.author}}
+                    <br> <br>
+                </div>
           </div>
-          </div>
+
+          <!-- <div mdbModal #removeModal="mdbModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myRemoveModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close pull-right" aria-label="Close" (click)="removeModal.hide()">
+                    <span aria-hidden="true">×</span>
+                  </button>
+                  <h4 class="modal-title w-100" id="myModalLabel">Confirm Removal</h4>
+                </div>
+                <div class="modal-body">
+          
+                Are you sure you want to remove this book from the shelf?
+          
+                </div>
+                <div class="modal-footer">
+                  <button type="button" mdbBtn color="primary" class="waves-light" aria-label="Close" (click)="removeModal.hide()" mdbWavesEffect>Cancel</button>
+                  <button type="button" mdbBtn color="danger" class="relative waves-light" (click)="this.bookService.deleteFromShelf(book.ISBN, sessionStorage.user_id, 'wanttoread');this.ngOnInit(); removeModal.hide(); this.notifyService.showSuccess('Book removed from shelf', 'Success')" mdbWavesEffect>Delete</button>
+                </div>
+              </div>
+            </div>
+          </div> -->
+
+        </div>
               </div>
 
               <!-- </div> -->
@@ -67,18 +109,17 @@
                 </div>
                 
             </div> -->
-    
-            </div>
+        
 
             <div class="col-md-3">
+                <br>
                 <div class="card gedf-card">
                     <div class="card-header">
                         <!-- <img src="https://img.icons8.com/fluent/48/000000/helping-hand.png"/> -->
-                        <h5 class="card-title">Example Column</h5>
+                        <h5 class="card-title">Reviewed</h5>
                     </div>
-                        <div class="card-body" style="cursor: pointer">
-                        
-                         
+                        <div class="card-body" style="cursor: pointer" *ngFor="let review of this.reviewService.user_review_list | async" >
+                            <a routerLink="/books/{{review.book_ISBN}}">{{review.book_title}}</a> - {{review.book_author}} ({{review.rating}} stars)
                         </div>
                     </div>
             </div>

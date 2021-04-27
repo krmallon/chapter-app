@@ -1,6 +1,7 @@
 <div class="container-fluid gedf-wrapper" *ngFor="let group of groupService.group_list | async">
   <div class="row">
       <div class="col-md-3">
+        <br>
           <div class="card gedf-card">
               <div class="card-header">
                   <h5 class="card-title">Details</h5>
@@ -8,7 +9,7 @@
                   <div class="card-body">
                       <h4>{{group.name}}</h4>
                       <h6>{{group.description}}</h6>
-                      <button type="button" class="btn btn-success btn-sm" (click)="this.groupService.joinGroup(group.id)">Join</button>
+                      <button type="button" class="btn btn-success btn-sm" (click)="onJoin()">Join</button>
           
                           
                   </div>
@@ -16,6 +17,7 @@
             </div>
 
           <div class="col-md-6 gedf-main">
+            <br>
             <div class="card gedf-card">
               <div class="card-header">
                   <h5 class="card-title">Discussion</h5>
@@ -38,6 +40,7 @@
         </div>
 
         <div class="col-md-3">
+          <br>
           <div class="card gedf-card">
               <div class="card-header">
                   <h5 class="card-title">Members</h5>
@@ -80,7 +83,7 @@
             </div>
             <div class="modal-footer">
               <button type="button" mdbBtn color="danger" class="waves-light" aria-label="Close" (click)="newPostModal.hide()" mdbWavesEffect>Cancel</button>
-              <button type="button" mdbBtn color="primary" class="relative waves-light" (click)= "this.groupService.createPost(group.id, this.newPostForm.value) ;newPostModal.hide();" mdbWavesEffect>Submit</button>
+              <button type="button" mdbBtn color="primary" class="relative waves-light" (click)= "onPost(); newPostModal.hide()" mdbWavesEffect>Submit</button>
             </div>
           </div>
           </div>

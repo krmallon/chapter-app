@@ -1,6 +1,7 @@
 <div class="container-fluid gedf-wrapper">
     <div class="row">
         <div class="col-md-3">
+            <br>
             <div class="card gedf-card">
                 <div class="card-header">
                     <img src="https://img.icons8.com/officel/40/000000/chat.png"/>
@@ -24,6 +25,7 @@
             
               </div>
               <div class="col-md-6 gedf-main">
+                <br>
                 <div class="card gedf-card">
                   <div class="card-header">
                       <h5 class="card-title">Conversation</h5>
@@ -32,6 +34,7 @@
 
                   <div *ngFor= "let msg of messagingService.convo_messages_list | async">
                       <ul>
+                          <h2 *ngIf="messagingService.convo_messages_list == null">Hey</h2>
                         <li *ngIf="receivedMessage(msg)" class="chat-left">
                             <div class="chat-avatar">
                                 <img src="{{msg.sender_image}}" alt="Profile Pic">
@@ -63,6 +66,7 @@
             </div>
 
             <div class="col-md-3">
+                <br>
                 <div class="card gedf-card">
                     <div class="card-header">
                         <img src="https://img.icons8.com/dusk/64/000000/badge.png"/>

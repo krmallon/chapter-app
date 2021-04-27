@@ -1,6 +1,7 @@
 <div class="container-fluid gedf-wrapper">
     <div class="row">
         <div class="col-md-3">
+            <br>
             <div class="card gedf-card">
                 <div class="card-header">
                     <img src="https://img.icons8.com/flat-round/64/000000/info.png"/>
@@ -15,6 +16,7 @@
             
               </div>
               <div class="col-md-6 gedf-main">
+                <br>
                 <div class="card gedf-card">
                   <div class="card-header">
                     <img src="https://img.icons8.com/color/50/000000/story-book.png"/>
@@ -26,10 +28,6 @@
                     <div class="card card-custom mx-2 mb-3" style="width:128px;" *ngFor =
                     "let recommendation of recommendationService.books_list | async"> 
                   <img src={{recommendation.rec_book.image}} alt="Image" style="cursor:pointer" routerLink='/books/{{recommendation.rec_book.ISBN}}' class="card-img">
-                  <!-- <h4>{{recommendation.rec_book.title}}</h4>
-                  <h6>{{recommendation.rec_book.author}}</h6> -->
-                  <!-- <h7>Because you enjoyed <a href="/books/{{recommendation.rec_source.ISBN}}"><b>{{ recommendation.rec_source.title}} </b></a></h7> -->
-                  <!-- {{recommendation.rec_book.title}} -->
                   <button type="button" class="btn btn-primary btn-sm" routerLink='/books/{{recommendation.rec_book.ISBN}}'>View</button>
                   <br>
                   <b>Title:</b>{{recommendation.rec_book.title}}
@@ -59,6 +57,7 @@
             </div>
 
             <div class="col-md-3">
+                <br>
                 <div class="card gedf-card">
                     <div class="card-header">
                         <img src="https://img.icons8.com/fluent/48/000000/helping-hand.png"/>
@@ -67,11 +66,7 @@
                         <div class="card-body" style="cursor: pointer">
                           <h5>Rate any of the following books to help us provide the best recommendations</h5>
                           <ul>
-                              <li>1<button type="button" class="btn btn-primary btn-sm" routerLink='/books'>View</button></li>
-                              <li>2</li>
-                              <li>3</li>
-                              <li>4</li>
-                              <li>5</li>
+                              <li *ngFor="let book of recommendationService.inspiration_books_list | async">{{book.title}} &nbsp; <button type="button" class="btn btn-primary btn-sm" routerLink='/books/{{book.ISBN}}'>View</button></li>
                           </ul>
                         
                          
