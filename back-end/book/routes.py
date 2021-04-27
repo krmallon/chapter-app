@@ -1,6 +1,9 @@
-from flask import Blueprint, make_response, jsonify
-from models import Book, Reading, WantsToRead, HasRead
+from flask import Blueprint, make_response, jsonify, request
+from models import Book, Reading, WantsToRead, HasRead, Activity, BookRecommendation, Goal
 from extensions import db
+from achievement.routes import check_achievement
+import requests
+import datetime
 
 book = Blueprint('book', __name__)
 
@@ -12,7 +15,7 @@ def book_in_db(ISBN):
     return make_response(jsonify(db.session.query(Book.ISBN).filter_by(ISBN=ISBN).first() is not None), 200) 
     # change to .scalar() instead of first when unique constraint is added to ISBN column  
 
-# add unit test 
+# think this can be removed (make sure though)
 def addBookToDB(isbn):
     url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn
     r = requests.get(url)
@@ -58,8 +61,6 @@ def addBookToDB(isbn):
 def addRecToDB(rec_book_id, rec_source_id, user_id):
     db.session.add(BookRecommendation(rec_book_id=rec_book_id, rec_source_id=rec_source_id, user_id=user_id))
 
-# BOOK ENDPOINTS
-
 @book.route("/api/v1.0/addbooktodb", methods=["POST"])
 def add_book_to_db():
     if "title" in request.form and "author" in request.form and "isbn" in request.form and "publish_date" in request.form and "page_count" in request.form and "image_link" in request.form:
@@ -97,7 +98,7 @@ def get_one_book(isbn):
     r = requests.get(url)
     js = r.json()
 
-    if not "items" in js:
+    if "items" not in js:
         return make_response(jsonify({"error" : "No result found"}), 404)
     
     title = "N/A"
@@ -144,7 +145,7 @@ def add_currently_reading(isbn, user_id):
         book_id = book.book_id
 
         db.session.add(Reading(user_id=user_id, book_id=book_id, start_date=datetime.date.today()))
-        db.session.add(Activity(user_id=user_id, action_id=4, object_id=1, date_created=datetime.date.today(), target_id=book_id))
+        db.session.add(Activity(user_id=user_id, action_id=4, object_id=1, date_created=datetime.datetime.now(), target_id=book_id))
         db.session.commit()
 
         return make_response( jsonify( {"success" : "Added to bookshelf"}), 201 )
@@ -186,9 +187,6 @@ def delete_currently_reading(isbn, user_id):
         return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
 
 
-        
-
-
 @book.route("/api/v1.0/books/<string:isbn>/<string:user_id>/wanttoread", methods=["POST"])
 def add_want_to_read(isbn, user_id):
     try:
@@ -196,7 +194,7 @@ def add_want_to_read(isbn, user_id):
         book_id = book.book_id
 
         db.session.add(WantsToRead(user_id=user_id, book_id=book_id, date_added=datetime.date.today()))
-        db.session.add(Activity(user_id=user_id, action_id=2, object_id=1, date_created=datetime.date.today(), target_id=book_id))
+        # db.session.add(Activity(user_id=user_id, action_id=2, object_id=1, date_created=datetime.date.today(), target_id=book_id))
         db.session.commit()
         
         return make_response( jsonify( {"success" : "Added to bookshelf"}), 201 )
@@ -246,7 +244,7 @@ def add_has_read(isbn, user_id):
 
         # update date selection
         db.session.add(HasRead(user_id=user_id, book_id=book_id, start_date=datetime.date.today(), finish_date=datetime.date.today()))
-        db.session.add(Activity(user_id=user_id, action_id=3, object_id=1, date_created=datetime.date.today(), target_id=book_id))
+        db.session.add(Activity(user_id=user_id, action_id=3, object_id=1, date_created=datetime.datetime.now(), target_id=book_id))
         goals = db.session.query(Goal).filter(Goal.user_id==user_id).all()
 
         for goal in goals:

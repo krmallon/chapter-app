@@ -34,14 +34,14 @@ def get_all_reviews_by_user(user_id):
     data_to_return = []
     
     if user_id_in_db(user_id):
-        reviews = db.session.query(Book.book_id, Book.title, Book.ISBN, Review.id, Review.reviewer_id, Review.rating, Review.text).join(Review, Book.book_id==Review.book_id).filter(Review.reviewer_id==user_id)
+        reviews = db.session.query(Book.book_id, Book.title, Book.ISBN, Book.author, Review.id, Review.reviewer_id, Review.rating, Review.text).join(Review, Book.book_id==Review.book_id).filter(Review.reviewer_id==user_id)
     
     else:
         return make_response( jsonify({"error":"Invalid user ID"}), 404)
         
     if reviews is not None:
         for review in reviews:
-            rev = {"book_id": review.book_id, "book_ISBN" : review.ISBN, "book title" : review.title, "review_id" : review.id, "reviewer_id" : review.reviewer_id, "rating" : review.rating, "text" : review.text}
+            rev = {"book_id": review.book_id, "book_ISBN" : review.ISBN, "book_title" : review.title, "book_author" : review.author, "review_id" : review.id, "reviewer_id" : review.reviewer_id, "rating" : review.rating, "text" : review.text}
             data_to_return.append(rev)
         return make_response( jsonify(data_to_return), 200)
 
@@ -97,7 +97,7 @@ def add_review(ISBN):
         db.session.add(Review(reviewer_id=reviewer_id, book_id=book_id, rating=rating, text=text))
         review_id = db.session.query(Review.id).filter(Review.reviewer_id==reviewer_id, Review.book_id==book_id, Review.rating==rating, Review.text==text).first()
 
-        db.session.add(Activity(user_id=reviewer_id, action_id=1, object_id=1, date_created=datetime.date.today(), target_id=book_id))
+        db.session.add(Activity(user_id=reviewer_id, action_id=1, object_id=1, date_created=datetime.datetime.now(), target_id=book_id))
         check_achievement(reviewer_id, 'review')
         # review_id = db.session.query(Review.review_id).filter_by(Review.reviewer_id=reviewer_id, Review.book_id=book_id, Review.rating=rating)
         db.session.commit()

@@ -1,7 +1,8 @@
 # coding: utf-8
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, Numeric, String, text
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, Numeric, String, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+from flask_sqlalchemy import SQLAlchemy
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -16,16 +17,6 @@ class Achievement(Base):
     badge = Column(String)
 
 
-class AchievementProgres(Base):
-    __tablename__ = 'Achievement_Progress'
-
-    user_id = Column(Integer, primary_key=True, nullable=False)
-    achievement_id = Column(Integer, primary_key=True, nullable=False)
-    target = Column(Integer)
-    current = Column(Integer)
-    date_earned = Column(Date)
-
-
 class Action(Base):
     __tablename__ = 'Action'
 
@@ -37,12 +28,12 @@ class Action(Base):
 class Activity(Base):
     __tablename__ = 'Activity'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, server_default=text("nextval('activity_id_seq'::regclass)"))
     user_id = Column(Integer)
     action_id = Column(Integer)
     object_id = Column(Integer)
-    date_created = Column(Date)
     target_id = Column(Integer)
+    date_created = Column(DateTime(True))
 
 
 class Book(Base):
@@ -109,6 +100,18 @@ class User(Base):
     image = Column(String)
 
 
+class AchievementProgres(Base):
+    __tablename__ = 'Achievement_Progress'
+
+    user_id = Column(Integer, primary_key=True, nullable=False)
+    achievement_id = Column(ForeignKey('Achievement.id'), primary_key=True, nullable=False)
+    target = Column(Integer)
+    current = Column(Integer)
+    date_earned = Column(Date)
+
+    achievement = relationship('Achievement')
+
+
 class BookRecommendation(Base):
     __tablename__ = 'BookRecommendation'
 
@@ -161,7 +164,7 @@ class FriendRecommendation(Base):
 class Goal(Base):
     __tablename__ = 'Goal'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, server_default=text("nextval('goal_id_sequence'::regclass)"))
     target = Column(Integer)
     current = Column(Integer)
     user_id = Column(ForeignKey('User.user_id'))
@@ -201,6 +204,7 @@ class Message(Base):
     sender_id = Column(ForeignKey('User.user_id'))
     recipient_id = Column(ForeignKey('User.user_id'))
     time_sent = Column(DateTime(True))
+    read = Column(Boolean)
 
     recipient = relationship('User', primaryjoin='Message.recipient_id == User.user_id')
     sender = relationship('User', primaryjoin='Message.sender_id == User.user_id')
@@ -209,7 +213,7 @@ class Message(Base):
 class Post(Base):
     __tablename__ = 'Post'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, server_default=text("nextval('post_id_seq'::regclass)"))
     group_id = Column(ForeignKey('Group.id'))
     author_id = Column(ForeignKey('User.user_id'))
     text = Column(String)
@@ -238,7 +242,6 @@ class Review(Base):
     book_id = Column(ForeignKey('Book.book_id'))
     rating = Column(Numeric)
     text = Column(String)
-    likes = Column(Integer)
 
     book = relationship('Book')
     reviewer = relationship('User')

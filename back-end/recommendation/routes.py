@@ -1,6 +1,7 @@
 from extensions import db
 from flask import Blueprint, make_response, jsonify, request
-from models import BookRecommendation, Book 
+from models import BookRecommendation, Book, BookRecDatum
+from sqlalchemy import func
 
 recommendation = Blueprint('recommedation', __name__)
 
@@ -16,6 +17,24 @@ def get_recommendations_by_user_id(user_id):
         rec_book = {"id" : rec.rec_book_id, "ISBN" : rec.ISBN, "title" : rec.title, "author" : rec.author, "image" : rec.image_link}
         recommendation = {"id" : rec.id, "rec_book" : rec_book, "rec_source" : rec_source}
         data_to_return.append(recommendation)
+
+    if data_to_return:
+        return make_response(jsonify(data_to_return), 200)
+    else:
+        return make_response(jsonify({"error" : "No recommendations found"}), 404)
+
+@recommendation.route("/api/v1.0/recommendations/inspiration", methods=["GET"])
+def get_rec_inspiration():
+    data_to_return = []
+
+    books = db.session.query(BookRecDatum).filter(BookRecDatum.book_id.between(1, 100)).order_by(func.random()).limit(5)
+
+    for book in books:
+        title = book.title
+        ISBN = book.isbn
+        author = book.authors
+        bk = {"ISBN" : ISBN, "title" : title, "author" : author}
+        data_to_return.append(bk)
 
     if data_to_return:
         return make_response(jsonify(data_to_return), 200)

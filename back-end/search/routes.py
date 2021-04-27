@@ -1,6 +1,8 @@
 from extensions import db
 from flask import Blueprint, make_response, jsonify, request
 from models import User
+# from config import 
+from config import auth0_access_token
 
 import requests
 

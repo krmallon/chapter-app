@@ -206,11 +206,12 @@ def get_recommendations(isbn, matrix, book_mapper, book_inv_mapper):
     book_id = book_list[isbn]
 
     try:
-        similar_ids = find_similar_books(book_id, matrix, book_mapper, book_inv_mapper, k=2)
-    except:
+        similar_ids = find_similar_books(book_id, matrix, book_mapper, book_inv_mapper, k=3)
+    except Exception:
+        pass
         # if the chosen book does not have an adequate number of ratings, the user is prompted to choose another
-        print("Insufficient rating data for this book. Please make another choice.")
-        get_recommendations(matrix, book_mapper, book_inv_mapper)
+        # print("Insufficient rating data for this book. Please make another choice.")
+        # get_recommendations(isbn, matrix, book_mapper, book_inv_mapper)
     else:
         # book_id = book_list[isbn]
 

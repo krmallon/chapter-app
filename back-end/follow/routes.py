@@ -1,6 +1,8 @@
 from extensions import db
 from flask import Blueprint, make_response, jsonify, request
-from models import Follow
+from models import Follow, User, Activity
+from user.routes import user_id_in_db
+import datetime
 
 import requests
 
@@ -56,7 +58,7 @@ def follow_user(user_id, follower_id):
         if not exists:
             db.session.add(Follow(user_id=user_id, follower_id=follower_id, follow_date=datetime.date.today()))
             follow_id = db.session.query(Follow.id).filter_by(user_id=user_id, follower_id=follower_id).first()
-            db.session.add(Activity(user_id=follower_id, action_id=6, object_id=5, date_created=datetime.date.today(), target_id=user_id))
+            db.session.add(Activity(user_id=follower_id, action_id=6, object_id=5, date_created=datetime.datetime.now(), target_id=user_id))
             db.session.commit()
         
             return make_response(jsonify({"success" : "Followed user", "data" : follow_id}), 200)

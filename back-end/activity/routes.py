@@ -66,7 +66,8 @@ def get_activity_followed_users(user_id):
             target = db.session.query(Achievement.id, Achievement.name, Achievement.description, Achievement.badge).filter(Achievement.id==activity.target_id).first()
 
         # return all updates with exception of 'User X liked User Y's update'
-        if not activity.object_id == 7:
+        # target not None ensures liking now deleted reviews does not appear on feed
+        if not activity.object_id == 7 and not target == None:
             act = {"activity_id" : activity.id, "user_id" : activity.user_id, "user" : activity.full_name, "user_image" : activity.image, "action" : activity.description, "object_id" : activity.object_id, "target" : target, "date_created" : activity.date_created, "likes" : likes}
             data_to_return.append(act)
         
@@ -87,7 +88,7 @@ def add_like(user_id):
         liked = db.session.query(Activity).filter(Activity.user_id==user_id, Activity.action_id==5, Activity.target_id==target_id).scalar() is not None
 
         if not liked:
-            db.session.add(Activity(user_id=user_id, action_id=5, object_id=object_id, date_created=datetime.date.today(), target_id=target_id))
+            db.session.add(Activity(user_id=user_id, action_id=5, object_id=object_id, date_created=datetime.datetime.now(), target_id=target_id))
             db.session.commit()
             
             return make_response(jsonify({"success" : "Added like"}), 201)
