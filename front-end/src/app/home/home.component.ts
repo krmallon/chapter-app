@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
+import { AchievementService } from '../services/achievement.service';
 import { FeedService } from '../services/feed.service';
 import { GoalService } from '../services/goal.service';
 import { LikeService } from '../services/like.service';
+import { MessagingService } from '../services/messaging.service';
+import { NotificationService } from '../services/notification.service';
 import { UserService } from '../services/user.service';
 
 @Component({
@@ -13,19 +16,28 @@ import { UserService } from '../services/user.service';
 })
 export class HomeComponent implements OnInit {
 
+  goalOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
   goalForm;
   feedObjectID = 7
 
+  // unreadCount;
+
   public sessionStorage = sessionStorage;
 
-  constructor(public feedService: FeedService, public authService: AuthService, public likeService: LikeService, public userService: UserService, private formBuilder: FormBuilder, public goalService: GoalService) { }
+  constructor(public feedService: FeedService, public notifyService: NotificationService, public authService: AuthService, public achievementService: AchievementService, public messagingService: MessagingService, public likeService: LikeService, public userService: UserService, private formBuilder: FormBuilder, public goalService: GoalService) { }
 
   ngOnInit(): void {
     // this.userService.getCurrentUser(sessionStorage.getItem("user"))
     if (this.authService.loggedIn) {
-      this.feedService.getFollowedActivity(sessionStorage.user_id)
+      // this.feedService.getFollowedActivity(sessionStorage.user_id)
+      this.userService.getFollowedActivity(sessionStorage.user_id)
       this.userService.getProfileDetails(sessionStorage.user_id)
       this.userService.getFollowedUsers(sessionStorage.user_id)
+      this.achievementService.getAllAchievements()
+
+      // this.messagingService.getUnreadCount(sessionStorage.user_id)
+      // this.unreadCount = this.messagingService.unread
+      // console.log(this.unreadCount)
 
     }
     // this.feedService.getFollowedActivity(sessionStorage.user_id)
@@ -49,6 +61,12 @@ export class HomeComponent implements OnInit {
     this.likeService.addLike(this.feedObjectID, activity.activity_id); 
     this.likeService.getLikes(this.feedObjectID, activity.activity_id)
   }
+
+  refresh() {
+    this.ngOnInit();
+  }
+
+  
 
 
 }

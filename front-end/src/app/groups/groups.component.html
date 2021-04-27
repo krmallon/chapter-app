@@ -1,6 +1,7 @@
 <div class="container-fluid gedf-wrapper">
   <div class="row">
       <div class="col-md-3">
+        <br>
           <div class="card gedf-card">
               <div class="card-header">
                 <img src="https://img.icons8.com/cute-clipart/64/000000/new.png"/>
@@ -13,6 +14,7 @@
                           
                   </div>
               </div>
+              <br>
               <div class="card gedf-card">
                 <div class="card-header">
                   <img src="https://img.icons8.com/doodle/50/000000/group.png"/>
@@ -28,6 +30,7 @@
             </div>
 
           <div class="col-md-6 gedf-main">
+            <br>
             <div class="card gedf-card">
               <div class="card-header">
                 <img src="https://img.icons8.com/doodle/50/000000/group.png"/>
@@ -44,6 +47,7 @@
         </div>
 
         <div class="col-md-3">
+          <br>
             <div class="card gedf-card">
                 <div class="card-header">
                   <img src="https://img.icons8.com/dusk/64/000000/badge.png"/>
@@ -90,7 +94,7 @@
               </div>
               <div class="modal-footer">
                 <button type="button" mdbBtn color="danger" class="waves-light" aria-label="Close" *ngIf="!isIncomplete()" (click)="newGroupModal.hide()" mdbWavesEffect>Cancel</button>
-                <button type="button" mdbBtn color="primary" class="relative waves-light" *ngIf="!isIncomplete()" (click)="this.groupService.createGroup(this.newGroupForm.value); newGroupModal.hide();" mdbWavesEffect>Submit</button>
+                <button type="button" mdbBtn color="primary" class="relative waves-light" *ngIf="!isIncomplete()" (click)="onCreate(); newGroupModal.hide();" mdbWavesEffect>Submit</button>
               </div>
             </div>
             </div>

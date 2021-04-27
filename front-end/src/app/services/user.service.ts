@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import axios from 'axios';
 import { Subject } from 'rxjs';
+import { FeedService } from './feed.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,10 +17,14 @@ export class UserService {
   private followedSubject = new Subject();
   followed_users_list = this.followedSubject.asObservable();
 
+  private followed_activity_private_list;
+  private followedActivitySubject = new Subject();
+  followed_activity_list = this.followedActivitySubject.asObservable();
+
   currentUser;
   following;
 
-  constructor(private http: HttpClient) {} 
+  constructor(private http: HttpClient, private feedService: FeedService) {} 
 
   addUserToDB(user) {
     let userData = new FormData();
@@ -51,10 +56,39 @@ export class UserService {
           response => {
               this.currentUser = response;
               sessionStorage.setItem("user_id", this.currentUser)
+
               console.log(this.currentUser)
+              
+              this.getFollowedActivity(this.currentUser)
+              this.getProfileDetails(this.currentUser)
+              this.getFollowedUsers(this.currentUser)
           }
       )
   }
+
+  // getCurrentUserProfile(auth0_id) {
+  //   this.getCurrentUser(auth0_id)
+  //   this.getFollowedActivity(this.currentUser)
+  //   this.getProfileDetails(this.currentUser)
+  //   this.getFollowedUsers(this.currentUser)
+  // }
+    
+
+
+  // getCurrentUser(auth0_id) {
+  //   return this.http.get('http://localhost:5000/api/v1.0/auth0/' + auth0_id).subscribe(
+  //     response => {
+  //         this.currentUser = response;
+  //         sessionStorage.setItem("user_id", this.currentUser)
+  //   })
+  // }
+
+  // getUserProfile(auth0_id) {
+  //   this.getCurrentUser(auth0_id)
+  //   this.getFollowedActivity(this.currentUser)
+  //   this.getProfileDetails(this.currentUser)
+  //   this.getFollowedUsers(this.currentUser)
+  // }
 
   getProfileDetails(user_id) {
     return this.http.get('http://localhost:5000/api/v1.0/user/' + user_id).subscribe(
@@ -79,7 +113,7 @@ export class UserService {
   }
   
   unfollowUser(user_id, follower_id) {
-    axios.get('http://localhost:5000/api/v1.0/user/' + user_id + '/unfollow/' + follower_id)
+    axios.delete('http://localhost:5000/api/v1.0/user/' + user_id + '/unfollow/' + follower_id)
   }
 
   getFollowedUsers(user_id) {
@@ -91,4 +125,14 @@ export class UserService {
       }
     )
   }
+
+  getFollowedActivity(user_id) {
+    return this.http.get('http://localhost:5000/api/v1.0/activity/followedby/' + user_id).subscribe(
+        response => {
+            this.followed_activity_private_list = response;
+            this.followedActivitySubject.next(this.followed_activity_private_list);
+        }
+    )
+
+}
 }

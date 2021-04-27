@@ -7,6 +7,8 @@ import { Subject } from 'rxjs';
 })
 export class MessagingService {
 
+  unread;
+
   private rec_messages_private_list;
   private recMessagesSubject = new Subject();
   rec_messages_list = this.recMessagesSubject.asObservable();
@@ -18,6 +20,10 @@ export class MessagingService {
   private msg_partners_private_list;
   private msgPartnersSubject = new Subject()
   msg_partners_list = this.msgPartnersSubject.asObservable();
+
+  private unread_private_count;
+  private unreadCountSubject = new Subject()
+  unread_count = this.unreadCountSubject.asObservable();
 
   constructor(private http: HttpClient) { }
 
@@ -66,6 +72,16 @@ sendMessage(sender_id, recipient_id, message) {
       // this.getBookID(isbn)
       // this.getReviews(isbn);
       } );
+}
+
+getUnreadCount(user_id) {
+    this.http.get('http://localhost:5000/api/v1.0/user/' + user_id + '/messages/unread').subscribe(
+        response => {
+            this.unread_private_count = response;
+            console.log(response)
+            this.unreadCountSubject.next(this.unread_private_count)
+        }
+    )
 }
 
 

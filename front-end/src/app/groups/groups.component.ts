@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { AuthService } from '../auth.service';
 import { GroupService } from '../services/group.service';
+import { NotificationService } from '../services/notification.service';
 import { SearchService } from '../services/search.service';
 
 @Component({
@@ -15,7 +16,7 @@ export class GroupsComponent implements OnInit {
   userSearchForm;
   newGroupForm;
 
-  constructor(public groupService: GroupService, public searchService: SearchService, public authService: AuthService, private formBuilder: FormBuilder) { }
+  constructor(public groupService: GroupService, public notifyService: NotificationService, public searchService: SearchService, public authService: AuthService, private formBuilder: FormBuilder) { }
 
   ngOnInit(): void {
 
@@ -37,12 +38,12 @@ export class GroupsComponent implements OnInit {
            this.newGroupForm.controls[control].touched;
   }
 
-  isIncomplete() {
-    return this.isInvalid('name') || this.isInvalid('description') || this.isUnTouched();
-  }
-
   isUnTouched() {
     return this.newGroupForm.controls.name.pristine && this.newGroupForm.controls.description.pristine
+  }
+
+  isIncomplete() {
+    return this.isInvalid('name') || this.isInvalid('description') || this.isUnTouched();
   }
 
   searchFormInvalid(control) {
@@ -58,6 +59,8 @@ export class GroupsComponent implements OnInit {
     return this.userSearchForm.controls.query.pristine
   }
 
-
-
+  onCreate() {
+    this.groupService.createGroup(this.newGroupForm.value);
+    this.notifyService.showSuccess('Group created', 'Success')
+  }
 }

@@ -14,6 +14,7 @@ export class GoalService {
 
   percentageComplete;
   currentYear = "2021";
+  // goalOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
   constructor(private http: HttpClient) { }
 
@@ -34,5 +35,12 @@ export class GoalService {
     goalData.append("year", this.currentYear)
 
     axios.post('http://localhost:5000/api/v1.0/goals/new', goalData)
+  }
+
+  editGoal(goal) {
+    let goalData = new FormData()
+    goalData.append("target", goal.goalFormControl)
+    
+    axios.put('http://localhost:5000/api/v1.0/goals/' + goal.id, goalData)
   }
 }

@@ -1,4 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
 import { MDBBootstrapModule } from 'angular-bootstrap-md';
 
@@ -28,6 +29,8 @@ import { CommentService } from './services/comment.service';
 import { AchievementService } from './services/achievement.service';
 import { MessagingService } from './services/messaging.service';
 import { SearchService } from './services/search.service';
+import { BooksComponent } from './books/books.component';
+import { ToastrModule } from 'ngx-toastr';
 
 var routes = [
   {
@@ -45,6 +48,10 @@ var routes = [
   {
     path: 'books/:id',
     component: BookComponent
+  },
+  {
+    path: 'bookshelves',
+    component: BooksComponent
   },
   {
     path: 'search/books/:query',
@@ -98,6 +105,7 @@ var routes = [
     SearchComponent,
     GroupComponent,
     GroupsComponent,
+    BooksComponent,
   ],
   imports: [
     BrowserModule,
@@ -106,7 +114,9 @@ var routes = [
     MDBBootstrapModule.forRoot(),
     HttpClientModule,
     ReactiveFormsModule,
-    FormsModule
+    FormsModule,
+    BrowserAnimationsModule,
+	  ToastrModule.forRoot()
   ],
   providers: [
     UserService, AuthService, BookService, GoalService, GroupService,

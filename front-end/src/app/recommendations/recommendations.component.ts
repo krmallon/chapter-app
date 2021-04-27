@@ -14,6 +14,7 @@ export class RecommendationsComponent implements OnInit {
 
   ngOnInit(): void {
     this.recommendationService.getRecommendations(sessionStorage.user_id)
+    this.recommendationService.getRecInspiration();
     // this.recommendationService.recommendationsExist()
     // this.recommendationsExist = this.recommendationService.recommendationsExist()
     // this.recommendationService.recommendationsExist()

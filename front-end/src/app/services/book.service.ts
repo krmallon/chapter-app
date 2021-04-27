@@ -12,9 +12,17 @@ export class BookService {
   private bookSubject = new Subject();
   book = this.bookSubject.asObservable();
 
-  private user_book_private_list;
-  private userBookSubject = new Subject();
-  user_book_list = this.userBookSubject.asObservable();
+  private user_reading_private_list;
+  private userReadingSubject = new Subject();
+  user_reading_list = this.userReadingSubject.asObservable();
+
+  private user_has_read_private_list;
+  private userHasReadSubject = new Subject();
+  user_has_read_list = this.userHasReadSubject.asObservable();
+
+  private user_wants_to_read_private_list;
+  private userWantsToReadSubject = new Subject();
+  user_wants_to_read_list = this.userWantsToReadSubject.asObservable();
 
   bookID;
   bookInDB;
@@ -49,6 +57,20 @@ getBook(isbn) {
    axios.post('http://localhost:5000/api/v1.0/books/'+ book + '/' + user_id + '/hasread')
  }
 
+ deleteFromShelf(book, user_id, shelf) {
+   axios.delete('http://localhost:5000/api/v1.0/books/'+ book + '/' + user_id + '/' + shelf)
+ }
+
+//  addToHasRead(book, user_id, date) {
+//   let postData = new FormData();
+//   let month = date.finishMonth
+//   let day = date.finishDay
+//   let finishDate;
+//   postData.append("finish_date", finishDate);
+
+//   axios.post('http://localhost:5000/api/v1.0/books/'+ book + '/' + user_id + '/hasread')
+// }
+
  bookPresentInDB(isbn) {
   this.http.get('http://localhost:5000/api/v1.0/bookinDB/' + isbn).subscribe(
     response => {
@@ -77,10 +99,31 @@ getBook(isbn) {
   getCurrentlyReadingByUser(user) {
         return this.http.get('http://localhost:5000/api/v1.0/user/' + user + '/currentlyreading').subscribe(
         response => {
-            this.user_book_private_list = response;
-            this.userBookSubject.next(this.user_book_private_list);
+            this.user_reading_private_list = response;
+            this.userReadingSubject.next(this.user_reading_private_list);
 
-            console.log(this.user_book_private_list)
+            console.log(this.user_reading_private_list)
          })
-}
+  }
+
+  getHasReadByUser(user) {
+    return this.http.get('http://localhost:5000/api/v1.0/user/' + user + '/hasread').subscribe(
+        response => {
+            this.user_has_read_private_list = response;
+            this.userHasReadSubject.next(this.user_has_read_private_list);
+
+            console.log(this.user_has_read_private_list)
+         })
+    }
+
+  getWantsToReadByUser(user) {
+    return this.http.get('http://localhost:5000/api/v1.0/user/' + user + '/wantstoread').subscribe(
+        response => {
+            this.user_wants_to_read_private_list = response;
+            this.userWantsToReadSubject.next(this.user_wants_to_read_private_list);
+
+            console.log(this.user_wants_to_read_private_list)
+         })
+
+  }
 }

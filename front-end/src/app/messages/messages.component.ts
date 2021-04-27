@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { MessagingService } from '../services/messaging.service';
+import { NotificationService } from '../services/notification.service';
 import { SearchService } from '../services/search.service';
 
 @Component({
@@ -15,7 +16,7 @@ export class MessagesComponent implements OnInit {
   userSearchForm;
   partner;
 
-  constructor(public messagingService: MessagingService, private formBuilder : FormBuilder, private route: ActivatedRoute, public searchService: SearchService) { }
+  constructor(public messagingService: MessagingService, public notifyService: NotificationService, private formBuilder : FormBuilder, private route: ActivatedRoute, public searchService: SearchService) { }
 
   ngOnInit(): void {
 
@@ -57,6 +58,9 @@ export class MessagesComponent implements OnInit {
     this.messagingService.sendMessage(sessionStorage.user_id, this.route.snapshot.params.user_id, this.newMessageForm.value)
     this.newMessageForm.reset()
     this.loadChat(this.route.snapshot.params.user_id)
+    this.messagingService.getChatPartners(sessionStorage.user_id)
+    this.notifyService.showSuccess('Message sent', 'Success')
+    
     // this.webService.getChatPartners(sessionStorage.user_id)
     // console.log(this.route.snapshot.params.user_id)
   }
@@ -64,5 +68,7 @@ export class MessagesComponent implements OnInit {
   chatOpen() {
     return this.route.snapshot.params.user_id
   }
+
+  
 
 }

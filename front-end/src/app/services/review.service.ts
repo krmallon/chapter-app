@@ -28,10 +28,11 @@ export class ReviewService {
 }
 
   getReviewsByUser(user) {
-    return this.http.get('http://localhost:5000/api/v1.0/' + user + '/reviews/').subscribe(
+    return this.http.get('http://localhost:5000/api/v1.0/user/' + user + '/reviews').subscribe(
         response => {
             this.user_review_private_list = response;
             this.userRevSubject.next(this.user_review_private_list);
+            // error => console.log(error)
         }
     )
   }

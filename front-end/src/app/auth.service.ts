@@ -6,6 +6,7 @@ import { tap, catchError, concatMap, shareReplay } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import config  from './config'
 import { UserService } from './services/user.service';
+import { FeedService } from './services/feed.service';
 
 
 @Injectable({
@@ -40,7 +41,7 @@ export class AuthService {
   // Create a local property for login status
   loggedIn: boolean = null;
 
-  constructor(private router: Router, private userService : UserService) {
+  constructor(private router: Router, private userService : UserService, private feedService: FeedService) {
     // On initial load, check authentication state with authorization server
     // Set up local auth streams if user is already authenticated
     this.localAuthSetup();
@@ -117,7 +118,8 @@ export class AuthService {
           this.userService.addUserToDB(user)
         }
         this.userService.getCurrentUser(user.sub)
-        // this.feedService.getFollowedActivity(sessionStorage.user_id)
+        // this.userService.getUserProfile(user.sub)
+        // this.feedService.getFollowedActivity(this.userService.currentUser)
         this.router.navigate([targetRoute]);
       });
     }

@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { BookService } from '../services/book.service';
+import { NotificationService } from '../services/notification.service';
+import { ReviewService } from '../services/review.service';
 
 @Component({
   selector: 'app-books',
@@ -11,13 +13,14 @@ export class BooksComponent implements OnInit {
   public sessionStorage = sessionStorage
   shelf = "Currently Reading"
 
-  constructor(public bookService: BookService) { }
+  constructor(public bookService: BookService, public reviewService: ReviewService, public notifyService: NotificationService) { }
 
   ngOnInit(): void {
     // this.getShelf(this.shelf)
     this.bookService.getCurrentlyReadingByUser(sessionStorage.user_id)
     this.bookService.getHasReadByUser(sessionStorage.user_id)
     this.bookService.getWantsToReadByUser(sessionStorage.user_id)
+    this.reviewService.getReviewsByUser(sessionStorage.user_id)
   }
 
   // reloadComponent() {
