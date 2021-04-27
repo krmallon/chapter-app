@@ -1,12 +1,26 @@
 from config import DB_URI, auth0_access_token
+from extensions import db
 from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from models import *
+# from models import *
 from sqlalchemy import and_, or_, func, desc
 from sqlalchemy.sql import label
 import requests
 import book_recommender
+
+from book.routes import book
+from search.routes import search
+from follow.routes import follow
+from achievement.routes import achievement
+from activity.routes import activity
+from goal.routes import goal
+from group.routes import group
+from message.routes import message
+from recommendation.routes import recommendation
+from review.routes import review
+from stats.routes import stats
+from user.routes import user
 
 import configparser
 import datetime
@@ -14,12 +28,25 @@ import datetime
 app = Flask(__name__)
 CORS(app)
 
-# config = configparser.ConfigParser()
-# config.read("config.py")
-# DB_URI = config.get("DEFAULT", "DB_URI")
+app.register_blueprint(book)
+app.register_blueprint(search)
+app.register_blueprint(follow)
+app.register_blueprint(stats)
+app.register_blueprint(achievement)
+app.register_blueprint(activity)
+app.register_blueprint(goal)
+app.register_blueprint(group)
+app.register_blueprint(message)
+app.register_blueprint(recommendation)
+app.register_blueprint(review)
+app.register_blueprint(user)
+
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URI
-db = SQLAlchemy(app)
+db.init_app(app)
+# db = SQLAlchemy(app)
+
+
 
 def user_id_in_db(user):
     return db.session.query(User.user_id).filter_by(user_id=user).scalar() is not None
@@ -37,294 +64,294 @@ def user_auth0_in_db(auth0_id):
         return make_response(jsonify(exists), 404)
 
 
-def isbn_in_bookRecData(isbn):
-    return db.session.query(BookRecDatum).filter_by(isbn=isbn).scalar() is not None
+# def isbn_in_bookRecData(isbn):
+#     return db.session.query(BookRecDatum).filter_by(isbn=isbn).scalar() is not None
 
-@app.route("/api/v1.0/bookinDB/<string:ISBN>", methods=["GET"])
-def book_in_db(ISBN):
-    return make_response(jsonify(db.session.query(Book.ISBN).filter_by(ISBN=ISBN).first() is not None), 200) 
-    # change to .scalar() instead of first when unique constraint is added to ISBN column  
+# @app.route("/api/v1.0/bookinDB/<string:ISBN>", methods=["GET"])
+# def book_in_db(ISBN):
+#     return make_response(jsonify(db.session.query(Book.ISBN).filter_by(ISBN=ISBN).first() is not None), 200) 
+#     # change to .scalar() instead of first when unique constraint is added to ISBN column  
 
-# add unit test 
-def addBookToDB(isbn):
-    url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn
-    r = requests.get(url)
-    js = r.json()
+# # add unit test 
+# def addBookToDB(isbn):
+#     url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn
+#     r = requests.get(url)
+#     js = r.json()
     
-    ISBN = "N/A"
-    title = "N/A"
-    author = "N/A"
-    image = "N/A"
-    description = "Description unavailable"
-    publish_date = "N/A"
-    page_count = 0
+#     ISBN = "N/A"
+#     title = "N/A"
+#     author = "N/A"
+#     image = "N/A"
+#     description = "Description unavailable"
+#     publish_date = "N/A"
+#     page_count = 0
 
-    # NEED TO REFACTOR THIS TO REMOVE MULTIPLE TRY/EXCEPT BLOCK
-    try:
-        title = js['items'][0]['volumeInfo']['title']
-    except Exception:
-        pass
-    try:
-        author = js['items'][0]['volumeInfo']['authors'][0]
-    except Exception:
-        pass
-    try:
-        image = js['items'][0]['volumeInfo']['imageLinks']['thumbnail']
-    except Exception:
-        pass
-    try:
-        publish_date = js['items'][0]['volumeInfo']['publishedDate']
-    except Exception:
-        pass
-    try:
-        page_count = js['items'][0]['volumeInfo']['pageCount']
-    except Exception:
-        pass
-    try:
-        description = js['items'][0]['volumeInfo']['description']
-    except Exception:
-        pass
+#     # NEED TO REFACTOR THIS TO REMOVE MULTIPLE TRY/EXCEPT BLOCK
+#     try:
+#         title = js['items'][0]['volumeInfo']['title']
+#     except Exception:
+#         pass
+#     try:
+#         author = js['items'][0]['volumeInfo']['authors'][0]
+#     except Exception:
+#         pass
+#     try:
+#         image = js['items'][0]['volumeInfo']['imageLinks']['thumbnail']
+#     except Exception:
+#         pass
+#     try:
+#         publish_date = js['items'][0]['volumeInfo']['publishedDate']
+#     except Exception:
+#         pass
+#     try:
+#         page_count = js['items'][0]['volumeInfo']['pageCount']
+#     except Exception:
+#         pass
+#     try:
+#         description = js['items'][0]['volumeInfo']['description']
+#     except Exception:
+#         pass
     
-    db.session.add(Book(ISBN=isbn, title=title, author=author, publish_date=publish_date, page_count=page_count, image_link=image))
-    db.session.commit()
+#     db.session.add(Book(ISBN=isbn, title=title, author=author, publish_date=publish_date, page_count=page_count, image_link=image))
+#     db.session.commit()
 
-def addRecToDB(rec_book_id, rec_source_id, user_id):
-    db.session.add(BookRecommendation(rec_book_id=rec_book_id, rec_source_id=rec_source_id, user_id=user_id))
+# def addRecToDB(rec_book_id, rec_source_id, user_id):
+#     db.session.add(BookRecommendation(rec_book_id=rec_book_id, rec_source_id=rec_source_id, user_id=user_id))
 
-# BOOK ENDPOINTS
+# # BOOK ENDPOINTS
 
-@app.route("/api/v1.0/addbooktodb", methods=["POST"])
-def add_book_to_db():
-    if "title" in request.form and "author" in request.form and "isbn" in request.form and "publish_date" in request.form and "page_count" in request.form and "image_link" in request.form:
-        title = request.form["title"]
-        author = request.form["author"]
-        isbn = request.form["isbn"]
-        publish_date = request.form["publish_date"]
-        page_count = request.form["page_count"]
-        image = request.form["image_link"]
-    else:
-        return make_response(jsonify({"error" : "Missing form data"}), 404)
+# @app.route("/api/v1.0/addbooktodb", methods=["POST"])
+# def add_book_to_db():
+#     if "title" in request.form and "author" in request.form and "isbn" in request.form and "publish_date" in request.form and "page_count" in request.form and "image_link" in request.form:
+#         title = request.form["title"]
+#         author = request.form["author"]
+#         isbn = request.form["isbn"]
+#         publish_date = request.form["publish_date"]
+#         page_count = request.form["page_count"]
+#         image = request.form["image_link"]
+#     else:
+#         return make_response(jsonify({"error" : "Missing form data"}), 404)
         
-    db.session.add(Book(ISBN=isbn, title=title, author=author, publish_date=publish_date, page_count=page_count, image_link=image))
-    db.session.commit()
+#     db.session.add(Book(ISBN=isbn, title=title, author=author, publish_date=publish_date, page_count=page_count, image_link=image))
+#     db.session.commit()
 
-    return make_response(jsonify({}), 200)
+#     return make_response(jsonify({}), 200)
 
-@app.route("/api/v1.0/book_id/<isbn>", methods=["GET"])
-def get_book_id_by_ISBN(isbn):
-    book = db.session.query(Book.book_id).filter(Book.ISBN==isbn).first()
+# @app.route("/api/v1.0/book_id/<isbn>", methods=["GET"])
+# def get_book_id_by_ISBN(isbn):
+#     book = db.session.query(Book.book_id).filter(Book.ISBN==isbn).first()
 
-    data_to_return = []
+#     data_to_return = []
 
-    if book is not None:
-        data_to_return.append(book.book_id)
+#     if book is not None:
+#         data_to_return.append(book.book_id)
 
-    if data_to_return:
-        return make_response(jsonify(data_to_return), 200)
-    else:
-        return make_response(jsonify({"error" : "Book not found in DB"}), 404)
+#     if data_to_return:
+#         return make_response(jsonify(data_to_return), 200)
+#     else:
+#         return make_response(jsonify({"error" : "Book not found in DB"}), 404)
 
-@app.route("/api/v1.0/books/<string:isbn>", methods=["GET"])
-def get_one_book(isbn):
-    url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn
-    r = requests.get(url)
-    js = r.json()
+# @app.route("/api/v1.0/books/<string:isbn>", methods=["GET"])
+# def get_one_book(isbn):
+#     url = "https://www.googleapis.com/books/v1/volumes?q=isbn:" + isbn
+#     r = requests.get(url)
+#     js = r.json()
 
-    if not "items" in js:
-        return make_response(jsonify({"error" : "No result found"}), 404)
+#     if not "items" in js:
+#         return make_response(jsonify({"error" : "No result found"}), 404)
     
-    title = "N/A"
-    author = "N/A"
-    image = "https://img.icons8.com/bubbles/100/000000/no-image.png"
-    description = "Description unavailable"
-    page_count = 0
-    publish_date = "N/A"
-    # NEED TO REFACTOR THIS TO REMOVE MULTIPLE TRY/EXCEPT BLOCK
+#     title = "N/A"
+#     author = "N/A"
+#     image = "https://img.icons8.com/bubbles/100/000000/no-image.png"
+#     description = "Description unavailable"
+#     page_count = 0
+#     publish_date = "N/A"
+#     # NEED TO REFACTOR THIS TO REMOVE MULTIPLE TRY/EXCEPT BLOCK
 
-    try:
-        title = js['items'][0]['volumeInfo']['title']
-    except Exception:
-        pass
-    try:
-        author = js['items'][0]['volumeInfo']['authors'][0]
-    except Exception:
-        pass
-    try:
-        image = js['items'][0]['volumeInfo']['imageLinks']['thumbnail']
-    except Exception:
-        pass
-    try:
-        description = js['items'][0]['volumeInfo']['description']
-    except Exception:
-        pass
-    try:
-        publish_date = js['items'][0]['volumeInfo']['publishedDate']
-    except Exception:
-        pass
-    try:
-        page_count = js['items'][0]['volumeInfo']['pageCount']
-    except Exception:
-        pass
+#     try:
+#         title = js['items'][0]['volumeInfo']['title']
+#     except Exception:
+#         pass
+#     try:
+#         author = js['items'][0]['volumeInfo']['authors'][0]
+#     except Exception:
+#         pass
+#     try:
+#         image = js['items'][0]['volumeInfo']['imageLinks']['thumbnail']
+#     except Exception:
+#         pass
+#     try:
+#         description = js['items'][0]['volumeInfo']['description']
+#     except Exception:
+#         pass
+#     try:
+#         publish_date = js['items'][0]['volumeInfo']['publishedDate']
+#     except Exception:
+#         pass
+#     try:
+#         page_count = js['items'][0]['volumeInfo']['pageCount']
+#     except Exception:
+#         pass
     
-    book = {"isbn" : isbn, "title" : title, "author" :  author, "image" : image, "description" : description, "pages" : page_count, "date" : publish_date}
+#     book = {"isbn" : isbn, "title" : title, "author" :  author, "image" : image, "description" : description, "pages" : page_count, "date" : publish_date}
 
-    return make_response(jsonify(book), 200)
+#     return make_response(jsonify(book), 200)
 
-@app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/currentlyreading", methods=["POST"])
-def add_currently_reading(isbn, user_id):
-    try:
-        book = db.session.query(Book).filter_by(ISBN=isbn).first()
-        book_id = book.book_id
+# @app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/currentlyreading", methods=["POST"])
+# def add_currently_reading(isbn, user_id):
+#     try:
+#         book = db.session.query(Book).filter_by(ISBN=isbn).first()
+#         book_id = book.book_id
 
-        db.session.add(Reading(user_id=user_id, book_id=book_id, start_date=datetime.date.today()))
-        db.session.add(Activity(user_id=user_id, action_id=4, object_id=1, date_created=datetime.date.today(), target_id=book_id))
-        db.session.commit()
+#         db.session.add(Reading(user_id=user_id, book_id=book_id, start_date=datetime.date.today()))
+#         db.session.add(Activity(user_id=user_id, action_id=4, object_id=1, date_created=datetime.date.today(), target_id=book_id))
+#         db.session.commit()
 
-        return make_response( jsonify( {"success" : "Added to bookshelf"}), 201 )
-    except Exception:
-        return make_response( jsonify( {"error" : "Failed to add to shelf"}), 404)
+#         return make_response( jsonify( {"success" : "Added to bookshelf"}), 201 )
+#     except Exception:
+#         return make_response( jsonify( {"error" : "Failed to add to shelf"}), 404)
 
-@app.route("/api/v1.0/user/<string:user_id>/currentlyreading", methods=["GET"])
-def get_currently_reading(user_id):
-    data_to_return = []
-    books = db.session.query(Reading.book_id, Book.ISBN, Book.title, Book.author, Book.image_link).join(Book, Reading.book_id==Book.book_id).filter(Reading.user_id==user_id).all()
+# @app.route("/api/v1.0/user/<string:user_id>/currentlyreading", methods=["GET"])
+# def get_currently_reading(user_id):
+#     data_to_return = []
+#     books = db.session.query(Reading.book_id, Book.ISBN, Book.title, Book.author, Book.image_link).join(Book, Reading.book_id==Book.book_id).filter(Reading.user_id==user_id).all()
 
-    for book in books:
-        book_id = book.book_id
-        ISBN = book.ISBN
-        title = book.title
-        author = book.author
-        image = book.image_link
-        bk = {"book_id" : book_id, "ISBN" : ISBN, "title" : title, "author" : author, "image" : image}
-        data_to_return.append(bk)
+#     for book in books:
+#         book_id = book.book_id
+#         ISBN = book.ISBN
+#         title = book.title
+#         author = book.author
+#         image = book.image_link
+#         bk = {"book_id" : book_id, "ISBN" : ISBN, "title" : title, "author" : author, "image" : image}
+#         data_to_return.append(bk)
     
-    if data_to_return:
-        return make_response(jsonify(data_to_return), 200)
-    else:
-        return make_response(jsonify({"error" : "No books found"}), 404)
+#     if data_to_return:
+#         return make_response(jsonify(data_to_return), 200)
+#     else:
+#         return make_response(jsonify({"error" : "No books found"}), 404)
 
 
-@app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/currentlyreading", methods=["DELETE"])
-def delete_currently_reading(isbn, user_id):
-    try:
-        book_id = db.session.query(Book.book_id).filter(Book.ISBN==isbn).first()
-        deleted_rows = db.session.query(Reading).filter(Reading.user_id==user_id, Reading.book_id==book_id).delete()
+# @app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/currentlyreading", methods=["DELETE"])
+# def delete_currently_reading(isbn, user_id):
+#     try:
+#         book_id = db.session.query(Book.book_id).filter(Book.ISBN==isbn).first()
+#         deleted_rows = db.session.query(Reading).filter(Reading.user_id==user_id, Reading.book_id==book_id).delete()
         
-        if deleted_rows == 1:
-            db.session.commit()
-            return make_response( jsonify( {"success" : "Removed from bookshelf"} ), 204)
-        else:
-            return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
-    except Exception:
-        return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
+#         if deleted_rows == 1:
+#             db.session.commit()
+#             return make_response( jsonify( {"success" : "Removed from bookshelf"} ), 204)
+#         else:
+#             return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
+#     except Exception:
+#         return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
 
 
         
 
 
-@app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/wanttoread", methods=["POST"])
-def add_want_to_read(isbn, user_id):
-    try:
-        book = db.session.query(Book).filter_by(ISBN=isbn).first()
-        book_id = book.book_id
+# @app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/wanttoread", methods=["POST"])
+# def add_want_to_read(isbn, user_id):
+#     try:
+#         book = db.session.query(Book).filter_by(ISBN=isbn).first()
+#         book_id = book.book_id
 
-        db.session.add(WantsToRead(user_id=user_id, book_id=book_id, date_added=datetime.date.today()))
-        db.session.add(Activity(user_id=user_id, action_id=2, object_id=1, date_created=datetime.date.today(), target_id=book_id))
-        db.session.commit()
+#         db.session.add(WantsToRead(user_id=user_id, book_id=book_id, date_added=datetime.date.today()))
+#         db.session.add(Activity(user_id=user_id, action_id=2, object_id=1, date_created=datetime.date.today(), target_id=book_id))
+#         db.session.commit()
         
-        return make_response( jsonify( {"success" : "Added to bookshelf"}), 201 )
-    except Exception:
-        return make_response( jsonify( {"error" : "Failed to add to shelf"}), 404)
+#         return make_response( jsonify( {"success" : "Added to bookshelf"}), 201 )
+#     except Exception:
+#         return make_response( jsonify( {"error" : "Failed to add to shelf"}), 404)
 
 
-@app.route("/api/v1.0/user/<string:user_id>/wantstoread", methods=["GET"])
-def get_wants_to_read(user_id):
-    data_to_return = []
-    books = db.session.query(WantsToRead.book_id, Book.ISBN, Book.title, Book.author, Book.image_link).join(Book, WantsToRead.book_id==Book.book_id).filter(WantsToRead.user_id==user_id).all()
+# @app.route("/api/v1.0/user/<string:user_id>/wantstoread", methods=["GET"])
+# def get_wants_to_read(user_id):
+#     data_to_return = []
+#     books = db.session.query(WantsToRead.book_id, Book.ISBN, Book.title, Book.author, Book.image_link).join(Book, WantsToRead.book_id==Book.book_id).filter(WantsToRead.user_id==user_id).all()
 
-    for book in books:
-        book_id = book.book_id
-        ISBN = book.ISBN
-        title = book.title
-        author = book.author
-        image = book.image_link
-        bk = {"book_id" : book_id, "ISBN" : ISBN, "title" : title, "author" : author, "image" : image}
-        data_to_return.append(bk)
+#     for book in books:
+#         book_id = book.book_id
+#         ISBN = book.ISBN
+#         title = book.title
+#         author = book.author
+#         image = book.image_link
+#         bk = {"book_id" : book_id, "ISBN" : ISBN, "title" : title, "author" : author, "image" : image}
+#         data_to_return.append(bk)
     
-    if data_to_return:
-        return make_response(jsonify(data_to_return), 200)
-    else:
-        return make_response(jsonify({"error" : "No books found"}), 404)
+#     if data_to_return:
+#         return make_response(jsonify(data_to_return), 200)
+#     else:
+#         return make_response(jsonify({"error" : "No books found"}), 404)
         
-@app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/wanttoread", methods=["DELETE"])
-def delete_wants_to_read(isbn, user_id):
-    try:
-        book_id = db.session.query(Book.book_id).filter(Book.ISBN==isbn).first()
-        deleted_rows = db.session.query(WantsToRead).filter(WantsToRead.user_id==user_id, WantsToRead.book_id==book_id).delete()
+# @app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/wanttoread", methods=["DELETE"])
+# def delete_wants_to_read(isbn, user_id):
+#     try:
+#         book_id = db.session.query(Book.book_id).filter(Book.ISBN==isbn).first()
+#         deleted_rows = db.session.query(WantsToRead).filter(WantsToRead.user_id==user_id, WantsToRead.book_id==book_id).delete()
         
-        if deleted_rows == 1:
-            db.session.commit()
-            return make_response( jsonify( {"success" : "Removed from bookshelf"} ), 204)
-        else:
-            return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
-    except Exception:
-        return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
+#         if deleted_rows == 1:
+#             db.session.commit()
+#             return make_response( jsonify( {"success" : "Removed from bookshelf"} ), 204)
+#         else:
+#             return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
+#     except Exception:
+#         return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
 
 
-@app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/hasread", methods=["POST"])
-def add_has_read(isbn, user_id):
-    try:
-        book = db.session.query(Book).filter_by(ISBN=isbn).first()
-        book_id = book.book_id
+# @app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/hasread", methods=["POST"])
+# def add_has_read(isbn, user_id):
+#     try:
+#         book = db.session.query(Book).filter_by(ISBN=isbn).first()
+#         book_id = book.book_id
 
-        # update date selection
-        db.session.add(HasRead(user_id=user_id, book_id=book_id, start_date=datetime.date.today(), finish_date=datetime.date.today()))
-        db.session.add(Activity(user_id=user_id, action_id=3, object_id=1, date_created=datetime.date.today(), target_id=book_id))
-        goals = db.session.query(Goal).filter(Goal.user_id==user_id).all()
+#         # update date selection
+#         db.session.add(HasRead(user_id=user_id, book_id=book_id, start_date=datetime.date.today(), finish_date=datetime.date.today()))
+#         db.session.add(Activity(user_id=user_id, action_id=3, object_id=1, date_created=datetime.date.today(), target_id=book_id))
+#         goals = db.session.query(Goal).filter(Goal.user_id==user_id).all()
 
-        for goal in goals:
-            if str(goal.year) in str(datetime.date.today()):
-                goal.current = goal.current + 1
+#         for goal in goals:
+#             if str(goal.year) in str(datetime.date.today()):
+#                 goal.current = goal.current + 1
 
-        db.session.commit()
-        check_achievement(user_id, 'goal')
-        check_achievement(user_id, 'reading')
-        return make_response( jsonify( {"success" : "Added to bookshelf"}), 201 )
-    except Exception:
-        return make_response( jsonify( {"error" : "Failed to add to shelf"}), 404)
+#         db.session.commit()
+#         check_achievement(user_id, 'goal')
+#         check_achievement(user_id, 'reading')
+#         return make_response( jsonify( {"success" : "Added to bookshelf"}), 201 )
+#     except Exception:
+#         return make_response( jsonify( {"error" : "Failed to add to shelf"}), 404)
 
-@app.route("/api/v1.0/user/<string:user_id>/hasread", methods=["GET"])
-def get_has_read(user_id):
-    data_to_return = []
-    books = db.session.query(HasRead.book_id, Book.ISBN, Book.title, Book.author, Book.image_link).join(Book, HasRead.book_id==Book.book_id).filter(HasRead.user_id==user_id).all()
+# @app.route("/api/v1.0/user/<string:user_id>/hasread", methods=["GET"])
+# def get_has_read(user_id):
+#     data_to_return = []
+#     books = db.session.query(HasRead.book_id, Book.ISBN, Book.title, Book.author, Book.image_link).join(Book, HasRead.book_id==Book.book_id).filter(HasRead.user_id==user_id).all()
 
-    for book in books:
-        book_id = book.book_id
-        ISBN = book.ISBN
-        title = book.title
-        author = book.author
-        image = book.image_link
-        bk = {"book_id" : book_id, "ISBN" : ISBN, "title" : title, "author" : author, "image" : image}
-        data_to_return.append(bk)
+#     for book in books:
+#         book_id = book.book_id
+#         ISBN = book.ISBN
+#         title = book.title
+#         author = book.author
+#         image = book.image_link
+#         bk = {"book_id" : book_id, "ISBN" : ISBN, "title" : title, "author" : author, "image" : image}
+#         data_to_return.append(bk)
     
-    if data_to_return:
-        return make_response(jsonify(data_to_return), 200)
-    else:
-        return make_response(jsonify({"error" : "No books found"}), 404)
+#     if data_to_return:
+#         return make_response(jsonify(data_to_return), 200)
+#     else:
+#         return make_response(jsonify({"error" : "No books found"}), 404)
 
-@app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/hasread", methods=["DELETE"])
-def delete_has_read(isbn, user_id):
-    try:
-        book_id = db.session.query(Book.book_id).filter(Book.ISBN==isbn).first()
-        deleted_rows = db.session.query(HasRead).filter(HasRead.user_id==user_id, HasRead.book_id==book_id).delete()
+# @app.route("/api/v1.0/books/<string:isbn>/<string:user_id>/hasread", methods=["DELETE"])
+# def delete_has_read(isbn, user_id):
+#     try:
+#         book_id = db.session.query(Book.book_id).filter(Book.ISBN==isbn).first()
+#         deleted_rows = db.session.query(HasRead).filter(HasRead.user_id==user_id, HasRead.book_id==book_id).delete()
         
-        if deleted_rows == 1:
-            db.session.commit()
-            return make_response( jsonify( {"success" : "Removed from bookshelf"} ), 204)
-        else:
-            return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
-    except Exception:
-        return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
+#         if deleted_rows == 1:
+#             db.session.commit()
+#             return make_response( jsonify( {"success" : "Removed from bookshelf"} ), 204)
+#         else:
+#             return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
+#     except Exception:
+#         return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
 
 # USER ENDPOINTS
 
@@ -356,100 +383,100 @@ def get_user_details(user_id):
 
 #  SEARCH ENDPOINTS
 
-@app.route("/api/v1.0/search/users/<query>", methods=["GET"])
-def search_users(query):
-    url = 'https://dev-1spzh9o1.eu.auth0.com/api/v2/users?q=name:*' + query + '*'
-    headers = {'authorization' : 'Bearer ' + auth0_access_token}
+# @app.route("/api/v1.0/search/users/<query>", methods=["GET"])
+# def search_users(query):
+#     url = 'https://dev-1spzh9o1.eu.auth0.com/api/v2/users?q=name:*' + query + '*'
+#     headers = {'authorization' : 'Bearer ' + auth0_access_token}
 
-    req = requests.get(url, headers=headers)
-    js = req.json()
+#     req = requests.get(url, headers=headers)
+#     js = req.json()
 
-    data_to_return = []
+#     data_to_return = []
 
-    for result in js:
-        try:
-            auth0_id = result['user_id']
-            name = result['name']
-            email = result['email']
+#     for result in js:
+#         try:
+#             auth0_id = result['user_id']
+#             name = result['name']
+#             email = result['email']
 
-            db_user = db.session.query(User).filter(User.auth0_id==auth0_id).first()
-            user = {"user_id" : db_user.user_id, "auth0_id" : auth0_id, "name" : name, "email" : email, "image" :db_user.image}
-            data_to_return.append(user)
-        except Exception:
-            pass
+#             db_user = db.session.query(User).filter(User.auth0_id==auth0_id).first()
+#             user = {"user_id" : db_user.user_id, "auth0_id" : auth0_id, "name" : name, "email" : email, "image" :db_user.image}
+#             data_to_return.append(user)
+#         except Exception:
+#             pass
 
-    if data_to_return:
-        return make_response(jsonify(data_to_return), 200)
-    else:
-        return make_response(jsonify({"error" : "No results for this query"}), 404)
+#     if data_to_return:
+#         return make_response(jsonify(data_to_return), 200)
+#     else:
+#         return make_response(jsonify({"error" : "No results for this query"}), 404)
 
-@app.route("/api/v1.0/search/books/<string:query>", methods=["GET"])
-def search_books(query):
+# @app.route("/api/v1.0/search/books/<string:query>", methods=["GET"])
+# def search_books(query):
 
-    # default settings
-    start_index = 0
-    page_size = 30
-    language = 'en'
-    order = 'relevance'
+#     # default settings
+#     start_index = 0
+#     page_size = 30
+#     language = 'en'
+#     order = 'relevance'
 
-    if request.args.get('startIndex'):
-        start_index = int(request.args.get('startIndex'))
+#     if request.args.get('startIndex'):
+#         start_index = int(request.args.get('startIndex'))
 
-    if request.args.get('lang'):
-        language = request.args.get('lang')
+#     if request.args.get('lang'):
+#         language = request.args.get('lang')
 
-    if request.args.get('order'):
-        order = request.args.get('order')
+#     if request.args.get('order'):
+#         order = request.args.get('order')
 
-    url = "https://www.googleapis.com/books/v1/volumes?q=" + query + '&startIndex=' + str(start_index) + '&maxResults=' + str(page_size) + '&langRestrict=' + language + '&orderBy=' + order
-    # '&startIndex=0&maxResults=40' # add pagination
-    r = requests.get(url)
-    js = r.json()
+#     url = "https://www.googleapis.com/books/v1/volumes?q=" + query + '&startIndex=' + str(start_index) + '&maxResults=' + str(page_size) + '&langRestrict=' + language + '&orderBy=' + order
+#     # '&startIndex=0&maxResults=40' # add pagination
+#     r = requests.get(url)
+#     js = r.json()
 
-    data_to_return = []
+#     data_to_return = []
 
-    # add what to do if no results i.e. no books in js['items']
-    try:
-        for book in js['items']:
-            title = book['volumeInfo']['title']
-            try:
-                author = book['volumeInfo']['authors'][0]
-            except Exception:
-                author = "N/A"
-            gb_id = book['id']
-            try:
-                # use ISBN_10 if present, otherwise use ISBN_13 or mark as N/A
-                # clean up code here
-                if book['volumeInfo']['industryIdentifiers'][0]['type'] == "ISBN_10":
-                    ISBN = book['volumeInfo']['industryIdentifiers'][0]['identifier']
-                elif book['volumeInfo']['industryIdentifiers'][1]['type'] and book['volumeInfo']['industryIdentifiers'][1]['type'] == "ISBN_10":
-                    ISBN = book['volumeInfo']['industryIdentifiers'][1]['identifier']
-                elif book['volumeInfo']['industryIdentifiers'][0]['type'] == "ISBN_13":
-                    ISBN = book['volumeInfo']['industryIdentifiers'][0]['identifier']
-                else:
-                    ISBN = "N/A"
-            except Exception:
-                ISBN = "N/A"
-            try:
-                date = book['volumeInfo']['publishedDate']
-            except Exception:
-                date = "N/A"
-            try:
-                imgLink = book['volumeInfo']['imageLinks']['thumbnail']
-            except Exception:
-                # imgLink = "https://img.icons8.com/fluent/96/000000/no-image.png"
-                imgLink = "https://img.icons8.com/bubbles/100/000000/no-image.png"
-                # https://www.rit.edu/nsfadvance/sites/rit.edu.nsfadvance/files/default_images/photo-unavailable.png" # find free-use default 'Cover Unavailable' image to use here
-            new_book = {"title" : title, "author" : author, "date" : date, "image" : imgLink, "ISBN" : ISBN}
-            if ISBN != "N/A":
-                data_to_return.append(new_book)
+#     # add what to do if no results i.e. no books in js['items']
+#     try:
+#         for book in js['items']:
+#             title = book['volumeInfo']['title']
+#             try:
+#                 author = book['volumeInfo']['authors'][0]
+#             except Exception:
+#                 author = "N/A"
+#             gb_id = book['id']
+#             try:
+#                 # use ISBN_10 if present, otherwise use ISBN_13 or mark as N/A
+#                 # clean up code here
+#                 if book['volumeInfo']['industryIdentifiers'][0]['type'] == "ISBN_10":
+#                     ISBN = book['volumeInfo']['industryIdentifiers'][0]['identifier']
+#                 elif book['volumeInfo']['industryIdentifiers'][1]['type'] and book['volumeInfo']['industryIdentifiers'][1]['type'] == "ISBN_10":
+#                     ISBN = book['volumeInfo']['industryIdentifiers'][1]['identifier']
+#                 elif book['volumeInfo']['industryIdentifiers'][0]['type'] == "ISBN_13":
+#                     ISBN = book['volumeInfo']['industryIdentifiers'][0]['identifier']
+#                 else:
+#                     ISBN = "N/A"
+#             except Exception:
+#                 ISBN = "N/A"
+#             try:
+#                 date = book['volumeInfo']['publishedDate']
+#             except Exception:
+#                 date = "N/A"
+#             try:
+#                 imgLink = book['volumeInfo']['imageLinks']['thumbnail']
+#             except Exception:
+#                 # imgLink = "https://img.icons8.com/fluent/96/000000/no-image.png"
+#                 imgLink = "https://img.icons8.com/bubbles/100/000000/no-image.png"
+#                 # https://www.rit.edu/nsfadvance/sites/rit.edu.nsfadvance/files/default_images/photo-unavailable.png" # find free-use default 'Cover Unavailable' image to use here
+#             new_book = {"title" : title, "author" : author, "date" : date, "image" : imgLink, "ISBN" : ISBN}
+#             if ISBN != "N/A":
+#                 data_to_return.append(new_book)
 
-        if data_to_return:
-            return make_response( jsonify(data_to_return), 200 )
-        else:
-            return make_response( jsonify({"error" : "No results"}), 404 )
-    except Exception:
-         return make_response( jsonify({"error" : "No results"}), 404 )
+#         if data_to_return:
+#             return make_response( jsonify(data_to_return), 200 )
+#         else:
+#             return make_response( jsonify({"error" : "No results"}), 404 )
+#     except Exception:
+#          return make_response( jsonify({"error" : "No results"}), 404 )
 
         
 # FOLLOW ENDPOINTS
