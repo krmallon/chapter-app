@@ -118,8 +118,9 @@
                         <!-- <img src="https://img.icons8.com/fluent/48/000000/helping-hand.png"/> -->
                         <h5 class="card-title">Reviewed</h5>
                     </div>
-                        <div class="card-body" style="cursor: pointer" *ngFor="let review of this.reviewService.user_review_list | async" >
-                            <a routerLink="/books/{{review.book_ISBN}}">{{review.book_title}}</a> - {{review.book_author}} ({{review.rating}} stars)
+                        <div class="card-body" *ngFor="let review of this.reviewService.user_review_list | async" >
+                            {{review.book_title}} - {{review.book_author}} ({{review.rating}} stars)
+                            <button type="button" class="btn btn-primary btn-sm" routerLink='/books/{{review.book_ISBN}}'>View</button>
                         </div>
                     </div>
             </div>

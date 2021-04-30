@@ -1,5 +1,39 @@
 
- 
+    <!--Intro Section-->
+    <section class="view intro-2" *ngIf="!this.authService.loggedIn">
+      <div class="full-bg-img mask rgba-gradient">
+        <div class="container flex-center">
+          <div class="d-flex align-items-center content-height w-100">
+            <div class="row flex-center pt-5 mt-3 w-100">
+              <div class="col-md-6 text-center text-md-left mb-5">
+                <div class="white-text">
+                  <h2 class="h1 h1-responsive font-bold wow fadeInLeft" data-wow-delay="0.3s">Start your Chapter today</h2>
+                  <hr class="hr-light wow fadeInLeft" data-wow-delay="0.3s">
+                  <h6 class="wow fadeInLeft" data-wow-delay="0.3s">Lorem ipsum dolor sit amet, consectetur
+                    adipisicing
+                    elit. Rem repellendus quasi fuga nesciunt dolorum nulla magnam veniam sapiente, fugiat!
+                    Commodi sequi
+                    non animi ea dolor molestiae, quisquam iste, maiores. Nulla.</h6>
+                  <br>
+                  <!-- <a mdbBtn color="white" outline="true" class="wow fadeInLeft waves-light" data-wow-delay="0.3s"
+                    mdbWavesEffect>Learn more</a> -->
+                </div>
+              </div>
+
+              <div class="col-md-6 col-xl-5 offset-xl-1">
+                <!--Form-->
+                <mdb-card class="wow fadeInRight" data-wow-delay="0.3s">
+                
+                </mdb-card>
+                <!--/.Form-->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
 
 <div class="container-fluid gedf-wrapper" *ngIf="this.authService.loggedIn">
         <div class="row">
@@ -86,9 +120,9 @@
                  <div class="card gedf-card" *ngFor= "let activity of userService.followed_activity_list | async">
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center" style="cursor: pointer" title="/user/{{activity.user_id}}" routerLink="/user/{{activity.user_id}}">
                                 <div class="mr-2">
-                                    <img class="rounded-circle" width="45" src="{{activity.user_image}}" alt="">
+                                    <img class="rounded-circle" width="45" src="{{activity.user_image}}" alt="Profile Picture">
                                 </div>
                                 <div class="ml-2">
                                     <div class="h5 m-0">{{activity.user}}</div>
@@ -131,7 +165,7 @@
                 <div class="card-body" *ngIf="actionType(activity)=='posted a review'">
                   <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>{{activity.date_created}}</div>
                   <a class="card-link">
-                      <h5 class="card-title">{{activity.user}} {{activity.action}} for {{activity.target.title}}</h5>
+                      <h5 class="card-title">{{activity.user}} {{activity.action}} for <b>{{activity.target.title}}</b></h5>
                   </a>
                   <a href="/books/{{activity.target.ISBN}}"><img src={{activity.target.image_link}} alt="Image"></a>
                    <p class="card-text">
@@ -143,12 +177,12 @@
               <div class="card-body" *ngIf="actionType(activity)=='liked'">
                 <div class="text-muted h7 mb-2"> <i class="fa fa-clock-o"></i>{{activity.date_created}}</div>
                 <a class="card-link">
-                    <h5 class="card-title" *ngIf="objectType(activity)==2">{{activity.user}} {{activity.action}} {{activity.target.full_name}}'s review</h5>
+                    <h5 class="card-title" *ngIf="objectType(activity)==2">{{activity.user}} {{activity.action}} <a href="/user/{{activity.target.user_id}}">{{activity.target.full_name}}'s</a> review of <b>{{activity.target.title}}</b></h5>
                     <h5 class="card-title" *ngIf="objectType(activity)==7" routerLink="user/{{activity.target.user_id}}">{{activity.user}} {{activity.action}} <a href="user/{{activity.target.user_id}}">{{activity.target.full_name}}'s </a>update</h5>
                 </a>
                 <p class="card-text" *ngIf="objectType(activity)==2">
-                    <!-- <img src={{activity.target.image_link}} alt="Image"></a> -->
-                    {{activity.target.title}}
+                    <img src={{activity.target.image_link}} alt="Image">
+                    <!-- {{activity.target.title}} -->
                     <br>
                   <b>{{activity.target.rating}} stars </b>
                   <br>
@@ -223,7 +257,7 @@
                             <h5 class="card-title">Annual Reading Challenge</h5>
                             <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
                             <p class="card-text">Challenge yourself by setting a reading goal for the year.</p>
-                            <button type="button" class="btn btn-success btn-sm" (click)="goalModal.show()">Set goal</button>
+                            <button type="button" class="btn btn-primary btn-sm" (click)="goalModal.show()">Set goal</button>
                         </div>
                     </div>
                     <div class="card gedf-card">

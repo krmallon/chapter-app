@@ -1,8 +1,47 @@
+
 <div class="container-fluid gedf-wrapper">
   <div class="row">
       <div class="col-md-3">
         <br>
-          <div class="card gedf-card" *ngFor="let book of bookService.book | async">
+        <div class="card mb-3" style="max-width: 540px" *ngFor="let book of bookService.book | async">
+          <div class="row g-0">
+            <div class="col-md-4">
+              <img
+                src="{{book.image}}"
+                alt="..."
+                
+              />
+            </div>
+            <div class="col-md-8">
+              <div class="card-body">
+                <h5 class="card-title">{{book.title}}</h5>
+                <p class="card-text">
+                
+                    Author: {{book.author}}
+                    <br>
+                    Published: {{book.date}}
+                            <br>
+                            Pages: {{book.pages}}
+                </p>
+                <div class="btn-group" mdbDropdown *ngIf="authService.loggedIn">
+                  <button mdbDropdownToggle type="button" mdbBtn color="primary" class="dropdown-toggle waves-light btn-sm" (click)="addToDB(book)"
+                    mdbWavesEffect>
+                    Add to shelf
+                  </button>
+                  <div class="dropdown-menu dropdown-primary">
+                    <a class="dropdown-item" (click)="addToShelf('currentlyreading', book)">Currently Reading</a>
+                    <div class="divider dropdown-divider"></div>
+                    <a class="dropdown-item" (click)="addToShelf('read', book)">Read</a>
+                    <div class="divider dropdown-divider"></div>
+                    <a class="dropdown-item" (click)="addToShelf('wanttoread', book)">Want to Read</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+          <!-- <div class="card gedf-card" *ngFor="let book of bookService.book | async">
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="d-flex justify-content-between align-items-center">
@@ -28,9 +67,6 @@
                         </div>
                          
                       
-                        <!-- <div class="ml-2">
-                            <div class="h5 m-0">{{book.title}}</div>
-                        </div> -->
                     </div>
                     <div>
                         
@@ -38,7 +74,7 @@
                 </div>
 
             </div>
-            </div>
+            </div> -->
 
         </div>
 
@@ -54,6 +90,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                    <div class="ml-2">
                       <div class="h5 m-0"> Description</div>
+                      <br>
                       <p>{{book.description}}</p>
                    </div>
                 </div>
@@ -66,7 +103,7 @@
           <div class="card gedf-card">
             <div class="card-header">
                 <h5 class="card-title">Reviews</h5>
-                <button type="button" class="btn btn-success btn-sm" *ngIf="authService.loggedIn" (click)="newReviewModal.show()">Add Review</button>
+                <button type="button" class="btn btn-primary btn-sm" *ngIf="authService.loggedIn" (click)="newReviewModal.show()">Add Review</button>
                 <h7 *ngIf="!authService.loggedIn">Sign in to add a review</h7>
             </div>
             <div class="card-body" *ngFor = "let review of reviewService.reviews_list | async">
@@ -81,7 +118,7 @@
                   </p>
                   {{review.likes.count}} likes
                   <button class="btn btn-danger btn-sm" *ngIf="isOwnReview(review)" (click)="deleteModal.show()">Delete</button>
-                  <button class="btn btn-primary btn-sm" *ngIf="!isOwnReview(review)" (click)="likeReview(review.review_id);this.notifyService.showSuccess('Review liked', 'Success')"><img src="https://img.icons8.com/dusk/50/000000/facebook-like.png" style="width:25px; height:25px"/></button>
+                  <button class="btn btn-primary btn-sm" *ngIf="!isOwnReview(review) && this.authService.loggedIn" (click)="likeReview(review.review_id);this.notifyService.showSuccess('Review liked', 'Success')"><img src="https://img.icons8.com/dusk/50/000000/facebook-like.png" style="width:25px; height:25px"/></button>
                   <!-- {{review.likes.count}} likes -->
 
                   <div mdbModal #deleteModal="mdbModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myDeleteModalLabel" aria-hidden="true">
