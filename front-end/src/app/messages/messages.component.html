@@ -4,12 +4,12 @@
             <br>
             <div class="card gedf-card">
                 <div class="card-header">
-                    <img src="https://img.icons8.com/officel/40/000000/chat.png"/>
+                    <!-- <img src="https://img.icons8.com/officel/40/000000/chat.png"/> -->
                     <h5 class="card-title">Chats</h5>
                 </div>
                     <div class="card-body"> 
                        <ul class="users">
-                        <li class="person" *ngFor= "let partner of messagingService.msg_partners_list | async" data-chat="person1">
+                        <li class="person"  [ngClass]="{'active': userSelected(partner.id)}" *ngFor= "let partner of messagingService.msg_partners_list | async" data-chat="person1">
                             <div class="user" (click)="loadChat(partner.id)" routerLink='/messages/{{partner.id}}'>
                                 <img src="{{partner.image}}" alt="Profile Pic">
                             </div>
@@ -17,6 +17,8 @@
                                 <span class="name">{{partner.name}}</span>
                             </p>
                             <!-- <button type="button" class="btn btn-primary btn-sm">View</button> -->
+                            <!-- [class.active]= -->
+                            <!-- document.getElementById('person').innerHTML = 'person active' -->
 
                         </li>
                     </ul>

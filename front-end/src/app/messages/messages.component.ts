@@ -69,6 +69,14 @@ export class MessagesComponent implements OnInit {
     return this.route.snapshot.params.user_id
   }
 
+  userSelected(id) {
+    return this.route.snapshot.params.user_id == id
+  }
+
+  setChatAsActive() {
+  }
+  
+
   
 
 }
