@@ -29,11 +29,22 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     // this.userService.getCurrentUser(sessionStorage.getItem("user"))
     if (this.authService.loggedIn) {
+
+      if (this.sessionStorage.getItem("user_id")=="N/A") {
+        // let auth0_id = this.sessionStorage.getItem("user")
+        this.userService.getCurrentUser(this.sessionStorage.getItem("user"))
+        console.log("Setting user_id")
+        this.ngOnInit()
+      }
+
       // this.feedService.getFollowedActivity(sessionStorage.user_id)
+
       this.userService.getFollowedActivity(sessionStorage.user_id)
       this.userService.getProfileDetails(sessionStorage.user_id)
       this.userService.getFollowedUsers(sessionStorage.user_id)
       this.achievementService.getAllAchievements()
+
+      
 
       // this.messagingService.getUnreadCount(sessionStorage.user_id)
       // this.unreadCount = this.messagingService.unread

@@ -112,11 +112,15 @@ export class AuthService {
       authComplete$.subscribe(([user, loggedIn]) => {
         sessionStorage.setItem("user", user.sub)
         console.log(sessionStorage.getItem("user"))
+        console.log(user)
+
+        this.userService.addUserToDB(user)
 
         // if new user, add to DB
-        if (!this.userService.existingUser(user.sub)) {
-          this.userService.addUserToDB(user)
-        }
+        // if (!this.userService.existingUser(user.sub)) {
+        //   this.userService.addUserToDB(user)
+        // }
+
         this.userService.getCurrentUser(user.sub)
         // this.userService.getUserProfile(user.sub)
         // this.feedService.getFollowedActivity(this.userService.currentUser)

@@ -8,7 +8,7 @@ def user_id_in_db(user):
     return db.session.query(User.user_id).filter_by(user_id=user).scalar() is not None
 
 def user_auth0_in_db(user):
-    return db.session.query(User.user_id).filter_by(auth0_id=user).scalar() is not None
+    return db.session.query(User.user_id).filter_by(auth0_id=user).first() is not None
 
 @user.route("/api/v1.0/userinDB/<string:auth0_id>", methods=["GET"])
 def user_auth0_in_db(auth0_id):
@@ -44,3 +44,28 @@ def get_user_details(user_id):
     data_to_return.append(user)
 
     return make_response(jsonify(data_to_return), 200)
+
+@user.route("/api/v1.0/userprofiletodb", methods=["POST"])
+def send_profile_to_db():
+    if "auth0_id" in request.form and "name" in request.form and "image" in request.form:
+        auth0_id = request.form["auth0_id"]
+        name = request.form["name"]
+        image = request.form["image"]
+        
+    try:
+        db.session.add(User(auth0_id = auth0_id, full_name=name, image=image, nickname="nickname", email="email"))
+        db.session.commit()
+
+        return make_response(jsonify("User added to DB"), 200)
+    except Exception:
+        return make_response(jsonify({"error" : "User already exists in DB"}), 400)
+
+
+    # if not user_auth0_in_db(auth0_id):
+    #     db.session.add(User(auth0_id = auth0_id, full_name=name, image=image, nickname="nickname", email="email"))
+    #     db.session.commit()
+
+    #     return make_response(jsonify("User added to DB"), 200)
+    # else: 
+    #     return make_response(jsonify({"error" : "User already exists in DB"}), 400)
+

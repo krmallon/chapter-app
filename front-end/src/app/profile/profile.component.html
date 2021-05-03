@@ -37,6 +37,9 @@
     		        </div>
     		        <div class="card-content">
                     <h2>{{user.name}}</h2>
+                    <!-- <h5>Bio</h5> -->
+                    <!-- <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</p> -->
+
                     <br><button type="button" class="btn btn-success btn-sm" 
                 *ngIf="authService.loggedIn && !isOwnProfile() && !following()" (click)="onFollow()">Follow</button>
                 <br><button type="button" class="btn btn-danger btn-sm" 

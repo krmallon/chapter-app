@@ -17,6 +17,7 @@ import { UserService } from '../services/user.service';
 export class ProfileComponent implements OnInit {
 
   public sessionStorage = sessionStorage
+  // coverImage;
 
   constructor(public authService: AuthService, public statService: StatService, public notifyService: NotificationService, public goalService: GoalService, public userService: UserService, public bookService: BookService, public reviewService: ReviewService, public achievementService: AchievementService, private route: ActivatedRoute) { }
 
