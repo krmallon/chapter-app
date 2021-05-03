@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import config from '../config';
 
 @Injectable({
   providedIn: 'root'
@@ -28,7 +29,7 @@ export class MessagingService {
   constructor(private http: HttpClient) { }
 
   getReceivedMessages(user_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/user/' + user_id + '/messages/received').subscribe(
+    return this.http.get(config.app_url + 'user/' + user_id + '/messages/received').subscribe(
         response => {
             this.rec_messages_private_list = response;
             this.recMessagesSubject.next(this.rec_messages_private_list);
@@ -37,7 +38,7 @@ export class MessagingService {
 }
 
 getConversation(user_id, partner_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/messages/?userA=' + user_id + '&userB=' + partner_id).subscribe(
+    return this.http.get(config.app_url + 'messages/?userA=' + user_id + '&userB=' + partner_id).subscribe(
         response => {
             this.convo_messages_private_list = response;
             this.convoMessagesSubject.next(this.convo_messages_private_list);
@@ -46,7 +47,7 @@ getConversation(user_id, partner_id) {
 }
 
 getChatPartners(user_id) {
-  return this.http.get('http://localhost:5000/api/v1.0/user/' + user_id + '/messages/participants').subscribe(
+  return this.http.get(config.app_url + 'user/' + user_id + '/messages/participants').subscribe(
       response => {
           this.msg_partners_private_list = response;
           this.msgPartnersSubject.next(this.msg_partners_private_list);
@@ -66,7 +67,7 @@ sendMessage(sender_id, recipient_id, message) {
   // postData.append("rating", review.rating);
 
   this.http.post(
-      'http://localhost:5000/api/v1.0/user/' + recipient_id + '/contact',
+      config.app_url + 'user/' + recipient_id + '/contact',
       postData).subscribe(
       response => {
       // this.getBookID(isbn)
@@ -75,7 +76,7 @@ sendMessage(sender_id, recipient_id, message) {
 }
 
 getUnreadCount(user_id) {
-    this.http.get('http://localhost:5000/api/v1.0/user/' + user_id + '/messages/unread').subscribe(
+    this.http.get(config.app_url + 'user/' + user_id + '/messages/unread').subscribe(
         response => {
             this.unread_private_count = response;
             console.log(response)

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import axios from 'axios';
 import { Subject } from 'rxjs';
+import config from '../config';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +21,7 @@ export class GoalService {
 
 
   getGoal(user_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/' + user_id + '/goals')
+    return this.http.get(config.app_url + user_id + '/goals')
     .subscribe(response => { 
         this.goal_private_list = response;
         this.goalSubject.next(this.goal_private_list);
@@ -34,13 +35,13 @@ export class GoalService {
     goalData.append("target", goal.goalFormControl)
     goalData.append("year", this.currentYear)
 
-    axios.post('http://localhost:5000/api/v1.0/goals/new', goalData)
+    axios.post(config.app_url + 'goals/new', goalData)
   }
 
   editGoal(goal) {
     let goalData = new FormData()
     goalData.append("target", goal.goalFormControl)
     
-    axios.put('http://localhost:5000/api/v1.0/goals/' + goal.id, goalData)
+    axios.put(config.app_url + 'goals/' + goal.id, goalData)
   }
 }

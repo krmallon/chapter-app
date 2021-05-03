@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import config from '../config';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,7 @@ export class StatService {
   constructor(private http: HttpClient) { }
 
   getMostRead(user_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/' + user_id + '/stats/mostread').subscribe(
+    return this.http.get(config.app_url + '' + user_id + '/stats/mostread').subscribe(
       response => {
         this.most_read_private_list = response;
         this.mostReadSubject.next(this.most_read_private_list);
@@ -26,7 +27,7 @@ export class StatService {
     }
 
   getTotalPagesRead(user_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/' + user_id + '/stats/totalpages').subscribe(
+    return this.http.get(config.app_url + '' + user_id + '/stats/totalpages').subscribe(
       response => {
         this.total_pages_private_list = response;
         this.totalPagesSubject.next(this.total_pages_private_list);

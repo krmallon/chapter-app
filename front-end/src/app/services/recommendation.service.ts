@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import config  from '../config'
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,7 @@ export class RecommendationService {
   constructor(private http: HttpClient) { }
 
   getRecommendations(user_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/' + user_id + '/recommendations').subscribe(
+    return this.http.get(config.app_url + user_id + '/recommendations').subscribe(
         response => {
             this.books_private_list = response;
             this.BooksSubject.next(this.books_private_list);
@@ -37,7 +38,7 @@ export class RecommendationService {
   }
 
   getRecInspiration() {
-    return this.http.get('http://localhost:5000/api/v1.0/recommendations/inspiration').subscribe(
+    return this.http.get(config.app_url + 'recommendations/inspiration').subscribe(
         response => {
             this.inspiration_books_private_list = response;
             this.InspoBooksSubject.next(this.inspiration_books_private_list);

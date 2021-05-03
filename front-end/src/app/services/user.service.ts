@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import axios from 'axios';
 import { Subject } from 'rxjs';
+import config from '../config';
 import { FeedService } from './feed.service';
 
 @Injectable({
@@ -33,7 +34,7 @@ export class UserService {
     userData.append("auth0_id", user.sub);
     userData.append("image", user.picture);
 
-    this.http.post('http://localhost:5000/api/v1.0/userprofiletodb', userData).subscribe(
+    this.http.post(config.app_url + 'userprofiletodb', userData).subscribe(
       response => {} );
     
 
@@ -41,18 +42,18 @@ export class UserService {
     // let name = user.name
     // let email = user.email
 
-    // axios.post('http://localhost:5000/api/v1.0/userprofiletodb/' + auth0_id + '/' + name + '/' + email)
+    // axios.post(config.app_url + 'userprofiletodb/' + auth0_id + '/' + name + '/' + email)
   }
 
   existingUser(user) {
     // check if user in DB
-    console.log(this.http.get('http://localhost:5000/api/v1.0/userinDB/' + user))
-    return this.http.get('http://localhost:5000/api/v1.0/userinDB/' + user)
+    console.log(this.http.get(config.app_url + 'userinDB/' + user))
+    return this.http.get(config.app_url + 'userinDB/' + user)
 
   }
 
   getCurrentUser(auth0_id) {
-      return this.http.get('http://localhost:5000/api/v1.0/auth0/' + auth0_id).subscribe(
+      return this.http.get(config.app_url + 'auth0/' + auth0_id).subscribe(
           response => {
               this.currentUser = response;
               sessionStorage.setItem("user_id", this.currentUser)
@@ -76,7 +77,7 @@ export class UserService {
 
 
   // getCurrentUser(auth0_id) {
-  //   return this.http.get('http://localhost:5000/api/v1.0/auth0/' + auth0_id).subscribe(
+  //   return this.http.get(config.app_url + 'auth0/' + auth0_id).subscribe(
   //     response => {
   //         this.currentUser = response;
   //         sessionStorage.setItem("user_id", this.currentUser)
@@ -91,7 +92,7 @@ export class UserService {
   // }
 
   getProfileDetails(user_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/user/' + user_id).subscribe(
+    return this.http.get(config.app_url + 'user/' + user_id).subscribe(
         response => {
             this.profile_details_private_list = response;
             this.profileDetailsSubject.next(this.profile_details_private_list);
@@ -99,7 +100,7 @@ export class UserService {
   }
 
   checkFollowing(user_id, follower_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/user/' + user_id + '/followedby/' + follower_id).subscribe(
+    return this.http.get(config.app_url + 'user/' + user_id + '/followedby/' + follower_id).subscribe(
         response => {
             // console.log(response)
             this.following = [response][0];
@@ -109,15 +110,15 @@ export class UserService {
   }
   
   followUser(user_id, follower_id) {
-    axios.post('http://localhost:5000/api/v1.0/user/' + user_id + '/follow/' + follower_id)
+    axios.post(config.app_url + 'user/' + user_id + '/follow/' + follower_id)
   }
   
   unfollowUser(user_id, follower_id) {
-    axios.delete('http://localhost:5000/api/v1.0/user/' + user_id + '/unfollow/' + follower_id)
+    axios.delete(config.app_url + 'user/' + user_id + '/unfollow/' + follower_id)
   }
 
   getFollowedUsers(user_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/user/' + user_id + '/followed').subscribe(
+    return this.http.get(config.app_url + 'user/' + user_id + '/followed').subscribe(
       response => {
         this.followed_users_private_list = response;
         this.followedSubject.next(this.followed_users_private_list)
@@ -127,7 +128,7 @@ export class UserService {
   }
 
   getFollowedActivity(user_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/activity/followedby/' + user_id).subscribe(
+    return this.http.get(config.app_url + 'activity/followedby/' + user_id).subscribe(
         response => {
             this.followed_activity_private_list = response;
             this.followedActivitySubject.next(this.followed_activity_private_list);

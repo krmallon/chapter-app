@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import config from '../config';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,7 @@ export class FeedService {
   constructor(private http: HttpClient) { }
 
   getFollowedActivity(user_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/activity/followedby/' + user_id).subscribe(
+    return this.http.get(config.app_url + 'activity/followedby/' + user_id).subscribe(
         response => {
             this.followed_activity_private_list = response;
             this.followedActivitySubject.next(this.followed_activity_private_list);

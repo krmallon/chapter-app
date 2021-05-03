@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import axios from 'axios';
+import config from '../config';
 
 @Injectable({
   providedIn: 'root'
@@ -30,14 +31,14 @@ export class BookService {
   constructor(private http: HttpClient) { }
 
   getBookID(isbn) {
-    return this.http.get('http://localhost:5000/api/v1.0/book_id/'+ isbn)
+    return this.http.get(config.app_url + 'book_id/'+ isbn)
     .subscribe(response => {
         this.bookID = Number(response)
     }); 
 }
 
 getBook(isbn) {
-    return this.http.get('http://localhost:5000/api/v1.0/books/' + isbn)
+    return this.http.get(config.app_url + 'books/' + isbn)
     .subscribe(response => { 
         this.book_private = [response];
         this.bookSubject.next(this.book_private)
@@ -46,19 +47,19 @@ getBook(isbn) {
 }
 
  addToWantToRead(book, user_id) {
-   axios.post('http://localhost:5000/api/v1.0/books/'+ book + '/' + user_id + '/wanttoread')
+   axios.post(config.app_url + 'books/'+ book + '/' + user_id + '/wanttoread')
 }
 
  addToCurrentlyReading(book, user_id) {
-   axios.post('http://localhost:5000/api/v1.0/books/' + book + '/' + user_id + '/currentlyreading')
+   axios.post(config.app_url + 'books/' + book + '/' + user_id + '/currentlyreading')
  }
 
  addToHasRead(book, user_id) {
-   axios.post('http://localhost:5000/api/v1.0/books/'+ book + '/' + user_id + '/hasread')
+   axios.post(config.app_url + 'books/'+ book + '/' + user_id + '/hasread')
  }
 
  deleteFromShelf(book, user_id, shelf) {
-   axios.delete('http://localhost:5000/api/v1.0/books/'+ book + '/' + user_id + '/' + shelf)
+   axios.delete(config.app_url + 'books/'+ book + '/' + user_id + '/' + shelf)
  }
 
 //  addToHasRead(book, user_id, date) {
@@ -68,11 +69,11 @@ getBook(isbn) {
 //   let finishDate;
 //   postData.append("finish_date", finishDate);
 
-//   axios.post('http://localhost:5000/api/v1.0/books/'+ book + '/' + user_id + '/hasread')
+//   axios.post(config.app_url + 'books/'+ book + '/' + user_id + '/hasread')
 // }
 
  bookPresentInDB(isbn) {
-  this.http.get('http://localhost:5000/api/v1.0/bookinDB/' + isbn).subscribe(
+  this.http.get(config.app_url + 'bookinDB/' + isbn).subscribe(
     response => {
       this.bookInDB = response;
       console.log(typeof response)
@@ -91,13 +92,13 @@ getBook(isbn) {
     bookData.append("image_link", book.image)
     
     this.http.post(
-      'http://localhost:5000/api/v1.0/addbooktodb', bookData).subscribe(
+      config.app_url + 'addbooktodb', bookData).subscribe(
         response => {}
       );
   }
 
   getCurrentlyReadingByUser(user) {
-        return this.http.get('http://localhost:5000/api/v1.0/user/' + user + '/currentlyreading').subscribe(
+        return this.http.get(config.app_url + 'user/' + user + '/currentlyreading').subscribe(
         response => {
             this.user_reading_private_list = response;
             this.userReadingSubject.next(this.user_reading_private_list);
@@ -107,7 +108,7 @@ getBook(isbn) {
   }
 
   getHasReadByUser(user) {
-    return this.http.get('http://localhost:5000/api/v1.0/user/' + user + '/hasread').subscribe(
+    return this.http.get(config.app_url + 'user/' + user + '/hasread').subscribe(
         response => {
             this.user_has_read_private_list = response;
             this.userHasReadSubject.next(this.user_has_read_private_list);
@@ -117,7 +118,7 @@ getBook(isbn) {
     }
 
   getWantsToReadByUser(user) {
-    return this.http.get('http://localhost:5000/api/v1.0/user/' + user + '/wantstoread').subscribe(
+    return this.http.get(config.app_url + 'user/' + user + '/wantstoread').subscribe(
         response => {
             this.user_wants_to_read_private_list = response;
             this.userWantsToReadSubject.next(this.user_wants_to_read_private_list);

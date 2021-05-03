@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import config from '../config';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,7 @@ export class AchievementService {
   constructor(private http: HttpClient) { }
 
   getUserAchievements(user_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/user/' + user_id + '/achievements').subscribe(
+    return this.http.get(config.app_url + 'user/' + user_id + '/achievements').subscribe(
         response => {
             this.user_achievements_private_list = response;
             this.userAchievementsSubject.next(this.user_achievements_private_list);
@@ -27,7 +28,7 @@ export class AchievementService {
 }
 
  getAllAchievements() {
-  return this.http.get('http://localhost:5000/api/v1.0/achievements').subscribe(
+  return this.http.get(config.app_url + 'achievements').subscribe(
     response => {
         this.achievements_private_list = response;
         this.achievementsSubject.next(this.achievements_private_list);

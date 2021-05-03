@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import axios from 'axios';
 import { Subject } from 'rxjs';
+import config from '../config';
 
 @Injectable({
   providedIn: 'root'
@@ -31,7 +32,7 @@ export class GroupService {
   constructor(private http: HttpClient) { }
 
   getAllGroups() {
-    return this.http.get('http://localhost:5000/api/v1.0/groups')
+    return this.http.get(config.app_url + 'groups')
     .subscribe(response => { 
         this.groups_private_list = response;
         this.groupsSubject.next(this.groups_private_list);
@@ -39,7 +40,7 @@ export class GroupService {
   }
 
   getGroupsByUser(user_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/user/' + user_id +'/groups')
+    return this.http.get(config.app_url + 'user/' + user_id +'/groups')
     .subscribe(response => { 
         this.user_groups_private_list = response;
         this.userGroupSubject.next(this.user_groups_private_list);
@@ -47,7 +48,7 @@ export class GroupService {
 }
 
   getMembers(group_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/groups/' + group_id + '/members')
+    return this.http.get(config.app_url + 'groups/' + group_id + '/members')
     .subscribe(response => { 
         this.members_private_list = response;
         this.memberSubject.next(this.members_private_list);
@@ -55,7 +56,7 @@ export class GroupService {
   }
 
   getGroup(group_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/groups/' + group_id)
+    return this.http.get(config.app_url + 'groups/' + group_id)
     .subscribe(response => { 
         this.group_private_list = response;
         this.groupSubject.next(this.group_private_list);
@@ -63,7 +64,7 @@ export class GroupService {
   }
 
   getPosts(group_id) {
-    return this.http.get('http://localhost:5000/api/v1.0/groups/' + group_id + '/posts')
+    return this.http.get(config.app_url + 'groups/' + group_id + '/posts')
     .subscribe(response => {
       this.posts_private_list = response;
       this.postsSubject.next(this.posts_private_list)
@@ -76,13 +77,13 @@ export class GroupService {
     groupData.append("name", group.name)
     groupData.append("description", group.description)
     groupData.append("founder_id", sessionStorage.user_id)
-    axios.post('http://localhost:5000/api/v1.0/groups/new', groupData)
+    axios.post(config.app_url + 'groups/new', groupData)
   }
 
   joinGroup(group_id) {
     let joinData = new FormData();
     joinData.append("user_id", sessionStorage.user_id)
-    axios.post('http://localhost:5000/api/v1.0/groups/' + group_id + '/join', joinData)
+    axios.post(config.app_url + 'groups/' + group_id + '/join', joinData)
   }
 
   createPost(group_id, post) {
@@ -91,6 +92,6 @@ export class GroupService {
     postData.append("text", post.text)
     postData.append("user_id", sessionStorage.user_id)
 
-    axios.post('http://localhost:5000/api/v1.0/groups/' + group_id + '/posts', postData)
+    axios.post(config.app_url + 'groups/' + group_id + '/posts', postData)
   }
 }

@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import config from '../config';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,7 @@ export class ReviewService {
   constructor(private http: HttpClient) { }
 
   getReviews(id) {
-    return this.http.get('http://localhost:5000/api/v1.0/books/' + id +'/reviews').subscribe(
+    return this.http.get(config.app_url + 'books/' + id +'/reviews').subscribe(
         response => {
         this.reviews_private_list = response;
         this.reviewsSubject.next(this.reviews_private_list);
@@ -28,7 +29,7 @@ export class ReviewService {
 }
 
   getReviewsByUser(user) {
-    return this.http.get('http://localhost:5000/api/v1.0/user/' + user + '/reviews').subscribe(
+    return this.http.get(config.app_url + 'user/' + user + '/reviews').subscribe(
         response => {
             this.user_review_private_list = response;
             this.userRevSubject.next(this.user_review_private_list);
@@ -47,7 +48,7 @@ export class ReviewService {
    
 
     this.http.post(
-        'http://localhost:5000/api/v1.0/books/' + isbn + '/reviews',
+        config.app_url + 'books/' + isbn + '/reviews',
         postData).subscribe(
         response => {
         // this.getBookID(isbn)
@@ -56,7 +57,7 @@ export class ReviewService {
 }
 
   deleteReview(review_id) {
-    return this.http.delete('http://localhost:5000/api/v1.0/reviews/'+ review_id).subscribe(response => {
+    return this.http.delete(config.app_url + 'reviews/'+ review_id).subscribe(response => {
         console.log("Review has been deleted");
     });
 
