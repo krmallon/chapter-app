@@ -30,11 +30,14 @@
      </ul>
 
      
-     <form class="form-inline md-form form-sm active-pink active-pink-2" [formGroup]="searchForm">
-      <input class="form-control form-control-sm ml-3 w-75" name="query" formControlName="query" type="text" placeholder="Search" aria-label="Search"
+     <form class="form-inline md-form form-sm active-pink active-pink-2" [formGroup]="searchForm" (keyup.enter)="onSearch()">
+      <input class="form-control form-control-sm ml-3 w-75" name="query" formControlName="query" type="text" placeholder="Search books..." aria-label="Search"
         mdbInput>
-        <mdb-icon fas icon="search" aria-hidden="true"  (click)="this.searchService.searchBooks(this.searchForm.value.query, 0, 'en', 'relevance')" routerLink='/search/books/{{this.searchForm.value.query}}'></mdb-icon>
+        &nbsp;
+        <mdb-icon fas icon="search" aria-hidden="true"  (click)="onSearch()"></mdb-icon>
     </form>
+
+    
     
     <!-- <div class="input-group mx-auto" [formGroup]="searchForm">
       <input type="text" class="form-control has-search" name="query" formControlName="query" placeholder="Search books by any keyword">
