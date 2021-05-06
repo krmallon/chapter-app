@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../auth.service';
 import { AchievementService } from '../services/achievement.service';
@@ -18,8 +19,10 @@ export class ProfileComponent implements OnInit {
 
   public sessionStorage = sessionStorage
   // coverImage;
+  editProfileForm;
 
-  constructor(public authService: AuthService, public statService: StatService, public notifyService: NotificationService, public goalService: GoalService, public userService: UserService, public bookService: BookService, public reviewService: ReviewService, public achievementService: AchievementService, private route: ActivatedRoute) { }
+  constructor(public authService: AuthService, public statService: StatService, public notifyService: NotificationService, public goalService: GoalService, public userService: UserService, public bookService: BookService, public reviewService: ReviewService, public achievementService: AchievementService, private route: ActivatedRoute,
+    private formBuilder: FormBuilder) { }
 
   ngOnInit(): void {
     this.userService.getProfileDetails(this.route.snapshot.params.id)
@@ -32,6 +35,11 @@ export class ProfileComponent implements OnInit {
     this.achievementService.getUserAchievements(this.route.snapshot.params.id)
     this.statService.getMostRead(this.route.snapshot.params.id)
     this.statService.getTotalPagesRead(this.route.snapshot.params.id)
+
+    this.editProfileForm = this.formBuilder.group({
+      name: ['', Validators.maxLength(50)],
+      image: ['', Validators.pattern('^.+png$')]
+    });
   }
 
   getGoalCompletion(current, target) {
@@ -54,6 +62,19 @@ export class ProfileComponent implements OnInit {
   onUnfollow() {
     this.userService.unfollowUser(this.route.snapshot.params.id, sessionStorage.user_id)
     this.notifyService.showSuccess('Unfollowed user', 'Success')
+  }
+
+  isInvalid(control) {
+    return this.editProfileForm.controls[control].invalid &&
+           this.editProfileForm.controls[control].touched;
+  }
+
+  isUnTouched() {
+    return this.editProfileForm.controls.name.pristine && this.editProfileForm.controls.image.pristine
+  }
+
+  isIncomplete() {
+    return this.isInvalid('name') || this.isInvalid('image') || this.isUnTouched();
   }
 
 }

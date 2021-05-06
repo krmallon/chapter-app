@@ -99,6 +99,22 @@ export class UserService {
     })
   }
 
+  editProfileDetails(profile) {
+    let profileData = new FormData()
+    
+    if (profile.name !="") {
+      profileData.append("name", profile.name)
+    }
+
+    if (profile.image !="") {
+      profileData.append("image", profile.image)
+    }
+
+    profileData.append("user_id", sessionStorage.user_id)
+    
+    axios.put(config.app_url + 'profile/edit', profileData)
+  }
+
   checkFollowing(user_id, follower_id) {
     return this.http.get(config.app_url + 'user/' + user_id + '/followedby/' + follower_id).subscribe(
         response => {

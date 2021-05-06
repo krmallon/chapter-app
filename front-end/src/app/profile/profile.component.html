@@ -36,7 +36,12 @@
     		            <img src="{{user.image}}" alt="profile-image" class="profile"/>
     		        </div>
     		        <div class="card-content">
+                        <!-- <button type="button" class="btn btn-success btn-sm" 
+                *ngIf="authService.loggedIn && isOwnProfile()">Change Photo</button> -->
                     <h2>{{user.name}}</h2>
+                    <!-- <h2>{{user.nickname}}</h2> -->
+                    <button type="button" class="btn btn-success btn-sm" 
+                *ngIf="authService.loggedIn && isOwnProfile()" (click)="editModal.show()">Edit Profile</button>
                     <!-- <h5>Bio</h5> -->
                     <!-- <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam</p> -->
 
@@ -136,6 +141,46 @@
                         </ul>
                     </div>
                 </div>
+
+                <div mdbModal #editModal="mdbModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <button type="button" class="close pull-right" aria-label="Close" (click)="editModal.hide()">
+                            <span aria-hidden="true">×</span>
+                          </button>
+                          <h4 class="modal-title w-100" id="myModalLabel">Edit Profile</h4>
+                        </div>
+                        <div class="modal-body">
+                            
+                            <form [formGroup]="editProfileForm">
+                                <div class="form-group">
+                                    <h5>Name</h5>
+                                    <textarea id="name" rows="1" name="name"
+                                    class="form-control"
+                                    formControlName="name" [ngClass]="{ 'error': isInvalid('name')}">
+                                                </textarea>
+                                    <h5>Profile Picture (PNG)</h5>
+                                    <textarea id="image" rows="1" name="image"
+                                    class="form-control"
+                                    formControlName="image" [ngClass]="{ 'error': isInvalid('image')}">
+                                                </textarea>
+                                                <span *ngIf="isInvalid('image')">
+                                                    Note: Images must be PNG format</span>
+                                    </div>
+                                 
+                                    </form>
+                              <!-- </div> -->
+                
+                          
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" mdbBtn color="danger" class="waves-light" aria-label="Close" (click)="editModal.hide()" mdbWavesEffect>Cancel</button>
+                          <button type="button" mdbBtn color="primary" class="relative waves-light" *ngIf="!isIncomplete()" (click)="this.userService.editProfileDetails(this.editProfileForm.value); editModal.hide()" mdbWavesEffect>Submit</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
                 <!-- <div mdbModal #editModal="mdbModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="editGoalModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
