@@ -54,12 +54,7 @@ def get_all_received_messages_by_user_id(user_id):
     messages = db.session.query(Message.msg_id, Message.msg_text, Message.sender_id, Message.recipient_id, Message.time_sent, Message.read, User.full_name, User.image).join(User, User.user_id==Message.sender_id).filter(Message.recipient_id==user_id)
 
     for message in messages:
-        msg = db.session.query(Message).filter(Message.msg_id==message.msg_id).first()
-        msg.read = True
-        # print(msg.read)
-        # mark_as_read(message.msg_id)
         db.session.commit()
-        print(message.read)
         msg = {"id" : message.msg_id, "text" : message.msg_text, "sender" : message.sender_id, "sender_name" : message.full_name, "sender_image" : message.image, "recipient" : message.recipient_id, "sent" : message.time_sent }
         data_to_return.append(msg)
 
@@ -68,26 +63,6 @@ def get_all_received_messages_by_user_id(user_id):
     else:
         return make_response(jsonify({"error" : "No messages found"}), 404)
 
-def mark_as_read(msg_id):
-    message = db.session.query(Message).filter(Message.msg_id==msg_id).first()
-    message.read = True
-    # print(message.read)
-    # db.session.commit()
-
-@message.route("/api/v1.0/user/<string:user_id>/messages/unread", methods=["GET"])
-def get_unread_count(user_id):
-    data_to_return = []
-    num_unread = 0
-    messages = db.session.query(Message).filter(Message.recipient_id==user_id).all()
-
-    for message in messages:
-        if message.read == False:
-            num_unread = num_unread + 1
-    
-    data_to_return.append(num_unread)
-    
-    # return make_response(jsonify({"num_unread" : num_unread}), 200)
-    return make_response(jsonify(data_to_return), 200)
 
 
 
@@ -143,9 +118,7 @@ def send_message(user_id):
     else:
         return make_response(jsonify({"error" : "Missing form data"}), 400)
 
-
-    # db.session.add(Message(msg_text=msg_text, sender_id=sender_id, recipient_id=recipient_id, time_sent=time_sent))
-    db.session.add(Message(msg_text=msg_text, sender_id=sender_id, recipient_id=recipient_id, time_sent=time_sent, read=False))
+    db.session.add(Message(msg_text=msg_text, sender_id=sender_id, recipient_id=recipient_id, time_sent=time_sent))
     db.session.commit()
 
     return make_response(jsonify({"success" : "Message sent successfully"}), 200)

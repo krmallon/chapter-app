@@ -1,6 +1,8 @@
 from extensions import db
 from flask import Blueprint, make_response, jsonify, request
 from models import Goal
+from achievement.routes import check_achievement
+import datetime
 
 goal = Blueprint('goal', __name__)
 
@@ -12,10 +14,6 @@ def get_goals_by_user_id(user_id):
     goals = db.session.query(Goal.id, Goal.target, Goal.current, Goal.year).filter(Goal.user_id==user_id).all()
 
     for goal in goals:
-        goal_id = goal.id
-        target = goal.target
-        current = goal.current
-        year = goal.year
         data_to_return.append(goal)
 
     if data_to_return:

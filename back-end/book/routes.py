@@ -194,7 +194,6 @@ def add_want_to_read(isbn, user_id):
         book_id = book.book_id
 
         db.session.add(WantsToRead(user_id=user_id, book_id=book_id, date_added=datetime.date.today()))
-        # db.session.add(Activity(user_id=user_id, action_id=2, object_id=1, date_created=datetime.date.today(), target_id=book_id))
         db.session.commit()
         
         return make_response( jsonify( {"success" : "Added to bookshelf"}), 201 )

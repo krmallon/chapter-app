@@ -24,7 +24,7 @@ def get_user_id_by_auth0(auth0_id):
     try:
         user_id = get_user_id(auth0_id)
         return make_response(jsonify(user_id), 200)
-    except:
+    except Exception:
         return make_response(jsonify({"error" : "Invalid ID"}), 404)
 
 def get_user_id(auth0_id):
@@ -37,7 +37,7 @@ def get_user_details(user_id):
 
     try:
         result = db.session.query(User).filter_by(user_id=user_id).first()
-    except:
+    except Exception:
         return make_response(jsonify({"error" : "Invalid ID"}), 404)
     
     user = {"user_id" : result.user_id, "auth0_id" : result.auth0_id, "name" : result.full_name, "image" : result.image}
@@ -53,10 +53,10 @@ def send_profile_to_db():
         image = request.form["image"]
         
     try:
-        db.session.add(User(auth0_id = auth0_id, full_name=name, image=image, nickname="nickname", email="email"))
+        db.session.add(User(auth0_id = auth0_id, full_name=name, image=image))
         db.session.commit()
 
-        return make_response(jsonify("User added to DB"), 200)
+        return make_response(jsonify({"success" : "User added to DB"}), 200)
     except Exception:
         return make_response(jsonify({"error" : "User already exists in DB"}), 400)
 
@@ -68,4 +68,30 @@ def send_profile_to_db():
     #     return make_response(jsonify("User added to DB"), 200)
     # else: 
     #     return make_response(jsonify({"error" : "User already exists in DB"}), 400)
+
+@user.route("/api/v1.0/profile/edit", methods=["PUT"])
+def edit_profile():
+    if "user_id" in request.form:
+        user_id = request.form["user_id"]
+
+        try:
+            user = db.session.query(User).filter(User.user_id==user_id).first()
+        except Exception:
+            return make_response(jsonify({"error" : "User not found"}), 404)
+
+        if "name" in request.form:
+            name = request.form["name"]
+            user.full_name = name
+        if "image" in request.form:
+            image = request.form["image"]
+            user.image = image
+
+        try:
+            db.session.commit()
+            return make_response(jsonify({"success" : "Profile updated"}), 200)
+        except Exception:
+            return make_response(jsonify({"error" : "Failed to update profile"}), 404)
+
+
+
 
