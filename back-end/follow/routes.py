@@ -10,9 +10,12 @@ follow = Blueprint('follow', __name__)
 
 @follow.route("/api/v1.0/user/<string:user_id>/followedby/<string:follower_id>", methods=["GET"])
 def check_following(user_id, follower_id):
-    exists = db.session.query(Follow.id).filter_by(user_id=user_id, follower_id=follower_id).scalar() is not None
-    
-    return make_response(jsonify(exists), 200)
+    exists = False
+    try:
+        exists = db.session.query(Follow.id).filter_by(user_id=user_id, follower_id=follower_id).scalar() is not None
+        return make_response(jsonify(exists), 200)
+    except Exception:
+        return make_response(jsonify(exists), 404)
 
 @follow.route("/api/v1.0/user/<string:user_id>/followers", methods=["GET"])
 def get_followers(user_id):

@@ -4,6 +4,11 @@ from extensions import db
 from achievement.routes import check_achievement
 import requests
 import datetime
+from sqlalchemy import exc
+import traceback
+from achievement.constants import GOAL_ACH_TYPE, READING_ACH_TYPE
+# from achievement.constants import READING_ACH_TYPE
+from activity.constants import WANT_TO_READ_ACTION_ID, HAS_READ_ACTION_ID, IS_READING_ACTION_ID, BOOK_OBJECT_ID
 
 book = Blueprint('book', __name__)
 
@@ -145,11 +150,12 @@ def add_currently_reading(isbn, user_id):
         book_id = book.book_id
 
         db.session.add(Reading(user_id=user_id, book_id=book_id, start_date=datetime.date.today()))
-        db.session.add(Activity(user_id=user_id, action_id=4, object_id=1, date_created=datetime.datetime.now(), target_id=book_id))
+        db.session.add(Activity(user_id=user_id, action_id=IS_READING_ACTION_ID, object_id=BOOK_OBJECT_ID, date_created=datetime.datetime.now(), target_id=book_id))
         db.session.commit()
 
         return make_response( jsonify( {"success" : "Added to bookshelf"}), 201 )
-    except Exception:
+    except AttributeError:
+        traceback.print_exc()
         return make_response( jsonify( {"error" : "Failed to add to shelf"}), 404)
 
 @book.route("/api/v1.0/user/<string:user_id>/currentlyreading", methods=["GET"])
@@ -183,7 +189,8 @@ def delete_currently_reading(isbn, user_id):
             return make_response( jsonify( {"success" : "Removed from bookshelf"} ), 204)
         else:
             return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
-    except Exception:
+    except AttributeError:
+        traceback.print_exc()
         return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
 
 
@@ -194,10 +201,12 @@ def add_want_to_read(isbn, user_id):
         book_id = book.book_id
 
         db.session.add(WantsToRead(user_id=user_id, book_id=book_id, date_added=datetime.date.today()))
+        db.session.add(Activity(user_id=user_id, action_id=WANT_TO_READ_ACTION_ID, object_id=BOOK_OBJECT_ID, date_created=datetime.datetime.now(), target_id=book_id))
         db.session.commit()
         
         return make_response( jsonify( {"success" : "Added to bookshelf"}), 201 )
-    except Exception:
+    except AttributeError:
+        traceback.print_exc()
         return make_response( jsonify( {"error" : "Failed to add to shelf"}), 404)
 
 
@@ -221,7 +230,7 @@ def get_wants_to_read(user_id):
         return make_response(jsonify({"error" : "No books found"}), 404)
         
 @book.route("/api/v1.0/books/<string:isbn>/<string:user_id>/wanttoread", methods=["DELETE"])
-def delete_wants_to_read(isbn, user_id):
+def delete_want_to_read(isbn, user_id):
     try:
         book_id = db.session.query(Book.book_id).filter(Book.ISBN==isbn).first()
         deleted_rows = db.session.query(WantsToRead).filter(WantsToRead.user_id==user_id, WantsToRead.book_id==book_id).delete()
@@ -231,7 +240,8 @@ def delete_wants_to_read(isbn, user_id):
             return make_response( jsonify( {"success" : "Removed from bookshelf"} ), 204)
         else:
             return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
-    except Exception:
+    except AttributeError:
+        traceback.print_exc()
         return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
 
 
@@ -243,7 +253,7 @@ def add_has_read(isbn, user_id):
 
         # update date selection
         db.session.add(HasRead(user_id=user_id, book_id=book_id, start_date=datetime.date.today(), finish_date=datetime.date.today()))
-        db.session.add(Activity(user_id=user_id, action_id=3, object_id=1, date_created=datetime.datetime.now(), target_id=book_id))
+        db.session.add(Activity(user_id=user_id, action_id=HAS_READ_ACTION_ID, object_id=BOOK_OBJECT_ID, date_created=datetime.datetime.now(), target_id=book_id))
         goals = db.session.query(Goal).filter(Goal.user_id==user_id).all()
 
         for goal in goals:
@@ -251,10 +261,11 @@ def add_has_read(isbn, user_id):
                 goal.current = goal.current + 1
 
         db.session.commit()
-        check_achievement(user_id, 'goal')
-        check_achievement(user_id, 'reading')
+        check_achievement(user_id, GOAL_ACH_TYPE)
+        check_achievement(user_id, READING_ACH_TYPE)
         return make_response( jsonify( {"success" : "Added to bookshelf"}), 201 )
-    except Exception:
+    except AttributeError:
+        traceback.print_exc()
         return make_response( jsonify( {"error" : "Failed to add to shelf"}), 404)
 
 @book.route("/api/v1.0/user/<string:user_id>/hasread", methods=["GET"])
@@ -287,5 +298,6 @@ def delete_has_read(isbn, user_id):
             return make_response( jsonify( {"success" : "Removed from bookshelf"} ), 204)
         else:
             return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)
-    except Exception:
+    except AttributeError:
+        traceback.print_exc()
         return make_response( jsonify( {"error" : "Failed to remove from bookshelf"} ), 400)

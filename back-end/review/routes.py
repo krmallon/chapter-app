@@ -7,6 +7,7 @@ from user.routes import user_id_in_db
 import datetime
 import book_recommender
 from book.routes import addBookToDB, addRecToDB
+from achievement.constants import REVIEW_ACH_TYPE
 
 
 review = Blueprint('review', __name__)
@@ -34,14 +35,16 @@ def get_all_reviews_by_user(user_id):
     data_to_return = []
     
     if user_id_in_db(user_id):
-        reviews = db.session.query(Book.book_id, Book.title, Book.ISBN, Book.author, Review.id, Review.reviewer_id, Review.rating, Review.text).join(Review, Book.book_id==Review.book_id).filter(Review.reviewer_id==user_id)
+        reviews = db.session.query(Book.book_id, Book.title, Book.ISBN, Book.author, Review.id, Review.reviewer_id, 
+                    Review.rating, Review.text).join(Review, Book.book_id==Review.book_id).filter(Review.reviewer_id==user_id)
     
     else:
         return make_response( jsonify({"error":"Invalid user ID"}), 404)
         
     if reviews is not None:
         for review in reviews:
-            rev = {"book_id": review.book_id, "book_ISBN" : review.ISBN, "book_title" : review.title, "book_author" : review.author, "review_id" : review.id, "reviewer_id" : review.reviewer_id, "rating" : review.rating, "text" : review.text}
+            rev = {"book_id": review.book_id, "book_ISBN" : review.ISBN, "book_title" : review.title, "book_author" : review.author, 
+                    "review_id" : review.id, "reviewer_id" : review.reviewer_id, "rating" : review.rating, "text" : review.text}
             data_to_return.append(rev)
         return make_response( jsonify(data_to_return), 200)
 
@@ -89,17 +92,13 @@ def add_review(ISBN):
                 rec_book_id = rec_book.book_id
                 if not rec_book.title == "N/A":
                     addRecToDB(rec_book_id, rec_source_id, reviewer_id)
-                # rec_book_id = db.session.query(Book.book_id).filter(Book.ISBN==rec).first()
-                # addRecToDB(rec_book_id, rec_source_id, reviewer_id)
-            # print(recs)
 
     if book is not None:
         db.session.add(Review(reviewer_id=reviewer_id, book_id=book_id, rating=rating, text=text))
         review_id = db.session.query(Review.id).filter(Review.reviewer_id==reviewer_id, Review.book_id==book_id, Review.rating==rating, Review.text==text).first()
 
         db.session.add(Activity(user_id=reviewer_id, action_id=1, object_id=1, date_created=datetime.datetime.now(), target_id=book_id))
-        check_achievement(reviewer_id, 'review')
-        # review_id = db.session.query(Review.review_id).filter_by(Review.reviewer_id=reviewer_id, Review.book_id=book_id, Review.rating=rating)
+        check_achievement(reviewer_id, REVIEW_ACH_TYPE)
         db.session.commit()
         return make_response( jsonify( {"review" : review_id} ), 201 )
     else:

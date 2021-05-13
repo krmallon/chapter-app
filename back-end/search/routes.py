@@ -14,18 +14,18 @@ def search_users(query):
     headers = {'authorization' : 'Bearer ' + auth0_access_token}
 
     req = requests.get(url, headers=headers)
-    js = req.json()
+    json = req.json()
 
     data_to_return = []
 
-    for result in js:
+    for result in json:
         try:
             auth0_id = result['user_id']
             name = result['name']
             email = result['email']
 
             db_user = db.session.query(User).filter(User.auth0_id==auth0_id).first()
-            user = {"user_id" : db_user.user_id, "auth0_id" : auth0_id, "name" : name, "email" : email, "image" :db_user.image}
+            user = {"user_id" : db_user.user_id, "display_name" : db_user.full_name, "auth0_id" : auth0_id, "name" : name, "email" : email, "image" :db_user.image}
             data_to_return.append(user)
         except Exception:
             pass
@@ -37,7 +37,6 @@ def search_users(query):
 
 @search.route("/api/v1.0/search/books/<string:query>", methods=["GET"])
 def search_books(query):
-
     # default settings
     start_index = 0
     page_size = 30
@@ -54,24 +53,31 @@ def search_books(query):
         order = request.args.get('order')
 
     url = "https://www.googleapis.com/books/v1/volumes?q=" + query + '&startIndex=' + str(start_index) + '&maxResults=' + str(page_size) + '&langRestrict=' + language + '&orderBy=' + order
-    # '&startIndex=0&maxResults=40' # add pagination
     r = requests.get(url)
-    js = r.json()
+    json = r.json()
 
     data_to_return = []
 
-    # add what to do if no results i.e. no books in js['items']
     try:
-        for book in js['items']:
+        data_to_return = get_book_fields(json)
+
+        if data_to_return:
+            return make_response( jsonify(data_to_return), 200 )
+        else:
+            return make_response( jsonify({"error" : "No results"}), 404 )
+    except Exception:
+         return make_response( jsonify({"error" : "No results"}), 404 )
+
+def get_book_fields(json):
+    data_to_return = []
+    for book in json['items']:
             title = book['volumeInfo']['title']
             try:
                 author = book['volumeInfo']['authors'][0]
             except Exception:
                 author = "N/A"
-            gb_id = book['id']
             try:
                 # use ISBN_10 if present, otherwise use ISBN_13 or mark as N/A
-                # clean up code here
                 if book['volumeInfo']['industryIdentifiers'][0]['type'] == "ISBN_10":
                     ISBN = book['volumeInfo']['industryIdentifiers'][0]['identifier']
                 elif book['volumeInfo']['industryIdentifiers'][1]['type'] and book['volumeInfo']['industryIdentifiers'][1]['type'] == "ISBN_10":
@@ -89,16 +95,12 @@ def search_books(query):
             try:
                 imgLink = book['volumeInfo']['imageLinks']['thumbnail']
             except Exception:
-                # imgLink = "https://img.icons8.com/fluent/96/000000/no-image.png"
                 imgLink = "https://img.icons8.com/bubbles/100/000000/no-image.png"
-                # https://www.rit.edu/nsfadvance/sites/rit.edu.nsfadvance/files/default_images/photo-unavailable.png" # find free-use default 'Cover Unavailable' image to use here
             new_book = {"title" : title, "author" : author, "date" : date, "image" : imgLink, "ISBN" : ISBN}
             if ISBN != "N/A":
                 data_to_return.append(new_book)
 
-        if data_to_return:
-            return make_response( jsonify(data_to_return), 200 )
-        else:
-            return make_response( jsonify({"error" : "No results"}), 404 )
-    except Exception:
-         return make_response( jsonify({"error" : "No results"}), 404 )
+    return data_to_return
+
+
+

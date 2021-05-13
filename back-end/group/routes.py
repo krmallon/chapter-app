@@ -2,6 +2,8 @@ from extensions import db
 from flask import Blueprint, make_response, jsonify, request
 from models import Group, UserGroup, User, Post
 from achievement.routes import check_achievement
+from achievement.constants import GROUP_ACH_TYPE
+import datetime
 
 group = Blueprint('group', __name__)
 
@@ -43,7 +45,7 @@ def create_new_group():
 
         db.session.add(Group(name=name, description=description, founder_id=founder_id))
         group_id = db.session.query(Group.id).filter(Group.name==name, Group.description==description, Group.founder_id==founder_id).first()
-        check_achievement(founder_id, "group")
+        check_achievement(founder_id, GROUP_ACH_TYPE)
         db.session.commit()
 
         return make_response(jsonify({"success:" : "Group created", "data" : group_id}), 200)

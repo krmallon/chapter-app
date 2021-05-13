@@ -1,8 +1,7 @@
 # coding: utf-8
-from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, Numeric, String, text
+from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, Numeric, String, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
-from flask_sqlalchemy import SQLAlchemy
 
 Base = declarative_base()
 metadata = Base.metadata
@@ -93,10 +92,8 @@ class User(Base):
     __tablename__ = 'User'
 
     user_id = Column(Integer, primary_key=True, server_default=text("nextval('user_id_seq'::regclass)"))
-    auth0_id = Column(String)
+    auth0_id = Column(String, unique=True)
     full_name = Column(String)
-    nickname = Column(String)
-    email = Column(String)
     image = Column(String)
 
 
@@ -150,17 +147,6 @@ class Follow(Base):
     user = relationship('User', primaryjoin='Follow.user_id == User.user_id')
 
 
-class FriendRecommendation(Base):
-    __tablename__ = 'FriendRecommendation'
-
-    id = Column(Integer, primary_key=True)
-    user_id = Column(ForeignKey('User.user_id'))
-    rec_friend_id = Column(ForeignKey('User.user_id'))
-
-    rec_friend = relationship('User', primaryjoin='FriendRecommendation.rec_friend_id == User.user_id')
-    user = relationship('User', primaryjoin='FriendRecommendation.user_id == User.user_id')
-
-
 class Goal(Base):
     __tablename__ = 'Goal'
 
@@ -204,7 +190,6 @@ class Message(Base):
     sender_id = Column(ForeignKey('User.user_id'))
     recipient_id = Column(ForeignKey('User.user_id'))
     time_sent = Column(DateTime(True))
-    read = Column(Boolean)
 
     recipient = relationship('User', primaryjoin='Message.recipient_id == User.user_id')
     sender = relationship('User', primaryjoin='Message.sender_id == User.user_id')
@@ -245,18 +230,6 @@ class Review(Base):
 
     book = relationship('Book')
     reviewer = relationship('User')
-
-
-class Status(Base):
-    __tablename__ = 'Status'
-
-    id = Column(Integer, primary_key=True)
-    user_id = Column(ForeignKey('User.user_id'))
-    update_type = Column(Integer)
-    description = Column(String)
-    likes = Column(Integer)
-
-    user = relationship('User')
 
 
 class UserAchievement(Base):

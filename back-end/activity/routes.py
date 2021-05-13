@@ -17,7 +17,7 @@ def get_all_activity_by_user(user_id):
     for activity in activities:
         if activity.action_id == 1:
             target = db.session.query(Book.title, Book.author, Book.ISBN, Review.id, Review.rating, Review.text).join(Review, Book.book_id==Review.book_id).filter(Book.book_id==activity.target_id).first()
-        elif activity.action_id == 2 or activity.action_id == 3 or activity.action_id == 4:
+        elif activity.action_id in(2, 3, 4):
             target = db.session.query(Book.title, Book.author, Book.ISBN).filter(Book.book_id==activity.target_id).first()
         elif activity.action_id == 5:
             target = db.session.query(Book.title, Book.author, Book.ISBN, Review.id, Review.rating, Review.text, User.user_id, User.full_name).join(Book, Review.book_id==Book.book_id).join(User, User.user_id==Review.reviewer_id).filter(Review.id==activity.target_id).first()
@@ -47,11 +47,11 @@ def get_activity_followed_users(user_id):
         target = ""
         if activity.action_id == 1:
             target = db.session.query(Book.title, Book.author, Book.ISBN, Book.image_link, Review.id, Review.rating, Review.text).join(Review, Book.book_id==Review.book_id).filter(Book.book_id==activity.target_id).first()
-        elif activity.action_id == 2 or activity.action_id == 3 or activity.action_id == 4:
+        elif activity.action_id in(2, 3, 4):
             target = db.session.query(Book.title, Book.author, Book.ISBN, Book.image_link).filter(Book.book_id==activity.target_id).first()
         elif activity.action_id == 5:
             if activity.object_id == 2:
-                target = db.session.query(Book.title, Book.author, Book.ISBN, Review.id, Review.rating, Review.text, User.user_id, User.full_name).join(Book, Review.book_id==Book.book_id).join(User, User.user_id==Review.reviewer_id).filter(Review.id==activity.target_id).first()
+                target = db.session.query(Book.title, Book.author, Book.ISBN, Book.image_link, Review.id, Review.rating, Review.text, User.user_id, User.full_name).join(Book, Review.book_id==Book.book_id).join(User, User.user_id==Review.reviewer_id).filter(Review.id==activity.target_id).first()
             if activity.object_id == 3:
                 target = db.session.query(Comment.comment_id, Comment.commenter_id, Comment.text, Comment.time_submitted, User.user_id, User.full_name).join(User, Comment.commenter_id==User.user_id).filter(Comment.comment_id==activity.target_id).first()
             if activity.object_id == 4:
@@ -112,10 +112,4 @@ def get_like_count():
 def get_like_count(object_id, target_id):
     likes = db.session.query(label('count', func.count(Activity.id))).filter(Activity.action_id==5, Activity.object_id==object_id,Activity.target_id==target_id).all()
 
-    # for lk in likes:
-    #     num_likes = lk['num_likes']
-
     return likes[0]
-
-    # return likes.num_likes
-    # return num_likes

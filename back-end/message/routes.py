@@ -51,7 +51,7 @@ def get_all_messages_by_user_id(user_id):
 def get_all_received_messages_by_user_id(user_id):
     data_to_return = []
 
-    messages = db.session.query(Message.msg_id, Message.msg_text, Message.sender_id, Message.recipient_id, Message.time_sent, Message.read, User.full_name, User.image).join(User, User.user_id==Message.sender_id).filter(Message.recipient_id==user_id)
+    messages = db.session.query(Message.msg_id, Message.msg_text, Message.sender_id, Message.recipient_id, Message.time_sent, User.full_name, User.image).join(User, User.user_id==Message.sender_id).filter(Message.recipient_id==user_id)
 
     for message in messages:
         db.session.commit()
